@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作品著作权声明组件配置</title>
+<style>
+:root{
+  --brand:#2F54EB;--brand-hover:#1D39C4;--brand-soft:#F0F5FF;
+  --gold:#B8956A;--green:#2E8B57;--green-soft:#ECF8F1;
+  --red:#F5222D;--orange:#FA8C16;--orange-soft:#FFF7E6;
+  --bg:#F5F6F8;--surface:#fff;--line:#E8E8E8;--line-strong:#D9D9D9;
+  --text:#262626;--sub:#595959;--muted:#8C8C8C;--soft:#FAFAFA;
+  --shadow:0 8px 24px rgba(15,23,42,.08);
+  --r:8px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;border:0}
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#fff;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center}
+.top-actions{display:flex;gap:10px}
+.btn{height:34px;padding:0 14px;border-radius:6px;font-weight:600;font-size:13px}
+.btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-hover)}
+.btn-ghost{background:#F5F5F5;color:var(--sub);border:1px solid var(--line)}
+.btn-outline{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.btn-danger{background:#FFF1F0;color:#CF1322;border:1px solid #FFCCC7}
+.layout{display:grid;grid-template-columns:220px minmax(560px,1fr) 360px;min-height:calc(100vh - 56px)}
+.sidebar{background:#fff;border-right:1px solid var(--line);padding:16px 12px}
+.side-title{padding:0 10px 10px;color:var(--muted);font-size:12px;font-weight:700}
+.side-item{display:flex;align-items:center;gap:10px;height:38px;padding:0 10px;border-radius:6px;color:var(--sub);font-weight:600}
+.side-item.active{background:var(--brand-soft);color:var(--brand)}
+.canvas-wrap{padding:20px 24px 28px;overflow:auto}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.page-head h1{margin:0 0 4px;font-size:20px}
+.page-head p{margin:0;color:var(--muted);font-size:13px}
+.tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.tab{padding:10px 14px;color:var(--muted);font-weight:700;border-bottom:2px solid transparent}
+.tab.active{color:var(--brand);border-color:var(--brand)}
+.builder{display:grid;grid-template-columns:1fr;gap:14px}
+.canvas-panel{min-height:640px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.canvas-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.canvas-toolbar strong{font-size:15px}
+.status{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:999px;background:var(--green-soft);color:var(--green);font-size:12px;font-weight:700}
+.form-card{position:relative;padding:22px;border:1.5px solid var(--line-strong);border-radius:16px;background:#fff;transition:.15s}
+.form-card.selected{border-color:var(--brand);box-shadow:0 0 0 3px rgba(47,84,235,.1)}
+.drag-handle{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:var(--muted);letter-spacing:2px}
+.card-actions{position:absolute;right:18px;bottom:18px;display:flex;align-items:center;gap:16px}
+.req-star{color:var(--red);font-size:17px}
+.field-title{display:flex;gap:4px;align-items:center;margin:0;font-size:17px;font-weight:800}
+.field-tip{margin:4px 0 12px;color:var(--muted)}
+.sign-preview-btn{width:128px;height:42px;border-radius:6px;border:1px solid var(--line-strong);background:#F5F5F5;color:var(--gold);font-weight:700}
+.switch-pill{width:64px;height:24px;padding:2px;display:flex;align-items:center;justify-content:flex-end;border-radius:999px;background:#4096FF;color:#fff;font-size:12px;font-weight:700}
+.switch-pill::after{content:"";width:20px;height:20px;margin-left:4px;border-radius:50%;background:#fff}
+.trash{color:var(--muted);font-size:18px}
+.component-note{margin-top:12px;padding:12px;background:#FAFAFA;border:1px dashed var(--line-strong);border-radius:8px;color:var(--muted);font-size:13px}
+.props{background:#fff;border-left:1px solid var(--line);padding:20px 16px;overflow:auto}
+.props-card{border:1px solid var(--line);border-radius:12px;padding:18px 16px;min-height:calc(100vh - 96px)}
+.props-card h2{margin:0 0 20px;font-size:24px}
+.form-group{margin-bottom:18px}
+.form-group label{display:flex;align-items:center;gap:5px;margin-bottom:8px;font-weight:700}
+.req{color:var(--red)}
+.help{width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;background:#D9D9D9;color:#fff;border-radius:50%;font-size:12px}
+.control{width:100%;min-height:46px;padding:10px 12px;border:1px solid #BFBFBF;border-radius:5px;background:#fff;color:var(--text)}
+.control:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(47,84,235,.12)}
+textarea.control{min-height:88px;resize:vertical}
+.template-summary{padding:12px;border:1px solid var(--line);border-radius:8px;background:#FAFAFA}
+.summary-row{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;color:var(--sub)}
+.summary-row:last-child{margin-bottom:0}
+.summary-row span:last-child{font-weight:700;color:var(--text);text-align:right}
+.wide-btn{width:100%;height:44px;border-radius:6px;background:#F5F5F5;border:1px solid var(--line-strong);color:var(--gold);font-weight:700}
+.radio-list{display:grid;gap:8px}
+.radio-item{display:flex;align-items:flex-start;gap:8px;padding:10px;border:1px solid var(--line);border-radius:8px}
+.radio-item input{margin-top:3px;accent-color:var(--brand)}
+.radio-item strong{display:block}.radio-item small{display:block;color:var(--muted);margin-top:2px}
+.preview-phone{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#F8FAFC}
+.phone-screen{width:210px;margin:auto;border:1px solid #D9D9D9;border-radius:18px;background:#fff;overflow:hidden}
+.phone-head{height:36px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);font-weight:800}
+.phone-body{padding:10px;font-size:12px;color:var(--sub)}
+.phone-block{border:1px solid var(--line);border-radius:7px;padding:8px;margin-bottom:8px}
+.phone-button{height:30px;display:flex;align-items:center;justify-content:center;background:var(--brand);color:#fff;border-radius:6px;font-weight:800}
+.modal-mask{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:20;padding:24px}
+.modal-mask.open{display:flex}
+.modal{width:min(920px,100%);max-height:90vh;display:flex;flex-direction:column;background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.modal-head,.modal-foot{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.modal-foot{border-top:1px solid var(--line);border-bottom:0;justify-content:flex-end;gap:10px}
+.modal-head h3{margin:0;font-size:18px}
+.modal-body{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;padding:18px 20px;overflow:auto}
+.editor-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tool{height:30px;padding:0 10px;border-radius:5px;border:1px solid var(--line);background:#FAFAFA;color:var(--sub);font-weight:700}
+.editor{width:100%;min-height:380px;padding:14px;border:1px solid var(--line-strong);border-radius:8px;line-height:1.8;resize:vertical}
+.token-panel{padding:14px;background:#FAFAFA;border:1px solid var(--line);border-radius:8px}
+.token-panel h4{margin:0 0 10px}
+.token{display:inline-flex;margin:0 6px 8px 0;padding:4px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700}
+.warn{margin-top:12px;padding:10px;background:var(--orange-soft);border:1px solid #FFD591;border-radius:8px;color:#AD4E00;font-size:13px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);display:none;padding:10px 14px;border-radius:999px;background:rgba(0,0,0,.82);color:#fff;z-index:30}
+.toast.show{display:block}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.sidebar{display:none}.props{border-left:0;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brand-mark">阅</div><span>活动表单配置</span></div>
+  <div class="top-actions">
+    <button class="btn btn-ghost" onclick="showToast('已保存为草稿')">保存草稿</button>
+    <button class="btn btn-outline" onclick="showToast('正在打开用户端预览')">用户端预览</button>
+    <button class="btn btn-primary" onclick="publishConfig()">保存并发布</button>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="sidebar">
+    <div class="side-title">活动配置</div>
+    <div class="side-item">基本信息</div>
+    <div class="side-item">活动介绍</div>
+    <div class="side-item active">提交表单</div>
+    <div class="side-item">答题配置</div>
+    <div class="side-item">外观装修</div>
+    <div class="side-item">预览发布</div>
+  </aside>
+
+  <section class="canvas-wrap">
+    <div class="page-head">
+      <div>
+        <h1>提交表单组件配置</h1>
+        <p>管理员配置作品提交前必须完成的著作权声明签署组件。</p>
+      </div>
+      <span class="status">配置完整</span>
+    </div>
+    <div class="tabs">
+      <div class="tab">基础字段</div>
+      <div class="tab active">声明与签署</div>
+      <div class="tab">提交校验</div>
+    </div>
+
+    <div class="builder">
+      <div class="canvas-panel">
+        <div class="canvas-toolbar">
+          <strong>用户提交页组件画布</strong>
+          <button class="btn btn-outline" onclick="showToast('已添加一个声明签署组件')">+ 添加组件</button>
+        </div>
+
+        <article class="form-card selected" id="componentCard">
+          <div class="drag-handle">•••</div>
+          <h2 class="field-title"><span class="req-star" id="cardReq">*</span><span id="cardTitle">作品著作权声明书</span></h2>
+          <p class="field-tip" id="cardTip">请签署作品著作权声明书</p>
+          <button class="sign-preview-btn" onclick="openTemplateModal()">签署</button>
+          <div class="card-actions">
+            <div class="switch-pill" id="requiredPill">必填</div>
+            <span class="trash" onclick="showToast('演示中未删除组件')">▥</span>
+          </div>
+        </article>
+
+        <div class="component-note">
+          用户端表现：提交作品时如未签署，将打开移动端“著作权声明”签署页；签署成功后生成记录并继续提交。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="props">
+    <div class="props-card">
+      <h2>作品著作权声明书</h2>
+
+      <div class="form-group">
+        <label><span class="req">*</span>字段标题</label>
+        <input class="control" id="titleInput" value="作品著作权声明书">
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span>提示语 <span class="help" title="展示在用户端字段标题下方">?</span></label>
+        <input class="control" id="tipInput" value="请签署作品著作权声明书">
+      </div>
+
+      <div class="form-group">
+        <label>声明书模板</label>
+        <button class="wide-btn" onclick="openTemplateModal()">查看并编辑模板</button>
+      </div>
+
+      <div class="form-group">
+        <label>签署要求</label>
+        <div class="radio-list">
+          <label class="radio-item">
+            <input type="radio" name="signMode" checked>
+            <span><strong>提交前必须签署</strong><small>未签署时拦截提交，完成后自动返回原流程。</small></span>
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="signMode">
+            <span><strong>仅提醒签署</strong><small>用户可跳过，不建议用于正式作品征集。</small></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>模板摘要</label>
+        <div class="template-summary">
+          <div class="summary-row"><span>模板版本</span><span id="versionText">V1.0</span></div>
+          <div class="summary-row"><span>签署方式</span><span>手写电子签名</span></div>
+          <div class="summary-row"><span>记录留存</span><span>用户、时间、模板版本、签名图</span></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>用户端效果</label>
+        <div class="preview-phone">
+          <div class="phone-screen">
+            <div class="phone-head">著作权声明</div>
+            <div class="phone-body">
+              <div class="phone-block"><strong id="phoneTitle">作品著作权声明书</strong><br><span id="phoneTip">请签署作品著作权声明书</span></div>
+              <div class="phone-block">声明模板 V1.0<br>签署人：林月</div>
+              <div class="phone-button">确认签署</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<div class="modal-mask" id="templateModal">
+  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h3 id="modalTitle">编辑作品著作权声明模板</h3>
+      <button class="btn btn-ghost" onclick="closeTemplateModal()">关闭</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="editor-toolbar">
+          <button class="tool" onclick="insertToken('{{用户姓名}}')">插入姓名</button>
+          <button class="tool" onclick="insertToken('{{作品名称}}')">插入作品</button>
+          <button class="tool" onclick="insertToken('{{活动名称}}')">插入活动</button>
+          <button class="tool" onclick="resetTemplate()">恢复默认</button>
+        </div>
+        <textarea class="editor" id="templateEditor">本人确认提交的作品为本人原创或本人已获得合法授权。本人承诺该作品不存在侵犯他人著作权、肖像权、名誉权、隐私权及其他合法权益的情形。
+
+本人同意活动主办方基于活动展示、评审、公示、传播及档案留存目的，在合理范围内使用本人提交的作品及相关署名信息。
+
+本人知悉，如因作品权属、授权或内容合规问题引发争议，本人应配合主办方核查，并依法承担相应责任。
+
+本人确认本次电子签名为本人真实意思表示，与手写签名具有同等确认效力。</textarea>
+      </div>
+      <aside class="token-panel">
+        <h4>模板配置说明</h4>
+        <p>模板由后台统一配置，用户端只阅读并签署，不允许用户修改声明内容。</p>
+        <div>
+          <span class="token">{{用户姓名}}</span>
+          <span class="token">{{作品名称}}</span>
+          <span class="token">{{活动名称}}</span>
+          <span class="token">{{签署时间}}</span>
+        </div>
+        <div class="warn">发布后如修改模板，应自动生成新版本，历史签署记录继续绑定旧版本。</div>
+      </aside>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeTemplateModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveTemplate()">保存模板</button>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const titleInput=document.getElementById('titleInput');
+const tipInput=document.getElementById('tipInput');
+const cardTitle=document.getElementById('cardTitle');
+const cardTip=document.getElementById('cardTip');
+const phoneTitle=document.getElementById('phoneTitle');
+const phoneTip=document.getElementById('phoneTip');
+const modal=document.getElementById('templateModal');
+const editor=document.getElementById('templateEditor');
+const toast=document.getElementById('toast');
+const versionText=document.getElementById('versionText');
+let version=1;
+const defaultTemplate=editor.value;
+
+function syncText(){
+  const title=titleInput.value.trim()||'作品著作权声明书';
+  const tip=tipInput.value.trim()||'请签署作品著作权声明书';
+  cardTitle.textContent=title;
+  cardTip.textContent=tip;
+  phoneTitle.textContent=title;
+  phoneTip.textContent=tip;
+}
+titleInput.addEventListener('input',syncText);
+tipInput.addEventListener('input',syncText);
+
+function openTemplateModal(){modal.classList.add('open');editor.focus()}
+function closeTemplateModal(){modal.classList.remove('open')}
+function insertToken(token){
+  const start=editor.selectionStart;
+  const end=editor.selectionEnd;
+  editor.value=editor.value.slice(0,start)+token+editor.value.slice(end);
+  editor.focus();
+  editor.selectionStart=editor.selectionEnd=start+token.length;
+}
+function resetTemplate(){editor.value=defaultTemplate;showToast('已恢复默认模板')}
+function saveTemplate(){
+  if(editor.value.trim().length<30){showToast('模板内容过短，请补充声明正文');return}
+  version+=1;
+  versionText.textContent='V1.'+(version-1);
+  closeTemplateModal();
+  showToast('模板已保存，发布后用户端按新版本签署');
+}
+function publishConfig(){
+  if(!titleInput.value.trim()||!tipInput.value.trim()){showToast('请完善字段标题和提示语');return}
+  showToast('配置已发布，用户提交前将签署声明');
+}
+function showToast(msg){
+  toast.textContent=msg;
+  toast.classList.add('show');
+  clearTimeout(showToast.timer);
+  showToast.timer=setTimeout(()=>toast.classList.remove('show'),1800);
+}
+if(new URLSearchParams(window.location.search).get('modal')==='1')openTemplateModal();
+</script>
+</body>
+</html>

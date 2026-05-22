@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="知识问答活动管理系统 - 活动管理、题库管理、数据统计一体化平台">
+    <title>知识问答活动管理系统</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css?v=20260519-daily-overview-filter">
+</head>
+<body>
+<!-- ===== TOP NAVIGATION BAR ===== -->
+<header class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand">
+            <div class="brand-icon">阅</div>
+            <div class="brand-text">
+                <div class="brand-name">阅途·文遇</div>
+                <div class="brand-url">www.yuetu100.com</div>
+            </div>
+        </div>
+        <nav class="top-nav-menu" id="topNavMenu">
+            <a class="top-nav-item" data-section="home" onclick="switchTopNav('home')">首页</a>
+            <a class="top-nav-item" data-section="activity-list-top" onclick="switchTopNav('activity-list-top')">活动列表</a>
+            <a class="top-nav-item active" data-section="activity" onclick="switchTopNav('activity')">活动管理</a>
+            <a class="top-nav-item" data-section="resource" onclick="switchTopNav('resource')">资源管理</a>
+            <a class="top-nav-item" data-section="operation" onclick="switchTopNav('operation')">运营管理</a>
+            <a class="top-nav-item" data-section="data" onclick="switchTopNav('data')">数据管理</a>
+            <a class="top-nav-item" data-section="system" onclick="switchTopNav('system')">系统管理</a>
+        </nav>
+    </div>
+    <div class="top-nav-right">
+        <button class="btn btn-outline btn-sm" style="border-color:#B8956A;color:#B8956A">访问PC官网</button>
+        <div class="top-nav-dropdown">
+            <span>阅途文化集团</span>
+            <span style="margin-left:4px">▼</span>
+        </div>
+        <div class="top-nav-icon">🔍</div>
+        <div class="top-nav-icon">📅</div>
+        <div class="top-nav-icon">🔔</div>
+        <div class="top-nav-divider"></div>
+        <div class="top-nav-user">
+            <div class="user-avatar">🐱</div>
+            <span>林月机构号</span>
+        </div>
+    </div>
+</header>
+
+<div class="manage-topbar" id="manageTopbar"></div>
+<div class="global-page-tabs" id="globalPageTabs"></div>
+
+<div class="layout">
+    <!-- ===== SIDEBAR (populated by JS — renderSidebar) ===== -->
+    <aside class="sidebar" id="sidebar"></aside>
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main" id="mainContent"></main>
+</div>
+<!-- ===== SHARED MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-head">
+            <h3 id="modalTitle">标题</h3>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-foot" id="modalFoot">
+            <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" id="modalConfirm">确认</button>
+        </div>
+    </div>
+</div>
+<!-- ===== SCRIPTS ===== -->
+<script src="js/app.js?v=20260518-fullscreen-create-flow"></script>
+<script src="js/workbench.js?v=20260518-activity-sidebar-rework"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/activity.js?v=20260520-quiz-create-label"></script>
+<script src="js/quiz-activity-create.js?v=20260520-practice-layout"></script>
+<script src="js/activity-manage.js"></script>
+<script src="js/question-bank.js?v=20260518-hide-secondary-return"></script>
+<script src="js/paper-mgmt.js?v=20260518-hide-secondary-return"></script>
+<script src="js/paper-review.js?v=20260518-hide-secondary-return"></script>
+<script src="js/practice-mgmt.js"></script>
+<script src="js/data-mgmt.js?v=20260519-daily-overview-filter"></script>
+<script src="js/submission-list.js"></script>
+<script src="js/leaderboard.js"></script>
+</body>
+</html>

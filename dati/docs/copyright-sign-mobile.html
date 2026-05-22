@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>著作权声明在线签署演示</title>
+    <style>
+        :root {
+            --brand: #2F54EB;
+            --brand-dark: #1D39C4;
+            --brand-soft: #F0F5FF;
+            --gold: #B8956A;
+            --green: #2E8B57;
+            --green-soft: #ECF8F1;
+            --red: #D93026;
+            --red-soft: #FFF1F0;
+            --amber: #D48806;
+            --amber-soft: #FFF7D6;
+            --ink: #1F1F1F;
+            --text: #434343;
+            --muted: #8C8C8C;
+            --line: #E8E8E8;
+            --line-strong: #D9D9D9;
+            --surface: #FFFFFF;
+            --app-bg: #F5F6F8;
+            --shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+            --radius: 8px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            min-height: 100%;
+            overflow-x: hidden;
+            color: var(--ink);
+            background: #EDEFF3;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+        }
+
+        .phone {
+            position: relative;
+            width: min(100%, 390px);
+            max-width: 100%;
+            min-height: 760px;
+            overflow: hidden;
+            background: var(--app-bg);
+            border: 1px solid #DDE1E8;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .statusbar {
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            color: #262626;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--surface);
+        }
+
+        .app-header {
+            height: 52px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .back-btn,
+        .icon-btn {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            background: transparent;
+            border-radius: 8px;
+            font-size: 22px;
+        }
+
+        .app-title {
+            flex: 1;
+            min-width: 0;
+            font-size: 17px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .page {
+            padding: 16px;
+        }
+
+        .section {
+            margin-bottom: 12px;
+            padding: 16px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+        }
+
+        .section-title {
+            margin: 0 0 10px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .field-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            color: var(--text);
+            font-size: 14px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .field-row:last-child {
+            border-bottom: 0;
+        }
+
+        .field-label {
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .field-value {
+            min-width: 0;
+            text-align: right;
+            font-weight: 500;
+            overflow-wrap: anywhere;
+        }
+
+        .notice {
+            padding: 12px;
+            color: #6B4F00;
+            background: var(--amber-soft);
+            border: 1px solid #FFE58F;
+            border-radius: var(--radius);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .notice.signed {
+            color: #135D34;
+            background: var(--green-soft);
+            border-color: #B7E4C7;
+        }
+
+        .sign-check {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .sign-status {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+            color: #135D34;
+            background: var(--green-soft);
+            border: 1px solid #B7E4C7;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .sign-status.show {
+            display: flex;
+        }
+
+        .modify-link {
+            flex: 0 0 auto;
+            padding: 0;
+            color: var(--brand);
+            background: transparent;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .secondary-action {
+            width: 100%;
+            height: 42px;
+            color: var(--brand);
+            background: #FFFFFF;
+            border: 1px solid var(--brand);
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .primary-action {
+            width: 100%;
+            height: 46px;
+            margin-top: 4px;
+            color: #FFFFFF;
+            background: var(--brand);
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .primary-action:disabled {
+            background: #BFBFBF;
+            cursor: not-allowed;
+        }
+
+        .primary-action:active {
+            background: var(--brand-dark);
+        }
+
+        .ghost-action {
+            width: 100%;
+            height: 44px;
+            color: var(--text);
+            background: #FFFFFF;
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .mask {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: flex-end;
+            background: rgba(0, 0, 0, 0.48);
+            z-index: 20;
+        }
+
+        .mask.open {
+            display: flex;
+        }
+
+        .sheet {
+            width: 100%;
+            min-width: 0;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border-radius: 18px 18px 0 0;
+            overflow: hidden;
+        }
+
+        .sheet.full {
+            height: 100%;
+            border-radius: 0;
+        }
+
+        .sheet-head {
+            min-height: 66px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .sheet-title-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sheet-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+
+        .sheet-subtitle {
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .sheet-body {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            overflow-x: hidden;
+            padding: 14px 14px 120px;
+            background: #FAFAFA;
+        }
+
+        .progress {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .progress-step {
+            height: 4px;
+            background: #E8E8E8;
+            border-radius: 999px;
+        }
+
+        .progress-step.active {
+            background: var(--brand);
+        }
+
+        .sign-block {
+            min-width: 0;
+            margin-bottom: 12px;
+            padding: 14px;
+            background: #FFFFFF;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+        }
+
+        .block-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .block-title {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .tag {
+            flex: 0 0 auto;
+            max-width: 128px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 3px 8px;
+            color: var(--brand-dark);
+            background: var(--brand-soft);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .template-box {
+            max-height: 236px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px;
+            color: var(--text);
+            background: #FFFFFF;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .template-box p {
+            margin: 0 0 10px;
+        }
+
+        .template-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .read-status {
+            margin-top: 10px;
+            color: var(--amber);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .read-status.done {
+            color: var(--green);
+        }
+
+        .user-grid {
+            border-top: 1px solid #F0F0F0;
+        }
+
+        .signature-tools {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            height: 32px;
+            padding: 0 12px;
+            color: var(--text);
+            background: #F5F5F5;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            height: 190px;
+            overflow: hidden;
+            background: #FFFFFF;
+            border: 1px dashed #BFBFBF;
+            border-radius: var(--radius);
+        }
+
+        .signature-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+        }
+
+        .canvas-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #BFBFBF;
+            pointer-events: none;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .canvas-placeholder.hidden {
+            display: none;
+        }
+
+        .error-tip {
+            min-height: 18px;
+            margin-top: 8px;
+            color: var(--red);
+            font-size: 13px;
+        }
+
+        .confirm-line {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .confirm-line input {
+            width: 20px;
+            height: 20px;
+            margin-top: 1px;
+            accent-color: var(--brand);
+        }
+
+        .sheet-foot {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 10px 14px calc(12px + var(--safe-bottom));
+            background: rgba(255, 255, 255, 0.96);
+            border-top: 1px solid var(--line);
+            backdrop-filter: blur(10px);
+        }
+
+        .foot-actions {
+            display: grid;
+            grid-template-columns: minmax(96px, 108px) minmax(0, 1fr);
+            gap: 10px;
+        }
+
+        .submit-btn {
+            height: 46px;
+            color: #FFFFFF;
+            background: var(--brand);
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .submit-btn:disabled {
+            color: #FFFFFF;
+            background: #BFBFBF;
+            cursor: not-allowed;
+        }
+
+        .toast {
+            position: absolute;
+            left: 50%;
+            bottom: 96px;
+            display: none;
+            transform: translateX(-50%);
+            max-width: calc(100% - 40px);
+            padding: 9px 14px;
+            color: #FFFFFF;
+            background: rgba(31, 31, 31, 0.88);
+            border-radius: 999px;
+            font-size: 13px;
+            z-index: 40;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .success-state {
+            display: none;
+            padding: 36px 14px 120px;
+            text-align: center;
+        }
+
+        .success-state.show {
+            display: block;
+        }
+
+        .success-mark {
+            width: 64px;
+            height: 64px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            color: #FFFFFF;
+            background: var(--green);
+            border-radius: 50%;
+            font-size: 34px;
+            font-weight: 800;
+        }
+
+        .success-state h2 {
+            margin: 0 0 8px;
+            font-size: 22px;
+        }
+
+        .success-state p {
+            margin: 0 0 18px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .record-box {
+            margin: 0 auto 18px;
+            padding: 12px 14px;
+            text-align: left;
+            background: var(--green-soft);
+            border: 1px solid #B7E4C7;
+            border-radius: var(--radius);
+        }
+
+        .record-box .field-row {
+            border-color: rgba(46, 139, 87, 0.16);
+        }
+
+        .signed-banner {
+            display: none;
+            margin-bottom: 12px;
+            padding: 12px;
+            color: #135D34;
+            background: var(--green-soft);
+            border: 1px solid #B7E4C7;
+            border-radius: var(--radius);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .signed-banner.show {
+            display: block;
+        }
+
+            @media (max-width: 520px) {
+            body {
+                display: block;
+                padding: 0;
+                background: var(--app-bg);
+            }
+
+            .phone {
+                width: min(100%, 390px);
+                min-height: 100vh;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="phone">
+        <div class="statusbar">
+            <span>9:41</span>
+            <span>5G  100%</span>
+        </div>
+
+        <header class="app-header">
+            <button class="back-btn" aria-label="返回">‹</button>
+            <div class="app-title">作品提交</div>
+            <button class="icon-btn" aria-label="更多">⋯</button>
+        </header>
+
+        <section class="page">
+            <div class="signed-banner" id="signedBanner">
+                著作权声明已签署，可继续完成作品提交。
+            </div>
+
+            <div class="section">
+                <h1 class="section-title">非遗文化知识闯关作品</h1>
+                <div class="field-row">
+                    <span class="field-label">提交人</span>
+                    <span class="field-value">林月</span>
+                </div>
+                <div class="field-row">
+                    <span class="field-label">作品名称</span>
+                    <span class="field-value">《纸上春秋》阅读札记</span>
+                </div>
+                <div class="field-row">
+                    <span class="field-label">活动要求</span>
+                    <span class="field-value">提交前签署著作权声明</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">提交检查</h2>
+                <div class="notice" id="submitNotice">
+                    系统检测到当前活动需要在线签署著作权声明。完成签署后，作品将继续提交。
+                </div>
+                <div class="sign-check">
+                    <button class="secondary-action" id="goSignBtn">去签署</button>
+                    <div class="sign-status" id="signStatus">
+                        <span id="signStatusText">已签署</span>
+                        <button class="modify-link" id="modifySignBtn">修改</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="primary-action" id="openSignBtn">提交作品</button>
+        </section>
+
+        <div class="mask" id="signMask" aria-hidden="true">
+            <section class="sheet full" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+                <header class="sheet-head">
+                    <button class="back-btn" id="closeSignBtn" aria-label="关闭">‹</button>
+                    <div class="sheet-title-wrap">
+                        <h2 class="sheet-title" id="dialogTitle">著作权声明</h2>
+                        <div class="sheet-subtitle">请阅读声明内容，并签署本人姓名</div>
+                    </div>
+                    <button class="icon-btn" id="viewRecordBtn" aria-label="查看签署记录">≡</button>
+                </header>
+
+                <div class="sheet-body" id="signForm">
+                    <div class="progress" aria-hidden="true">
+                        <span class="progress-step active"></span>
+                        <span class="progress-step" id="stepRead"></span>
+                        <span class="progress-step" id="stepSign"></span>
+                        <span class="progress-step" id="stepConfirm"></span>
+                    </div>
+
+                    <section class="sign-block">
+                        <div class="block-head">
+                            <h3 class="block-title">声明模板</h3>
+                            <span class="tag">后台模板 V1.0</span>
+                        </div>
+                        <div class="template-box" id="templateBox" tabindex="0">
+                            <p>本人确认提交的作品为本人原创或本人已获得合法授权。本人承诺该作品不存在侵犯他人著作权、肖像权、名誉权、隐私权及其他合法权益的情形。</p>
+                            <p>本人同意活动主办方基于活动展示、评审、公示、传播及档案留存目的，在合理范围内使用本人提交的作品及相关署名信息。</p>
+                            <p>本人知悉，如因作品权属、授权或内容合规问题引发争议，本人应配合主办方核查，并依法承担相应责任。</p>
+                            <p>本人确认本次电子签名为本人真实意思表示，与手写签名具有同等确认效力。</p>
+                        </div>
+                        <div class="read-status" id="readStatus">请阅读完整声明内容</div>
+                    </section>
+
+                    <section class="sign-block">
+                        <div class="block-head">
+                            <h3 class="block-title">签署人信息</h3>
+                        </div>
+                        <div class="user-grid">
+                            <div class="field-row">
+                                <span class="field-label">姓名</span>
+                                <span class="field-value">林月</span>
+                            </div>
+                            <div class="field-row">
+                                <span class="field-label">账号</span>
+                                <span class="field-value">138****0628</span>
+                            </div>
+                            <div class="field-row">
+                                <span class="field-label">签署事项</span>
+                                <span class="field-value">作品著作权声明</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sign-block">
+                        <div class="block-head">
+                            <h3 class="block-title">电子签名</h3>
+                            <div class="signature-tools">
+                                <button class="tool-btn" id="undoBtn">撤销</button>
+                                <button class="tool-btn" id="clearBtn">清除</button>
+                            </div>
+                        </div>
+                        <div class="canvas-wrap">
+                            <canvas class="signature-canvas" id="signatureCanvas"></canvas>
+                            <div class="canvas-placeholder" id="canvasPlaceholder">请在此处手写签名</div>
+                        </div>
+                        <div class="error-tip" id="signatureTip"></div>
+                    </section>
+
+                    <section class="sign-block">
+                        <label class="confirm-line">
+                            <input type="checkbox" id="confirmCheck">
+                            <span>我已阅读并理解上述著作权声明，确认以本人真实意愿签署，并承诺提交内容为本人原创或已获得合法授权。</span>
+                        </label>
+                    </section>
+                </div>
+
+                <div class="success-state" id="successState">
+                    <div class="success-mark">✓</div>
+                    <h2>签署成功</h2>
+                    <p>声明已记录，返回后可继续提交作品。</p>
+                    <div class="record-box">
+                        <div class="field-row">
+                            <span class="field-label">签署人</span>
+                            <span class="field-value">林月</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">记录编号</span>
+                            <span class="field-value" id="recordNo">-</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">签署时间</span>
+                            <span class="field-value" id="signedAt">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="sheet-foot">
+                    <div class="foot-actions" id="formActions">
+                        <button class="ghost-action" id="cancelBtn">暂不签署</button>
+                        <button class="submit-btn" id="submitSignBtn" disabled>请先阅读声明</button>
+                    </div>
+                    <button class="primary-action" id="continueBtn" style="display:none">返回作品页</button>
+                </footer>
+            </section>
+        </div>
+
+        <div class="toast" id="toast"></div>
+    </main>
+
+    <script>
+        const openSignBtn = document.getElementById('openSignBtn');
+        const goSignBtn = document.getElementById('goSignBtn');
+        const modifySignBtn = document.getElementById('modifySignBtn');
+        const signStatus = document.getElementById('signStatus');
+        const signStatusText = document.getElementById('signStatusText');
+        const signMask = document.getElementById('signMask');
+        const closeSignBtn = document.getElementById('closeSignBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const submitSignBtn = document.getElementById('submitSignBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const templateBox = document.getElementById('templateBox');
+        const readStatus = document.getElementById('readStatus');
+        const confirmCheck = document.getElementById('confirmCheck');
+        const signatureCanvas = document.getElementById('signatureCanvas');
+        const canvasPlaceholder = document.getElementById('canvasPlaceholder');
+        const signatureTip = document.getElementById('signatureTip');
+        const undoBtn = document.getElementById('undoBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const signForm = document.getElementById('signForm');
+        const successState = document.getElementById('successState');
+        const formActions = document.getElementById('formActions');
+        const signedAt = document.getElementById('signedAt');
+        const recordNo = document.getElementById('recordNo');
+        const submitNotice = document.getElementById('submitNotice');
+        const signedBanner = document.getElementById('signedBanner');
+        const toast = document.getElementById('toast');
+        const stepRead = document.getElementById('stepRead');
+        const stepSign = document.getElementById('stepSign');
+        const stepConfirm = document.getElementById('stepConfirm');
+        const viewRecordBtn = document.getElementById('viewRecordBtn');
+
+        let hasRead = false;
+        let hasSignature = false;
+        let isSigned = false;
+        let isDrawing = false;
+        let pointsCount = 0;
+        let strokes = [];
+        let currentStroke = [];
+        const ctx = signatureCanvas.getContext('2d');
+        openSignBtn.disabled = true;
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            window.clearTimeout(showToast.timer);
+            showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        function openSheet(options = {}) {
+            signMask.classList.add('open');
+            signMask.setAttribute('aria-hidden', 'false');
+            resizeCanvas();
+            if (isSigned && !options.edit) {
+                showSuccessState();
+            } else {
+                if (options.edit) {
+                    clearSignature();
+                    confirmCheck.checked = false;
+                }
+                showFormState();
+                updateSubmitState();
+            }
+        }
+
+        function closeSheet() {
+            signMask.classList.remove('open');
+            signMask.setAttribute('aria-hidden', 'true');
+        }
+
+        function showFormState() {
+            signForm.style.display = 'block';
+            successState.classList.remove('show');
+            formActions.style.display = 'grid';
+            continueBtn.style.display = 'none';
+        }
+
+        function showSuccessState() {
+            signForm.style.display = 'none';
+            successState.classList.add('show');
+            formActions.style.display = 'none';
+            continueBtn.style.display = 'block';
+        }
+
+        function markReadIfNeeded() {
+            const bottom = templateBox.scrollTop + templateBox.clientHeight;
+            if (bottom >= templateBox.scrollHeight - 8) {
+                hasRead = true;
+                readStatus.textContent = '已阅读完整声明';
+                readStatus.classList.add('done');
+                stepRead.classList.add('active');
+                updateSubmitState();
+            }
+        }
+
+        function updateSubmitState() {
+            stepSign.classList.toggle('active', hasSignature);
+            stepConfirm.classList.toggle('active', confirmCheck.checked);
+
+            if (!hasRead) {
+                submitSignBtn.disabled = true;
+                submitSignBtn.textContent = '请先阅读声明';
+                return;
+            }
+
+            if (!hasSignature) {
+                submitSignBtn.disabled = true;
+                submitSignBtn.textContent = '请完成签名';
+                return;
+            }
+
+            if (!confirmCheck.checked) {
+                submitSignBtn.disabled = true;
+                submitSignBtn.textContent = '请勾选确认声明';
+                return;
+            }
+
+            submitSignBtn.disabled = false;
+            submitSignBtn.textContent = '确认签署';
+        }
+
+        function resizeCanvas() {
+            const rect = signatureCanvas.getBoundingClientRect();
+            const ratio = window.devicePixelRatio || 1;
+            signatureCanvas.width = Math.floor(rect.width * ratio);
+            signatureCanvas.height = Math.floor(rect.height * ratio);
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            redrawStrokes();
+        }
+
+        function drawStroke(stroke) {
+            if (stroke.length < 2) return;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#1F1F1F';
+            ctx.beginPath();
+            ctx.moveTo(stroke[0].x, stroke[0].y);
+            for (let i = 1; i < stroke.length; i += 1) {
+                ctx.lineTo(stroke[i].x, stroke[i].y);
+            }
+            ctx.stroke();
+        }
+
+        function redrawStrokes() {
+            const rect = signatureCanvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            strokes.forEach(drawStroke);
+            drawStroke(currentStroke);
+            canvasPlaceholder.classList.toggle('hidden', strokes.length > 0 || currentStroke.length > 0);
+        }
+
+        function getCanvasPoint(event) {
+            const source = event.touches ? event.touches[0] : event;
+            const rect = signatureCanvas.getBoundingClientRect();
+            return {
+                x: source.clientX - rect.left,
+                y: source.clientY - rect.top
+            };
+        }
+
+        function beginDraw(event) {
+            event.preventDefault();
+            isDrawing = true;
+            currentStroke = [getCanvasPoint(event)];
+            signatureTip.textContent = '';
+            redrawStrokes();
+        }
+
+        function moveDraw(event) {
+            if (!isDrawing) return;
+            event.preventDefault();
+            currentStroke.push(getCanvasPoint(event));
+            pointsCount += 1;
+            redrawStrokes();
+        }
+
+        function endDraw(event) {
+            if (!isDrawing) return;
+            event.preventDefault();
+            isDrawing = false;
+            if (currentStroke.length > 1) {
+                strokes.push(currentStroke);
+            }
+            currentStroke = [];
+            hasSignature = pointsCount >= 10;
+            if (!hasSignature) {
+                signatureTip.textContent = '请完整签署本人姓名';
+            }
+            redrawStrokes();
+            updateSubmitState();
+        }
+
+        function clearSignature() {
+            strokes = [];
+            currentStroke = [];
+            pointsCount = 0;
+            hasSignature = false;
+            signatureTip.textContent = '';
+            redrawStrokes();
+            updateSubmitState();
+        }
+
+        function undoSignature() {
+            const removed = strokes.pop();
+            if (removed) {
+                pointsCount = Math.max(0, pointsCount - removed.length);
+            }
+            hasSignature = pointsCount >= 10;
+            redrawStrokes();
+            updateSubmitState();
+        }
+
+        function submitSignature() {
+            if (submitSignBtn.disabled) return;
+            submitSignBtn.disabled = true;
+            submitSignBtn.textContent = '签署中...';
+
+            window.setTimeout(() => {
+                isSigned = true;
+                const now = new Date();
+                signedAt.textContent = now.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                recordNo.textContent = `CR${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getTime()).slice(-6)}`;
+                showSuccessState();
+            }, 700);
+        }
+
+        function continueSubmit() {
+            closeSheet();
+            renderSignedSubmitState();
+            showToast('已返回作品提交页');
+        }
+
+        function renderSignedSubmitState() {
+            signedBanner.classList.add('show');
+            submitNotice.textContent = '著作权声明已签署，可继续提交作品。';
+            submitNotice.classList.add('signed');
+            signStatus.classList.add('show');
+            signStatusText.textContent = `已签署 ${signedAt.textContent}`;
+            goSignBtn.style.display = 'none';
+            openSignBtn.disabled = false;
+            openSignBtn.textContent = '提交作品';
+        }
+
+        goSignBtn.addEventListener('click', () => openSheet({ edit: !isSigned }));
+        modifySignBtn.addEventListener('click', () => openSheet({ edit: true }));
+        openSignBtn.addEventListener('click', () => {
+            if (!isSigned) {
+                showToast('请先完成著作权声明签署');
+                openSheet({ edit: false });
+                return;
+            }
+            submitNotice.textContent = '作品已提交，签署记录已随作品一并留存。';
+            showToast('作品提交成功');
+        });
+        closeSignBtn.addEventListener('click', () => {
+            if (isSigned) {
+                closeSheet();
+                return;
+            }
+            showToast('未完成签署，暂不能继续提交');
+        });
+        cancelBtn.addEventListener('click', () => {
+            closeSheet();
+            showToast('已暂存当前提交，签署后可继续');
+        });
+        continueBtn.addEventListener('click', continueSubmit);
+        templateBox.addEventListener('scroll', markReadIfNeeded);
+        templateBox.addEventListener('touchend', markReadIfNeeded);
+        confirmCheck.addEventListener('change', updateSubmitState);
+        submitSignBtn.addEventListener('click', submitSignature);
+        clearBtn.addEventListener('click', clearSignature);
+        undoBtn.addEventListener('click', undoSignature);
+        viewRecordBtn.addEventListener('click', () => {
+            if (isSigned) {
+                showSuccessState();
+            } else {
+                showToast('完成签署后将生成记录');
+            }
+        });
+
+        signatureCanvas.addEventListener('mousedown', beginDraw);
+        signatureCanvas.addEventListener('mousemove', moveDraw);
+        signatureCanvas.addEventListener('mouseup', endDraw);
+        signatureCanvas.addEventListener('mouseleave', endDraw);
+        signatureCanvas.addEventListener('touchstart', beginDraw, { passive: false });
+        signatureCanvas.addEventListener('touchmove', moveDraw, { passive: false });
+        signatureCanvas.addEventListener('touchend', endDraw, { passive: false });
+        window.addEventListener('resize', resizeCanvas);
+
+        markReadIfNeeded();
+        if (new URLSearchParams(window.location.search).get('open') === '1') {
+            openSheet();
+        }
+        if (new URLSearchParams(window.location.search).get('signed') === '1') {
+            isSigned = true;
+            const demoTime = '2026/05/18 14:30';
+            signedAt.textContent = demoTime;
+            recordNo.textContent = 'CR20260518-143000';
+            renderSignedSubmitState();
+        }
+    </script>
+</body>
+</html>

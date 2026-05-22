@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>答题活动配置 - 知识问答系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+    --primary:#4A6CF7;--primary-hover:#3B5DE7;--primary-light:#EEF2FF;--primary-glow:rgba(74,108,247,.15);
+    --success:#10B981;--success-light:#ECFDF5;--danger:#EF4444;--danger-light:#FEF2F2;
+    --warning:#F59E0B;--warning-light:#FFFBEB;
+    --bg:#F1F5F9;--surface:#FFF;--border:#E2E8F0;--border-light:#F1F5F9;
+    --text-primary:#0F172A;--text-secondary:#475569;--text-muted:#94A3B8;
+    --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.05);--shadow-md:0 4px 6px -1px rgba(0,0,0,.1);
+    --t-fast:all .15s cubic-bezier(.4,0,.2,1);--t-base:all .25s cubic-bezier(.4,0,.2,1)
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text-primary);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ===== LAYOUT ===== */
+.page-wrap{max-width:960px;margin:0 auto;padding:24px 28px}
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--text-primary)}
+.page-head p{font-size:13px;color:var(--text-muted);margin-top:4px}
+
+/* ===== MODE SELECTOR ===== */
+.mode-selector{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.mode-card{padding:20px 24px;border:2px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:var(--t-base);position:relative;overflow:hidden}
+.mode-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:transparent;transition:var(--t-base)}
+.mode-card:hover{border-color:#94A3B8;box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.mode-card.selected{border-color:var(--primary);background:var(--primary-light);box-shadow:0 0 0 3px var(--primary-glow)}
+.mode-card.selected::before{background:var(--primary)}
+.mode-card .mode-icon{font-size:28px;margin-bottom:8px}
+.mode-card .mode-title{font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:4px}
+.mode-card .mode-desc{font-size:12px;color:var(--text-muted);line-height:1.6}
+.mode-card .mode-tag{position:absolute;top:12px;right:12px;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.3px;background:var(--border-light);color:var(--text-muted);transition:var(--t-fast)}
+.mode-card.selected .mode-tag{background:var(--primary);color:#fff}
+
+/* ===== SECTION ===== */
+.section{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius-lg);margin-bottom:20px;overflow:hidden;transition:var(--t-base)}
+.section:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.section-head{padding:16px 24px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px;background:#F8FAFC}
+.section-head .sec-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.section-head .sec-icon.blue{background:var(--primary-light);color:var(--primary)}
+.section-head .sec-icon.green{background:var(--success-light);color:var(--success)}
+.section-head .sec-icon.yellow{background:var(--warning-light);color:#B45309}
+.section-head .sec-icon.red{background:var(--danger-light);color:var(--danger)}
+.section-head .sec-title{font-size:15px;font-weight:700;color:var(--text-primary)}
+.section-head .sec-subtitle{font-size:12px;color:var(--text-muted);margin-top:1px}
+.section-body{padding:20px 24px}
+
+/* ===== FORM ===== */
+.form-group{margin-bottom:16px}
+.form-group:last-child{margin-bottom:0}
+.form-group>label{display:block;margin-bottom:5px;font-weight:600;font-size:13px;color:var(--text-secondary)}
+.form-group>label .req{color:var(--danger);margin-right:2px}
+.form-control{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;transition:var(--t-fast);background:var(--surface);color:var(--text-primary)}
+.form-control:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px var(--primary-glow)}
+.form-control:hover:not(:focus){border-color:#94A3B8}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
+.radio-group,.checkbox-group{display:flex;gap:14px;flex-wrap:wrap}
+.radio-item,.checkbox-item{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;padding:4px 0}
+.radio-item input,.checkbox-item input{accent-color:var(--primary)}
+.hint{font-size:12px;color:var(--text-muted);margin-top:4px;line-height:1.5}
+.hint strong{color:var(--text-secondary)}
+
+/* ===== SWITCH ===== */
+.switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.sw-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#CBD5E1;transition:var(--t-base);border-radius:24px}
+.sw-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;transition:var(--t-base);border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+input:checked+.sw-slider{background:var(--primary)}
+input:checked+.sw-slider:before{transform:translateX(20px)}
+
+/* ===== SWITCH ROW ===== */
+.sw-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-light)}
+.sw-row:last-child{border-bottom:none}
+.sw-row .sw-text{flex:1}
+.sw-row .sw-label{font-size:13px;color:var(--text-secondary);font-weight:600}
+.sw-row .sw-hint{font-size:12px;color:var(--text-muted);margin-top:2px;line-height:1.5}
+
+/* ===== INLINE FIELD ===== */
+.inline-field{display:flex;align-items:center;gap:8px;font-size:13px}
+.inline-field input[type="number"]{width:80px;padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;text-align:center}
+.inline-field input[type="number"]:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px var(--primary-glow)}
+.inline-field select{padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px}
+
+/* ===== BUTTONS ===== */
+.btn{padding:8px 18px;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:var(--t-fast);font-weight:600;letter-spacing:-.1px}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 1px 2px rgba(74,108,247,.3)}.btn-primary:hover{background:var(--primary-hover);box-shadow:0 4px 12px rgba(74,108,247,.4);transform:translateY(-1px)}
+.btn-ghost{background:#F1F5F9;color:var(--text-secondary)}.btn-ghost:hover{background:#E2E8F0}
+.btn-outline{background:var(--surface);color:var(--primary);border:1.5px solid var(--primary)}.btn-outline:hover{background:var(--primary-light)}
+.btn-success{background:var(--success);color:#fff;box-shadow:0 1px 2px rgba(16,185,129,.3)}.btn-success:hover{background:#059669;box-shadow:0 4px 12px rgba(16,185,129,.4);transform:translateY(-1px)}
+.btn-group{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)}
+
+/* ===== BADGE ===== */
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-blue{background:var(--primary-light);color:#3730A3}
+.badge-green{background:var(--success-light);color:#065F46}
+.badge-yellow{background:var(--warning-light);color:#78350F}
+.badge-gray{background:#F1F5F9;color:#64748B}
+
+/* ===== CONFIG BLOCK ===== */
+.config-block{background:#F8FAFC;border:1.5px solid var(--border-light);border-radius:var(--radius-md);padding:16px;margin-bottom:16px}
+.config-block:last-child{margin-bottom:0}
+.config-block-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+/* ===== COMPARISON TABLE ===== */
+.cmp-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;margin-bottom:16px}
+.cmp-table th,.cmp-table td{padding:10px 14px;border-bottom:1px solid var(--border-light)}
+.cmp-table th{background:#F8FAFC;color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;text-align:left}
+.cmp-table th:nth-child(2),.cmp-table th:nth-child(3){text-align:center}
+.cmp-table td:nth-child(2),.cmp-table td:nth-child(3){text-align:center}
+.cmp-table td:first-child{color:var(--text-secondary);font-weight:500}
+.cmp-table .check{color:var(--success);font-weight:700}
+.cmp-table .na{color:var(--text-muted);font-size:12px}
+.cmp-table .warn{color:var(--warning);font-weight:600}
+.cmp-table tbody tr:hover td{background:#F8FAFC}
+.cmp-table td[rowspan]{border-right:2px solid var(--border-light);background:#FAFBFC}
+.cmp-table .check{color:var(--success);font-weight:700;white-space:nowrap}
+.cmp-table .na{color:var(--text-muted);font-size:12px;white-space:nowrap}
+.cmp-table .warn{color:var(--warning);font-weight:600;white-space:nowrap}
+
+/* ===== INFO BOX ===== */
+.info-box{padding:12px 16px;border-radius:var(--radius-md);margin-bottom:16px;font-size:13px;line-height:1.6;border-left:3px solid}
+.info-box.blue{background:var(--primary-light);border-left-color:var(--primary);color:#312E81}
+.info-box.yellow{background:var(--warning-light);border-left-color:var(--warning);color:#78350F}
+.info-box.green{background:var(--success-light);border-left-color:var(--success);color:#064E3B}
+
+/* ===== PAPER SELECT CARD ===== */
+.paper-card{border:1.5px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;transition:var(--t-fast);cursor:pointer}
+.paper-card:hover{border-color:var(--primary);background:var(--primary-light)}
+.paper-card.selected{border-color:var(--primary);background:var(--primary-light);box-shadow:0 0 0 3px var(--primary-glow)}
+.paper-card .paper-info{flex:1}
+.paper-card .paper-name{font-weight:600;font-size:13px;color:var(--text-primary)}
+.paper-card .paper-meta{font-size:12px;color:var(--text-muted);margin-top:2px}
+.paper-card .paper-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.paper-card.selected .paper-radio{border-color:var(--primary)}
+.paper-card.selected .paper-radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--primary)}
+
+/* ===== DRAW RULE ROW ===== */
+.draw-rule{display:grid;grid-template-columns:1.2fr .8fr .8fr .6fr .6fr;gap:10px;align-items:end;padding:12px 0;border-bottom:1px solid var(--border-light)}
+.draw-rule:last-of-type{border-bottom:none}
+.draw-rule label{font-size:11px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:3px}
+.draw-rule select,.draw-rule input{width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px}
+.draw-rule select:focus,.draw-rule input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 2px var(--primary-glow)}
+
+/* ===== DAILY SCHEDULE ===== */
+.schedule-row{display:grid;grid-template-columns:1fr 1.2fr 1.2fr .7fr .7fr .5fr;gap:10px;align-items:end;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.schedule-row:last-of-type{border-bottom:none}
+.schedule-row label{font-size:11px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:3px}
+.schedule-row select,.schedule-row input{width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px}
+.schedule-row select:focus,.schedule-row input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 2px var(--primary-glow)}
+
+/* ===== HIDDEN ===== */
+.mode-config{display:none;animation:fadeIn .3s ease}.mode-config.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){.form-row,.form-row-3,.form-row-4{grid-template-columns:1fr}.mode-selector{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<!-- PAGE HEADER -->
+<div class="page-head">
+    <h1>答题活动配置</h1>
+    <p>配置活动的答题时间、参与规则、题目来源和分值规则。选择活动模式后，系统将自动展示对应配置项。</p>
+    <div style="display:flex;gap:8px;margin-top:12px">
+        <span class="badge badge-blue">考试模式</span>
+        <span class="badge badge-green">每日答题闯关模式</span>
+        <span class="badge badge-yellow">闯关模式</span>
+        <span style="font-size:11px;color:var(--text-muted);margin-left:4px">闯关模式：顺序解锁、实时校验、即时解析</span>
+    </div>
+</div>
+
+<!-- ===== MODE SELECTOR ===== -->
+<div class="mode-selector" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="mode-card selected" id="modeExam" onclick="selectMode('exam')">
+        <div class="mode-tag">考试</div>
+        <div class="mode-icon">📝</div>
+        <div class="mode-title">考试模式</div>
+        <div class="mode-desc">面向考试模式、测评、竞赛场景。支持固定题目与随机抽题，配置考试时长与防作弊设置。</div>
+    </div>
+    <div class="mode-card" id="modeChallenge" onclick="selectMode('challenge')">
+        <div class="mode-tag">每日</div>
+        <div class="mode-icon">🎯</div>
+        <div class="mode-title">每日答题闯关模式</div>
+        <div class="mode-desc">面向连续参与、每日学习、积分排行场景。支持每日关卡抽题与排行榜激励。</div>
+    </div>
+    <div class="mode-card" id="modeLevel" onclick="selectMode('level')">
+        <div class="mode-tag">闯关</div>
+        <div class="mode-icon">⚔️</div>
+        <div class="mode-title">闯关模式</div>
+        <div class="mode-desc">面向顺序闯关、刷题练习、实时校验场景。过关才解锁下一关，答完即显解析。</div>
+    </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- EXAM MODE CONFIGURATION -->
+<!-- ====================================================================== -->
+<div class="mode-config active" id="examConfig">
+
+<!-- Section 1: 答题时间 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon blue">⏱</div>
+        <div><div class="sec-title">答题时间</div><div class="sec-subtitle">配置考试开放时间、答题时段和考试时长</div></div>
+    </div>
+    <div class="section-body">
+        <div class="form-group">
+            <label><span class="req">*</span> 考试开放时间</label>
+            <div class="form-row">
+                <input type="datetime-local" class="form-control" value="2026-06-09T09:00">
+                <input type="datetime-local" class="form-control" value="2026-06-09T18:00">
+            </div>
+            <p class="hint">配置用户可以进入考试、点击「开始答题」的时间范围</p>
+        </div>
+        <div class="form-group">
+            <label>可设置答题时段</label>
+            <div class="inline-field">
+                <span>每日开放</span>
+                <input type="time" value="09:00" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                <span>至</span>
+                <input type="time" value="18:00" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                <span>可答题</span>
+            </div>
+            <p class="hint">支持配置具体开放时段，例如 09:00-18:00。留空表示全天开放。</p>
+        </div>
+        <div class="form-group">
+            <label><span class="req">*</span> 考试时长</label>
+            <div class="inline-field">
+                <input type="number" value="120" min="1" placeholder="120">
+                <span>分钟</span>
+            </div>
+            <p class="hint">用户点击「开始答题」后，单次考试最长可作答时间。到达后系统自动交卷。</p>
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: 参与次数 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon green">🔄</div>
+        <div><div class="sec-title">参与次数</div><div class="sec-subtitle">配置每日答题次数和总答题次数限制</div></div>
+    </div>
+    <div class="section-body">
+        <div class="form-group">
+            <label><span class="req">*</span> 每日答题次数</label>
+            <div class="radio-group">
+                <div class="radio-item"><input type="radio" name="examDailyN" checked><label>每天仅可答 1 次</label></div>
+                <div class="radio-item"><input type="radio" name="examDailyN"><label>每天可答</label><input type="number" style="width:56px;margin:0 4px;padding:4px 6px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;text-align:center" placeholder="N"><label>次</label></div>
+                <div class="radio-item"><input type="radio" name="examDailyN"><label>每天不限次</label></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>每人最多答题次数（整个活动期间）</label>
+            <div class="inline-field">
+                <input type="number" placeholder="留空不限制" min="1">
+                <span>次</span>
+            </div>
+            <p class="hint">限制用户在整个活动期间最多可答题次数。留空表示不限制。</p>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: 参与规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon yellow">📋</div>
+        <div><div class="sec-title">参与规则</div><div class="sec-subtitle">配置中断答题、计时、跳题等答题过程规则</div></div>
+    </div>
+    <div class="section-body">
+        <div class="config-block">
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">允许中断答题</div>
+                    <div class="sw-hint">控制用户答题过程中退出后是否允许继续答题。关闭后，退出将自动交卷。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">中断后默认计时将继续</div>
+                    <div class="sw-hint">中断后倒计时继续，避免用户通过退出暂停计时。关闭后中断期间暂停计时。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">允许跳题</div>
+                    <div class="sw-hint">控制用户是否可以跳过当前题目，后续再作答。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">显示答题卡</div>
+                    <div class="sw-hint">展示题目作答状态，支持快速跳题。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>防作弊设置</label>
+            <div class="config-block">
+                <div class="form-group" style="margin-bottom:0">
+                    <label>切屏限制</label>
+                    <div class="inline-field">
+                        <span>切屏</span>
+                        <input type="number" value="3" min="1" style="width:60px">
+                        <span>次，超过后</span>
+                        <select style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                            <option>弹出警告</option>
+                            <option>强制交卷</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 4: 题目与试卷配置 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon blue">📄</div>
+        <div><div class="sec-title">题目与试卷配置</div><div class="sec-subtitle">考试模式：从试卷库中选择试卷作为考试内容</div></div>
+    </div>
+    <div class="section-body">
+        <div class="info-box blue">💡 考试模式使用<strong>试卷</strong>作为题目来源。请先在「试卷管理」中创建试卷（支持固定题目和随机抽题），然后在此选择试卷。<strong>抽题规则</strong>在创建随机抽题时配置，不属于活动配置。</div>
+        <div class="form-group">
+            <label><span class="req">*</span> 选择试卷</label>
+            <div class="paper-card selected" onclick="selectPaper(this)">
+                <div class="paper-info">
+                    <div class="paper-name">图书馆知识竞赛试卷 <span class="badge badge-green" style="margin-left:6px">固定题目</span></div>
+                    <div class="paper-meta">题目数量：50 | 总分：100 | 及格分：60 | 创建时间：2026-05-01</div>
+                </div>
+                <div class="paper-radio"></div>
+            </div>
+            <div class="paper-card" onclick="selectPaper(this)">
+                <div class="paper-info">
+                    <div class="paper-name">历史文化知识测试 <span class="badge badge-yellow" style="margin-left:6px">随机抽题</span></div>
+                    <div class="paper-meta">题目数量：30 | 总分：100 | 及格分：60 | 创建时间：2026-05-03</div>
+                </div>
+                <div class="paper-radio"></div>
+            </div>
+            <div class="paper-card" onclick="selectPaper(this)">
+                <div class="paper-info">
+                    <div class="paper-name">阅读素养测评 <span class="badge badge-green" style="margin-left:6px">固定题目</span></div>
+                    <div class="paper-meta">题目数量：40 | 总分：100 | 及格分：60 | 创建时间：2026-05-05</div>
+                </div>
+                <div class="paper-radio"></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+                <button class="btn btn-outline" style="font-size:12px" onclick="alert('跳转至试卷管理页面，可创建固定题目或随机抽题（含抽题规则配置）')">+ 创建新试卷</button>
+                <button class="btn btn-ghost" style="font-size:12px">前往试卷管理</button>
+            </div>
+        </div>
+        <!-- 试卷详情预览 -->
+        <div id="paperPreview" class="config-block" style="margin-top:4px">
+            <div class="config-block-title">📋 已选试卷详情</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>试卷名称</label>
+                    <div style="font-size:13px;color:var(--text-primary);font-weight:600">图书馆知识竞赛试卷</div>
+                </div>
+                <div class="form-group">
+                    <label>组卷模式</label>
+                    <div><span class="badge badge-green">固定题目</span></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>题目数量</label>
+                    <div style="font-size:13px;color:var(--text-primary)">50 题</div>
+                </div>
+                <div class="form-group">
+                    <label>总分 / 及格分</label>
+                    <div style="font-size:13px;color:var(--text-primary)">100 分 / 60 分</div>
+                </div>
+            </div>
+            <p class="hint" style="margin-top:4px">如需修改试卷内容或抽题规则，请前往「试卷管理」编辑试卷。</p>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5: 随机规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon green">🔀</div>
+        <div><div class="sec-title">随机规则</div><div class="sec-subtitle">控制题目和选项展示顺序的随机性</div></div>
+    </div>
+    <div class="section-body">
+        <div class="config-block">
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">题目顺序随机</div>
+                    <div class="sw-hint">控制用户答题时题目展示顺序是否随机，降低互相抄题风险。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">选项顺序随机</div>
+                    <div class="sw-hint">控制选择题选项展示顺序是否随机，降低互相抄答案风险。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 6: 分值规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon yellow">📊</div>
+        <div><div class="sec-title">分值规则</div><div class="sec-subtitle">配置每题分值、总分计算和满分规则</div></div>
+    </div>
+    <div class="section-body">
+        <div class="info-box blue">💡 每题分值和总分由所选试卷决定。选择试卷后，系统自动读取试卷的分值规则。如需修改请前往「试卷管理」。</div>
+        <div class="config-block">
+            <div class="sw-row" style="padding-top:0">
+                <div class="sw-text">
+                    <div class="sw-label">每题分值</div>
+                    <div class="sw-hint">由所选试卷决定。固定题目在组卷时设分值，随机抽题在抽题规则中设分值。</div>
+                </div>
+                <span class="badge badge-blue">跟随试卷</span>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">总分计算</div>
+                    <div class="sw-hint">系统根据题目数量和分值自动计算总分。</div>
+                </div>
+                <span class="badge badge-green">自动计算</span>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">满分是否默认 100 分</div>
+                    <div class="sw-hint">开启后系统将自动换算为 100 分制；关闭则保留原始总分。⚠️ 此项待确认。</div>
+                </div>
+                <label class="switch"><input type="checkbox"><span class="sw-slider"></span></label>
+            </div>
+        </div>
+        <div class="form-row" style="margin-top:12px">
+            <div class="form-group">
+                <label>及格分数</label>
+                <div class="inline-field"><input type="number" value="60" min="0"> <span>分</span></div>
+            </div>
+            <div class="form-group">
+                <label>得分展示</label>
+                <select class="form-control">
+                    <option>提交后立即展示</option>
+                    <option>活动结束后展示</option>
+                    <option>不展示</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>答案解析展示</label>
+                <select class="form-control">
+                    <option>提交后立即展示</option>
+                    <option>活动结束后展示</option>
+                    <option>不展示</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>多次答题成绩规则</label>
+                <select class="form-control">
+                    <option>取最高分作为有效成绩</option>
+                    <option>取最后一次成绩</option>
+                    <option>取第一次成绩</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- end examConfig -->
+
+<!-- ====================================================================== -->
+<!-- CHALLENGE MODE CONFIGURATION -->
+<!-- ====================================================================== -->
+<div class="mode-config" id="challengeConfig">
+
+<!-- Section 1: 答题时间 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon blue">⏱</div>
+        <div><div class="sec-title">答题时间</div><div class="sec-subtitle">配置闯关开放时间、答题时段和每题限时</div></div>
+    </div>
+    <div class="section-body">
+        <div class="form-group">
+            <label><span class="req">*</span> 答题开放时间</label>
+            <div class="form-row">
+                <input type="datetime-local" class="form-control" value="2026-06-01T09:00">
+                <input type="datetime-local" class="form-control" value="2026-06-30T18:00">
+            </div>
+            <p class="hint">配置用户可以「开始答题」的时间范围</p>
+        </div>
+        <div class="form-group">
+            <label>可设置答题时段</label>
+            <div class="inline-field">
+                <span>每日开放</span>
+                <input type="time" value="09:00" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                <span>至</span>
+                <input type="time" value="18:00" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                <span>可答题</span>
+            </div>
+            <p class="hint">支持配置具体开放时段，例如 09:00-18:00。留空表示全天开放。</p>
+        </div>
+        <div class="form-group">
+            <label><span class="req">*</span> 每题限时</label>
+            <div class="inline-field"><input type="number" value="60" min="1" placeholder="60"> <span>秒</span></div>
+            <p class="hint">限制用户每道题的作答时间。超时后自动跳转下一题。</p>
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: 参与次数 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon green">🔄</div>
+        <div><div class="sec-title">参与次数</div><div class="sec-subtitle">配置每日答题次数和总答题次数限制</div></div>
+    </div>
+    <div class="section-body">
+        <div class="form-group">
+            <label><span class="req">*</span> 每日答题次数</label>
+            <div class="radio-group">
+                <div class="radio-item"><input type="radio" name="chDailyN" checked><label>每天仅可答 1 次</label></div>
+                <div class="radio-item"><input type="radio" name="chDailyN"><label>每天可答</label><input type="number" style="width:56px;margin:0 4px;padding:4px 6px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;text-align:center" placeholder="N"><label>次</label></div>
+                <div class="radio-item"><input type="radio" name="chDailyN"><label>每天不限次</label></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>每人最多答题次数（整个活动期间）</label>
+            <div class="inline-field">
+                <input type="number" placeholder="留空不限制" min="1">
+                <span>次</span>
+            </div>
+            <p class="hint">限制用户在整个活动期间最多可答题次数。留空表示不限制。</p>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: 参与规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon yellow">📋</div>
+        <div><div class="sec-title">参与规则</div><div class="sec-subtitle">配置中断答题、计时、跳题等答题过程规则</div></div>
+    </div>
+    <div class="section-body">
+        <div class="config-block">
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">允许中断答题</div>
+                    <div class="sw-hint">控制用户答题过程中退出后是否允许继续答题。关闭后，退出将自动交卷。</div>
+                </div>
+                <label class="switch"><input type="checkbox"><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">中断后默认计时将继续</div>
+                    <div class="sw-hint">中断后倒计时继续，避免用户通过退出暂停计时。关闭后中断期间暂停计时。</div>
+                </div>
+                <label class="switch"><input type="checkbox"><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">允许跳题</div>
+                    <div class="sw-hint">控制用户是否可以跳过当前题目，后续再作答。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">显示答题卡</div>
+                    <div class="sw-hint">展示题目作答状态，支持快速跳题。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">立即显示成绩</div>
+                    <div class="sw-hint">交卷后是否立即展示本次成绩。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">显示答题解析</div>
+                    <div class="sw-hint">交卷后是否展示答案解析。</div>
+                </div>
+                <label class="switch"><input type="checkbox"><span class="sw-slider"></span></label>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+            <label>防作弊设置</label>
+            <div class="config-block">
+                <div class="form-group" style="margin-bottom:0">
+                    <label>切屏限制</label>
+                    <div class="inline-field">
+                        <span>切屏</span>
+                        <input type="number" value="3" min="1" style="width:60px">
+                        <span>次，超过后</span>
+                        <select style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                            <option>弹出警告</option>
+                            <option>强制交卷</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 4: 组卷方式（闯关模式：固定题目 / 随机组卷 / 每日题库计划组卷） -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon blue">🎯</div>
+        <div><div class="sec-title">组卷方式</div><div class="sec-subtitle">闯关模式支持三种组卷方式，选择后展示对应配置项</div></div>
+    </div>
+    <div class="section-body">
+        <div class="info-box green">🎯 选择组卷方式后，系统将展示对应的配置项。「公共题库」不是独立组卷方式，而是随机组卷时可选的题库来源。</div>
+
+        <!-- ===== 组卷方式三选一 ===== -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
+            <div class="mode-card" id="chFixed" onclick="switchChMethod('fixed')">
+                <div class="mode-tag">手动组卷</div>
+                <div class="mode-icon">📝</div>
+                <div class="mode-title">固定题目</div>
+                <div class="mode-desc">手动选择固定题目，所有用户每天答同一套题。适合标准测评。</div>
+            </div>
+            <div class="mode-card selected" id="chRandom" onclick="switchChMethod('random')">
+                <div class="mode-tag">随机抽题</div>
+                <div class="mode-icon">🎲</div>
+                <div class="mode-title">随机组卷</div>
+                <div class="mode-desc">从指定题库范围中随机抽题，每个用户可能题目不同。适合考试、竞赛、测评。</div>
+            </div>
+            <div class="mode-card" id="chDaily" onclick="switchChMethod('daily')">
+                <div class="mode-tag">每日计划</div>
+                <div class="mode-icon">📅</div>
+                <div class="mode-title">每日题库计划组卷</div>
+                <div class="mode-desc">适合每日答题闯关，每天可配置不同题库、不同主题、不同抽题规则。</div>
+            </div>
+        </div>
+
+        <!-- ===== 固定题目配置 ===== -->
+        <div id="chFixedPane" class="ch-pane" style="display:none">
+            <div class="config-block">
+                <div class="config-block-title">📝 固定题目配置</div>
+                <div class="info-box blue" style="margin-bottom:12px">💡 固定题目模式下，所有用户每天看到的题目完全相同。请选择一张已创建的固定题目。</div>
+                <div class="form-group">
+                    <label><span class="req">*</span> 选择试卷</label>
+                    <div class="paper-card selected" onclick="selectChPaper(this)">
+                        <div class="paper-info">
+                            <div class="paper-name">图书馆基础知识固定题组 <span class="badge badge-green" style="margin-left:6px">固定题目</span></div>
+                            <div class="paper-meta">题目数量：10 | 总分：100 | 及格分：60</div>
+                        </div>
+                        <div class="paper-radio"></div>
+                    </div>
+                    <div class="paper-card" onclick="selectChPaper(this)">
+                        <div class="paper-info">
+                            <div class="paper-name">阅读素养固定题组 <span class="badge badge-green" style="margin-left:6px">固定题目</span></div>
+                            <div class="paper-meta">题目数量：15 | 总分：150 | 及格分：90</div>
+                        </div>
+                        <div class="paper-radio"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sw-row" style="padding-top:8px">
+                <div class="sw-text">
+                    <div class="sw-label">每日使用相同题目</div>
+                    <div class="sw-hint">固定题目模式下，默认每天使用同一套题目。关闭后可配置每日轮换不同试卷。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- ===== 随机组卷配置 ===== -->
+        <div id="chRandomPane" class="ch-pane">
+            <!-- 题库来源 -->
+            <div class="config-block">
+                <div class="config-block-title">📂 题库来源</div>
+                <p class="hint" style="margin-bottom:10px">请选择本次随机组卷可使用的题库范围。系统将根据抽题规则，从所选题库中随机抽取题目生成试卷。</p>
+                <div class="radio-group" style="margin-bottom:8px">
+                    <div class="radio-item"><input type="radio" name="chBankSource" value="mine" onclick="switchBankSource(this,'random')"><label>我的题库</label></div>
+                    <div class="radio-item"><input type="radio" name="chBankSource" value="org" onclick="switchBankSource(this,'random')"><label>机构题库</label></div>
+                    <div class="radio-item"><input type="radio" name="chBankSource" value="public" checked onclick="switchBankSource(this,'random')"><label>平台公共题库</label></div>
+                    <div class="radio-item"><input type="radio" name="chBankSource" value="all" onclick="switchBankSource(this,'random')"><label>全部可用题库</label></div>
+                </div>
+                <!-- 题库来源说明 -->
+                <div id="randomBankHint" class="info-box blue" style="margin-bottom:0">🌐 平台公共题库由平台统一维护，适合没有自建题库、希望快速创建答题活动的场景。</div>
+            </div>
+
+            <!-- 选择题库 -->
+            <div class="config-block" style="margin-top:12px">
+                <div class="config-block-title">📚 选择题库</div>
+                <div class="checkbox-group" style="margin-bottom:8px">
+                    <div class="checkbox-item"><input type="checkbox" checked> 公共图书馆知识题库</div>
+                    <div class="checkbox-item"><input type="checkbox" checked> 公共阅读素养题库</div>
+                    <div class="checkbox-item"><input type="checkbox"> 公共非遗知识题库</div>
+                    <div class="checkbox-item"><input type="checkbox"> 公共传统文化题库</div>
+                </div>
+                <p class="hint">勾选后，系统将从已勾选题库中按规则抽取题目。</p>
+            </div>
+
+            <!-- 抽题规则 -->
+            <div class="config-block" style="margin-top:12px">
+                <div class="config-block-title">📋 抽题规则</div>
+                <div style="overflow-x:auto">
+                    <table style="width:100%;font-size:13px;border-collapse:collapse">
+                        <thead><tr>
+                            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border)">题型</th>
+                            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border)">难度</th>
+                            <th style="padding:8px 10px;text-align:center;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border)">数量</th>
+                            <th style="padding:8px 10px;text-align:center;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border)">每题分值</th>
+                            <th style="padding:8px 10px;text-align:center;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border)">小计</th>
+                            <th style="padding:8px 10px;text-align:center;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border)">操作</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding:8px 6px"><select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>单选题</option><option>多选题</option><option>判断题</option></select></td>
+                                <td style="padding:8px 6px"><select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>全部难度</option><option>简单</option><option>中等</option><option>困难</option></select></td>
+                                <td style="padding:8px 6px"><input type="number" value="8" min="1" style="width:60px;margin:0 auto;display:block;padding:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></td>
+                                <td style="padding:8px 6px"><input type="number" value="10" min="1" style="width:60px;margin:0 auto;display:block;padding:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></td>
+                                <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">80分</td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--danger);cursor:pointer;font-size:12px">删除</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 6px"><select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>判断题</option><option>单选题</option><option>多选题</option></select></td>
+                                <td style="padding:8px 6px"><select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>简单</option><option>全部难度</option><option>中等</option><option>困难</option></select></td>
+                                <td style="padding:8px 6px"><input type="number" value="2" min="1" style="width:60px;margin:0 auto;display:block;padding:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></td>
+                                <td style="padding:8px 6px"><input type="number" value="10" min="1" style="width:60px;margin:0 auto;display:block;padding:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></td>
+                                <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">20分</td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--danger);cursor:pointer;font-size:12px">删除</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn btn-outline" style="margin-top:10px;font-size:12px">+ 添加规则</button>
+            </div>
+
+            <!-- 配比概览 -->
+            <div class="config-block" style="margin-top:12px">
+                <div class="config-block-title">📊 配比概览</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px">
+                    <div style="text-align:center;padding:10px;background:#F8FAFC;border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-muted)">总题数</div><div style="font-size:20px;font-weight:700;color:var(--primary)">10</div></div>
+                    <div style="text-align:center;padding:10px;background:#F8FAFC;border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-muted)">总分</div><div style="font-size:20px;font-weight:700;color:var(--success)">100</div></div>
+                    <div style="text-align:center;padding:10px;background:#F8FAFC;border-radius:var(--radius-sm)"><div style="font-size:11px;color:var(--text-muted)">规则数</div><div style="font-size:20px;font-weight:700;color:var(--warning)">2</div></div>
+                </div>
+            </div>
+
+            <!-- 闯关随机规则 -->
+            <div class="config-block" style="margin-top:12px">
+                <div class="config-block-title">⚙️ 闯关抽题规则</div>
+                <div class="sw-row" style="padding-top:0">
+                    <div class="sw-text">
+                        <div class="sw-label">每日重新抽题</div>
+                        <div class="sw-hint">同一用户每天多次答题时是否重新抽题。关闭后用户每天看到的题目相同。</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+                </div>
+                <div class="sw-row">
+                    <div class="sw-text">
+                        <div class="sw-label">同日多次答题题目相同</div>
+                        <div class="sw-hint">同一用户同一天内多次答题题目保持一致。</div>
+                    </div>
+                    <label class="switch"><input type="checkbox"><span class="sw-slider"></span></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 每日题库计划组卷配置 ===== -->
+        <div id="chDailyPane" class="ch-pane" style="display:none">
+            <div class="info-box green" style="margin-bottom:12px">📅 每日题库计划组卷适合每日答题闯关，每天可以配置不同题库、不同主题、不同抽题规则。公共题库只是某一天可选的题库来源。</div>
+
+            <!-- 每日题库来源（全局默认） -->
+            <div class="config-block">
+                <div class="config-block-title">📂 默认题库来源</div>
+                <p class="hint" style="margin-bottom:10px">设置每日关卡默认的题库来源。单日关卡可在下方独立覆盖。</p>
+                <div class="radio-group">
+                    <div class="radio-item"><input type="radio" name="chDailyBankSource" value="mine"><label>我的题库</label></div>
+                    <div class="radio-item"><input type="radio" name="chDailyBankSource" value="org"><label>机构题库</label></div>
+                    <div class="radio-item"><input type="radio" name="chDailyBankSource" value="public" checked><label>平台公共题库</label></div>
+                    <div class="radio-item"><input type="radio" name="chDailyBankSource" value="all"><label>全部可用题库</label></div>
+                </div>
+                <div class="info-box blue" style="margin-top:8px;margin-bottom:0">🌐 平台公共题库由平台统一维护，适合没有自建题库、希望快速创建答题活动的场景。</div>
+            </div>
+
+            <!-- 每日关卡计划表 -->
+            <div class="config-block" style="margin-top:12px">
+                <div class="config-block-title">📋 每日关卡计划 <span style="color:var(--text-muted);font-weight:400;font-size:12px;margin-left:8px">（3天）</span></div>
+                <div style="overflow-x:auto">
+                    <table style="width:100%;font-size:13px;border-collapse:collapse">
+                        <thead><tr>
+                            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap">日期</th>
+                            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap">每日主题</th>
+                            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap">题库来源</th>
+                            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap">使用题库</th>
+                            <th style="padding:8px 10px;text-align:center;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap">组卷方式</th>
+                            <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap">抽题规则</th>
+                            <th style="padding:8px 10px;text-align:center;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap">总分</th>
+                            <th style="padding:8px 10px;text-align:center;font-size:11px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap">操作</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid var(--border-light)">
+                                <td style="padding:10px 8px;font-weight:700;color:var(--primary)">第 1 天</td>
+                                <td style="padding:8px 6px"><input type="text" value="图书馆入门知识" style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"></td>
+                                <td style="padding:8px 6px">
+                                    <select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px" onchange="onDailyBankSourceChange(this)">
+                                        <option value="public" selected>平台公共题库</option>
+                                        <option value="mine">我的题库</option>
+                                        <option value="org">机构题库</option>
+                                        <option value="all">全部可用题库</option>
+                                    </select>
+                                </td>
+                                <td style="padding:8px 6px">
+                                    <select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px">
+                                        <option>公共图书馆知识题库</option>
+                                        <option>公共阅读素养题库</option>
+                                        <option>公共非遗知识题库</option>
+                                    </select>
+                                </td>
+                                <td style="padding:8px 6px;text-align:center"><span class="badge badge-yellow">随机抽题</span></td>
+                                <td style="padding:8px 6px;font-size:12px;color:var(--text-secondary)">单选 8 + 判断 2</td>
+                                <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">100</td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600">编辑</span></td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-light)">
+                                <td style="padding:10px 8px;font-weight:700;color:var(--primary)">第 2 天</td>
+                                <td style="padding:8px 6px"><input type="text" value="阅读素养知识" style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"></td>
+                                <td style="padding:8px 6px">
+                                    <select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px" onchange="onDailyBankSourceChange(this)">
+                                        <option value="org" selected>机构题库</option>
+                                        <option value="public">平台公共题库</option>
+                                        <option value="mine">我的题库</option>
+                                        <option value="all">全部可用题库</option>
+                                    </select>
+                                </td>
+                                <td style="padding:8px 6px">
+                                    <select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px">
+                                        <option>阅读素养题库</option>
+                                        <option>文学基础知识题库</option>
+                                    </select>
+                                </td>
+                                <td style="padding:8px 6px;text-align:center"><span class="badge badge-yellow">随机抽题</span></td>
+                                <td style="padding:8px 6px;font-size:12px;color:var(--text-secondary)">单选 5 + 多选 3 + 判断 2</td>
+                                <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">100</td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600">编辑</span></td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-light)">
+                                <td style="padding:10px 8px;font-weight:700;color:var(--primary)">第 3 天</td>
+                                <td style="padding:8px 6px"><input type="text" value="传统文化知识" style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"></td>
+                                <td style="padding:8px 6px">
+                                    <select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px" onchange="onDailyBankSourceChange(this)">
+                                        <option value="mine" selected>我的题库</option>
+                                        <option value="public">平台公共题库</option>
+                                        <option value="org">机构题库</option>
+                                        <option value="all">全部可用题库</option>
+                                    </select>
+                                </td>
+                                <td style="padding:8px 6px">
+                                    <select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px">
+                                        <option>传统文化题库</option>
+                                        <option>非遗知识题库</option>
+                                    </select>
+                                </td>
+                                <td style="padding:8px 6px;text-align:center"><span class="badge badge-green">固定题目</span></td>
+                                <td style="padding:8px 6px;font-size:12px;color:var(--text-secondary)">固定 10 题</td>
+                                <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">100</td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600">编辑</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn btn-outline" style="margin-top:12px;font-size:12px">+ 添加关卡</button>
+            </div>
+
+            <div class="info-box blue" style="margin-top:12px">💡 每日关卡可独立配置：题库来源、使用题库、组卷方式、抽题规则和总分。点击「编辑」进入当日详情配置。</div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5: 随机规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon green">🔀</div>
+        <div><div class="sec-title">随机规则</div><div class="sec-subtitle">控制题目和选项展示顺序的随机性</div></div>
+    </div>
+    <div class="section-body">
+        <div class="config-block">
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">题目顺序随机</div>
+                    <div class="sw-hint">控制用户答题时题目展示顺序是否随机，降低互相抄题风险。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">选项顺序随机</div>
+                    <div class="sw-hint">控制选择题选项展示顺序是否随机，降低互相抄答案风险。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 6: 分值规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon yellow">📊</div>
+        <div><div class="sec-title">分值规则</div><div class="sec-subtitle">配置每题分值、总分计算和满分规则</div></div>
+    </div>
+    <div class="section-body">
+        <div class="info-box blue">💡 闯关模式的每题分值在上方抽题规则中配置，系统自动汇总计算总分。</div>
+        <div class="config-block">
+            <div class="sw-row" style="padding-top:0">
+                <div class="sw-text">
+                    <div class="sw-label">每题分值</div>
+                    <div class="sw-hint">在上方抽题规则中已配置每题分值，系统自动汇总。</div>
+                </div>
+                <span class="badge badge-blue">已配置</span>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">总分计算</div>
+                    <div class="sw-hint">系统根据题目数量和分值自动计算总分。</div>
+                </div>
+                <span class="badge badge-green">自动计算</span>
+            </div>
+            <div class="sw-row">
+                <div class="sw-text">
+                    <div class="sw-label">满分是否默认 100 分</div>
+                    <div class="sw-hint">开启后系统将自动换算为 100 分制；关闭则保留原始总分。⚠️ 此项待确认。</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
+            </div>
+        </div>
+        <div class="form-row" style="margin-top:12px">
+            <div class="form-group">
+                <label>每日得分计算规则</label>
+                <select class="form-control">
+                    <option>每日最高分</option>
+                    <option>每日最后一次得分</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>排名规则</label>
+                <select class="form-control">
+                    <option>累计总积分</option>
+                    <option>每日平均分</option>
+                </select>
+            </div>
+        </div>
+        <div class="info-box yellow">🏆 排行榜排序规则：<strong>累计总积分 &gt; 有效参与天数 &gt; 累计用时 &gt; 最早达成时间</strong></div>
+    </div>
+</div>
+
+</div><!-- end challengeConfig -->
+
+<!-- ====================================================================== -->
+<!-- LEVEL MODE CONFIGURATION (闯关模式) -->
+<!-- ====================================================================== -->
+<div class="mode-config" id="levelConfig">
+
+<!-- Section 1: 答题时间 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon blue">⏱</div>
+        <div><div class="sec-title">答题时间</div><div class="sec-subtitle">闯关模式仅配置开放时间范围，不设置关卡答题时间</div></div>
+    </div>
+    <div class="section-body">
+        <div class="form-group">
+            <label><span class="req">*</span> 活动开放时间</label>
+            <div class="form-row">
+                <input type="datetime-local" class="form-control" value="2026-06-01T09:00">
+                <input type="datetime-local" class="form-control" value="2026-06-30T18:00">
+            </div>
+        </div>
+        <div class="info-box green">⚔️ 闯关模式不设置关卡答题时间限制。用户可从容答题，实时校验闯关结果。</div>
+    </div>
+</div>
+
+<!-- Section 2: 闯关次数 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon green">🔄</div>
+        <div><div class="sec-title">闯关次数</div><div class="sec-subtitle">设置用户闯关次数，允许刷题重闯</div></div>
+    </div>
+    <div class="section-body">
+        <div class="form-group">
+            <label><span class="req">*</span> 每关闯关次数</label>
+            <div class="radio-group">
+                <div class="radio-item"><input type="radio" name="levelAttempts" checked><label>每关仅可闯 1 次</label></div>
+                <div class="radio-item"><input type="radio" name="levelAttempts"><label>每关可闯</label><input type="number" style="width:56px;margin:0 4px;padding:4px 6px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;text-align:center" value="3" min="1"><label>次</label></div>
+                <div class="radio-item"><input type="radio" name="levelAttempts"><label>每关不限次（允许刷题）</label></div>
+            </div>
+            <p class="hint">设置每关允许闯关的次数。选择「不限次」可允许用户反复刷题练习。</p>
+        </div>
+        <div class="form-group">
+            <label>重闯时是否重新抽题</label>
+            <div class="radio-group">
+                <div class="radio-item"><input type="radio" name="levelRedraw" checked><label>每次重新抽题</label></div>
+                <div class="radio-item"><input type="radio" name="levelRedraw"><label>保持相同题目</label></div>
+            </div>
+            <p class="hint">选择重新抽题可增加刷题效果，选择相同题目可帮助巩固薄弱关卡。</p>
+        </div>
+        <div class="form-group">
+            <label>取最高分规则</label>
+            <div class="radio-group">
+                <div class="radio-item"><input type="radio" name="levelBestScore" checked><label>取最高分为本关成绩</label></div>
+                <div class="radio-item"><input type="radio" name="levelBestScore"><label>取最后一次为本关成绩</label></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: 闯关规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon yellow">📋</div>
+        <div><div class="sec-title">闯关规则</div><div class="sec-subtitle">关卡解锁、实时校验、即时解析</div></div>
+    </div>
+    <div class="section-body">
+        <div class="info-box blue">⚔️ 闯关模式核心规则：用户必须按顺序闯关，前一关通过后才能解锁下一关。答题过程中实时校验闯关结果。</div>
+        <div class="config-block">
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">顺序解锁</div><div class="sw-hint">前一关达到通关分数后，才解锁下一关</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">实时校验闯关结果</div><div class="sw-hint">每答一题即实时校验是否已达到通关分数</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">闯关成功弹窗</div><div class="sw-hint">闯关成功后弹出提示，用户可选择「继续答题」或「进入下一关」</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">闯关失败实时提示</div><div class="sw-hint">当剩余题目已无法达到通关分数时，实时提示失败</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">答完一题立即显示解析</div><div class="sw-hint">每答完一题后自动展示该题答案与解析，帮助用户即时学习</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">显示答题卡</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+        </div>
+        <div class="info-box yellow" style="margin-top:12px">💡 闯关成功弹窗示例：<strong>🎉 恭喜过关！</strong> 您可以「继续答题」获取更高分，或「进入下一关」开始新挑战。闯关失败提示：<strong>😢 很遗憾</strong>，剩余题目已无法达到通关分数，本次闯关失败。</div>
+    </div>
+</div>
+
+<!-- Section 4: 关卡列表 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon blue">⚔️</div>
+        <div><div class="sec-title">关卡列表</div><div class="sec-subtitle">配置每关的题库、题型、题目数量、每题分值和通关分数</div></div>
+    </div>
+    <div class="section-body">
+        <div class="info-box green">⚔️ 闯关模式仅支持客观题（单选、多选、判断），不支持主观题。系统自动过滤主观题。</div>
+        <div class="config-block">
+            <div class="config-block-title">📋 关卡配置 <span id="levelStageSummary" style="color:var(--text-muted);font-weight:400;font-size:12px;margin-left:8px">共 <strong>3</strong> 关 · <strong>45</strong> 题 · 总分 <strong>450</strong></span></div>
+            <!-- Table Header -->
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr 1fr 80px 80px 80px 50px;gap:8px;padding:8px 0;border-bottom:2px solid var(--border);font-size:12px;font-weight:600;color:var(--text-secondary)">
+                <div style="text-align:center">序号</div>
+                <div>关卡名称</div>
+                <div>使用题库</div>
+                <div>题型</div>
+                <div style="text-align:center">题目数</div>
+                <div style="text-align:center">每题分值</div>
+                <div style="text-align:center">通关分</div>
+                <div style="text-align:center">操作</div>
+            </div>
+            <!-- Stage Rows -->
+            <div id="levelStageList">
+                <div style="display:grid;grid-template-columns:40px 1fr 1fr 1fr 80px 80px 80px 50px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light)">
+                    <div style="text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--primary-light);color:var(--primary);font-weight:700;font-size:12px">1</span></div>
+                    <div><input type="text" value="第一关：基础入门" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"></div>
+                    <div><select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option selected>图书馆知识题库</option><option>历史文化题库</option><option>非遗知识题库</option></select></div>
+                    <div><select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>全部客观题</option><option>单选题</option><option>单选题+多选题</option><option selected>单选题+判断题</option><option>多选题+判断题</option></select></div>
+                    <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div><input type="number" value="60" min="0" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div style="text-align:center"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:40px 1fr 1fr 1fr 80px 80px 80px 50px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light)">
+                    <div style="text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--primary-light);color:var(--primary);font-weight:700;font-size:12px">2</span></div>
+                    <div><input type="text" value="第二关：进阶提升" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"></div>
+                    <div><select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>图书馆知识题库</option><option selected>历史文化题库</option><option>非遗知识题库</option></select></div>
+                    <div><select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>全部客观题</option><option>单选题</option><option selected>单选题+多选题</option><option>单选题+判断题</option><option>多选题+判断题</option></select></div>
+                    <div><input type="number" value="15" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div><input type="number" value="70" min="0" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer">删除</span></div>
+                </div>
+                <div style="display:grid;grid-template-columns:40px 1fr 1fr 1fr 80px 80px 80px 50px;gap:8px;align-items:center;padding:10px 0">
+                    <div style="text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--primary-light);color:var(--primary);font-weight:700;font-size:12px">3</span></div>
+                    <div><input type="text" value="第三关：高级挑战" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"></div>
+                    <div><select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>图书馆知识题库</option><option>历史文化题库</option><option selected>非遗知识题库</option></select></div>
+                    <div><select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option selected>全部客观题</option><option>单选题</option><option>单选题+多选题</option><option>单选题+判断题</option><option>多选题+判断题</option></select></div>
+                    <div><input type="number" value="20" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div><input type="number" value="80" min="0" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+                    <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer">删除</span></div>
+                </div>
+            </div>
+            <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="addLevelStageStandalone()">+ 添加关卡</button>
+        </div>
+        <div class="info-box blue" style="margin-top:12px">💡 每关可独立配置题库、题型、题目数量和通关分数。题型仅限客观题（单选、多选、判断），不支持主观题。</div>
+    </div>
+</div>
+
+<!-- Section 5: 随机规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon green">🔀</div>
+        <div><div class="sec-title">随机规则</div><div class="sec-subtitle">闯关模式固定题目与选项顺序，不做随机排序</div></div>
+    </div>
+    <div class="section-body">
+        <div class="info-box yellow">⚠️ 闯关模式默认<strong>不随机排序</strong>题目和选项，确保所有用户在同一关卡看到相同的题目顺序和选项顺序。</div>
+        <div class="config-block">
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">题目顺序随机</div><div class="sw-hint">闯关模式建议关闭，保持一致体验</div></div><label class="switch"><input type="checkbox" disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">选项顺序随机</div><div class="sw-hint">闯关模式建议关闭，保持一致体验</div></div><label class="switch"><input type="checkbox" disabled><span class="sw-slider"></span></label></div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 6: 排行榜规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon yellow">🏆</div>
+        <div><div class="sec-title">排行榜规则</div><div class="sec-subtitle">闯关时间榜与总分榜，权重：闯关关卡数 > 分数</div></div>
+    </div>
+    <div class="section-body">
+        <div class="form-group">
+            <label><span class="req">*</span> 排行榜类型</label>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" checked><label>闯关时间榜</label><span style="font-size:12px;color:var(--text-muted);margin-left:4px">按通关先后排名</span></div>
+                <div class="checkbox-item"><input type="checkbox" checked><label>总分榜</label><span style="font-size:12px;color:var(--text-muted);margin-left:4px">按累计分数排名</span></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label><span class="req">*</span> 排序权重</label>
+            <div class="info-box blue" style="margin-bottom:0">
+                🏆 闯关模式排行榜排序规则：<strong>闯关关卡数（高→低）＞ 累计总分（高→低）＞ 通关总用时（短→长）＞ 最早通关时间（早→晚）</strong>
+            </div>
+        </div>
+        <div class="form-row" style="margin-top:12px">
+            <div class="form-group"><label>闯关时间榜计算规则</label><select class="form-control"><option>按通关总用时排名</option><option>按最后一关通关时间排名</option><option>按第一关通关时间排名</option></select></div>
+            <div class="form-group"><label>总分榜计算规则</label><select class="form-control"><option>所有关卡最高分之和</option><option>所有关卡最后一次得分之和</option></select></div>
+        </div>
+        <div class="config-block" style="margin-top:12px">
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">显示排行榜</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">排行榜显示通关关卡数</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">排行榜显示通关用时</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 7: 分值规则 -->
+<div class="section">
+    <div class="section-head">
+        <div class="sec-icon blue">📊</div>
+        <div><div class="sec-title">分值规则</div></div>
+    </div>
+    <div class="section-body">
+        <div class="info-box blue">💡 闯关模式的每题分值在上方关卡列表中逐关配置，系统自动汇总计算总分和通关条件。</div>
+        <div class="config-block">
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">每题分值</div><div class="sw-hint">在上方关卡列表中已逐关配置</div></div><span class="badge badge-blue">已配置</span></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">总分计算</div><div class="sw-hint">系统根据每关题目数×分值自动汇总</div></div><span class="badge badge-green">自动计算</span></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">通关条件</div><div class="sw-hint">每关达到通关分即为过关</div></div><span class="badge badge-blue">逐关配置</span></div>
+        </div>
+        <div class="form-row" style="margin-top:12px">
+            <div class="form-group"><label>得分展示</label><select class="form-control"><option>实时展示（每题后）</option><option>每关结束后展示</option><option>活动结束后展示</option></select></div>
+            <div class="form-group"><label>答案解析展示</label><select class="form-control" disabled><option>答完每题立即展示（固定）</option></select><p class="hint">闯关模式固定为答完即显解析</p></div>
+        </div>
+    </div>
+</div>
+
+</div><!-- end levelConfig -->
+
+<!-- ===== COMPARISON TABLE (collapsible) ===== -->
+<div class="section">
+    <div class="section-head" style="cursor:pointer" onclick="toggleCmp()">
+        <div class="sec-icon" style="background:#F1F5F9;color:var(--text-muted)">📐</div>
+        <div style="flex:1"><div class="sec-title">模式对比参考</div><div class="sec-subtitle">三种模式的功能配置差异一览</div></div>
+        <span id="cmpArrow" style="font-size:12px;color:var(--text-muted);transition:var(--t-fast)">▼ 展开</span>
+    </div>
+    <div class="section-body" id="cmpBody" style="display:none">
+        <!-- Table 1: 答题时间与参与规则 -->
+        <div style="margin-bottom:20px">
+            <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:10px">答题时间与参与规则对比表</div>
+            <table class="cmp-table">
+                <thead><tr><th style="width:14%">模块</th><th style="width:22%">功能点</th><th style="width:12%">考试模式</th><th style="width:14%">每日答题闯关模式</th><th>需求说明</th></tr></thead>
+                <tbody>
+                    <tr><td rowspan="5" style="font-weight:600;color:var(--text-primary);vertical-align:middle">答题时间</td><td>考试 / 答题开放时间</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">配置用户可以进入答题、点击「开始答题」的时间范围</td></tr>
+                    <tr><td>可设置答题时段</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">支持配置具体开放时段，例如 09:00-18:00</td></tr>
+                    <tr><td>考试时长 / 闯关时长限时</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">考试时长：用户点击「开始答题」后，单次考试最长可作答时间，例如 120 分钟</td></tr>
+                    <tr><td>每题限时</td><td class="na">— 不适用</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">限制用户每道题的作答时间</td></tr>
+                    <tr><td>闯关限时 + 每题限时</td><td class="na">— 不适用</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">同时限制每日闯关总时长和每道题作答时间</td></tr>
+                    <tr><td rowspan="2" style="font-weight:600;color:var(--text-primary);vertical-align:middle">参与次数</td><td>每日答题次数</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">支持每天仅可答 1 次、每天可答 N 次、每天不限次</td></tr>
+                    <tr><td>每人最多答题次数</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">限制用户在整个活动期间最多可答题次数</td></tr>
+                    <tr><td rowspan="2" style="font-weight:600;color:var(--text-primary);vertical-align:middle">参与规则</td><td>允许中断答题</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">控制用户答题过程中退出后是否允许继续答题</td></tr>
+                    <tr><td>中断后默认计时将继续</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">中断后倒计时继续，避免用户通过退出暂停计时</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Table 2: 题目与试卷配置 -->
+        <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:10px">题目与试卷配置对比表</div>
+            <table class="cmp-table">
+                <thead><tr><th style="width:14%">模块</th><th style="width:22%">功能点</th><th style="width:12%">考试模式</th><th style="width:14%">每日答题闯关模式</th><th>需求说明</th></tr></thead>
+                <tbody>
+                    <tr><td rowspan="4" style="font-weight:600;color:var(--text-primary);vertical-align:middle">题目来源</td><td>选择试卷</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">考试模式从试卷库中选择一张试卷作为考试内容</td></tr>
+                    <tr><td>固定题目</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">固定题目由管理员手动选择题目并设置分值（在试卷管理中配置）</td></tr>
+                    <tr><td>随机抽题</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">随机抽题按抽题规则自动组卷（在试卷管理中配置抽题规则）</td></tr>
+                    <tr><td>抽题规则</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">考试模式：在试卷管理中配置；闯关模式：在活动配置中配置每日抽题规则</td></tr>
+                    <tr><td rowspan="2" style="font-weight:600;color:var(--text-primary);vertical-align:middle">随机规则</td><td>题目顺序随机</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">控制用户答题时题目展示顺序是否随机</td></tr>
+                    <tr><td>选项顺序随机</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">控制选择题选项展示顺序是否随机</td></tr>
+                    <tr><td rowspan="3" style="font-weight:600;color:var(--text-primary);vertical-align:middle">分值规则</td><td>每题分值</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">支持按题目或抽题规则配置每题分值</td></tr>
+                    <tr><td>总分计算</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">系统根据题目数量和分值自动计算总分</td></tr>
+                    <tr><td>满分是否默认 100 分</td><td class="warn">⚠️ 待确认</td><td class="warn">⚠️ 待确认</td><td style="font-size:12px;color:var(--text-secondary)">建议支持系统自动换算为 100 分，也可保留原始总分</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ACTIONS ===== -->
+<div class="btn-group" style="background:var(--surface);padding:16px 24px;border-radius:var(--radius-lg);box-shadow:0 -4px 16px rgba(0,0,0,.08);position:sticky;bottom:16px;border:1px solid var(--border-light);z-index:50">
+    <button class="btn btn-success">💾 保存配置</button>
+    <button class="btn btn-primary">💾 保存并下一步</button>
+    <button class="btn btn-ghost">取消</button>
+</div>
+
+</div>
+
+<script>
+// ===== Mode selector (Exam / Challenge) =====
+function selectMode(mode) {
+    document.getElementById('modeExam').classList.toggle('selected', mode === 'exam');
+    document.getElementById('modeChallenge').classList.toggle('selected', mode === 'challenge');
+    document.getElementById('modeLevel').classList.toggle('selected', mode === 'level');
+    document.getElementById('examConfig').classList.toggle('active', mode === 'exam');
+    document.getElementById('challengeConfig').classList.toggle('active', mode === 'challenge');
+    document.getElementById('levelConfig').classList.toggle('active', mode === 'level');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ===== Paper selector =====
+function selectPaper(el) {
+    el.parentElement.querySelectorAll('.paper-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+// ===== Challenge mode: Fixed paper selector =====
+function selectChPaper(el) {
+    el.parentElement.querySelectorAll('.paper-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+// ===== Challenge mode: Switch composition method =====
+function switchChMethod(method) {
+    document.getElementById('chFixed').classList.toggle('selected', method === 'fixed');
+    document.getElementById('chRandom').classList.toggle('selected', method === 'random');
+    document.getElementById('chDaily').classList.toggle('selected', method === 'daily');
+
+    document.getElementById('chFixedPane').style.display = method === 'fixed' ? 'block' : 'none';
+    document.getElementById('chRandomPane').style.display = method === 'random' ? 'block' : 'none';
+    document.getElementById('chDailyPane').style.display = method === 'daily' ? 'block' : 'none';
+}
+
+// ===== Bank source hints =====
+const bankSourceHints = {
+    'mine':   '📦 我的题库：从当前管理员自己维护的题库中抽题。',
+    'org':    '🏛️ 机构题库：从当前机构统一维护的题库中抽题。',
+    'public': '🌐 平台公共题库由平台统一维护，适合没有自建题库、希望快速创建答题活动的场景。',
+    'all':    '📚 全部可用题库：从当前账号有权限使用的全部题库中抽题，范围最广。'
+};
+
+function switchBankSource(radio, context) {
+    const value = radio.value;
+    if (context === 'random') {
+        const hintEl = document.getElementById('randomBankHint');
+        if (hintEl) hintEl.innerHTML = bankSourceHints[value] || '';
+        // Update the bank checkboxes based on source
+        updateBankCheckboxes(value, 'random');
+    }
+}
+
+function updateBankCheckboxes(source, context) {
+    // Prototype: update available bank checkboxes based on source selection
+    const bankMap = {
+        'mine':   ['我的图书馆知识题库', '我的阅读素养题库', '我的传统文化题库'],
+        'org':    ['机构图书馆知识题库', '机构阅读素养题库', '机构非遗知识题库'],
+        'public': ['公共图书馆知识题库', '公共阅读素养题库', '公共非遗知识题库', '公共传统文化题库'],
+        'all':    ['图书馆知识题库', '阅读素养题库', '非遗知识题库', '传统文化题库', '历史文化题库', '安全知识题库']
+    };
+    // In a real app, this would dynamically update the checkbox list
+    console.log('Switching bank source to:', source, 'Available banks:', bankMap[source]);
+}
+
+// ===== Daily plan: Bank source change =====
+function onDailyBankSourceChange(selectEl) {
+    const value = selectEl.value;
+    // In a real app, this would update the adjacent "使用题库" dropdown
+    const bankMap = {
+        'mine':   ['我的图书馆知识题库', '我的阅读素养题库', '我的传统文化题库'],
+        'org':    ['阅读素养题库', '文学基础知识题库'],
+        'public': ['公共图书馆知识题库', '公共阅读素养题库', '公共非遗知识题库'],
+        'all':    ['图书馆知识题库', '阅读素养题库', '非遗知识题库', '传统文化题库']
+    };
+    const row = selectEl.closest('tr');
+    const bankSelect = row.querySelectorAll('select')[1]; // second select is the bank
+    if (bankSelect && bankMap[value]) {
+        bankSelect.innerHTML = bankMap[value].map(b => `<option>${b}</option>`).join('');
+    }
+}
+
+// ===== Comparison table toggle =====
+function toggleCmp() {
+    const body = document.getElementById('cmpBody');
+    const arrow = document.getElementById('cmpArrow');
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        arrow.textContent = '▲ 收起';
+    } else {
+        body.style.display = 'none';
+        arrow.textContent = '▼ 展开';
+    }
+}
+
+// ===== Level mode: Add stage =====
+let levelStandaloneId = 4;
+function addLevelStageStandalone() {
+    const container = document.getElementById('levelStageList');
+    if (!container) return;
+    const cn = ['一','二','三','四','五','六','七','八','九','十'];
+    const idx = levelStandaloneId - 1;
+    const label = idx < cn.length ? cn[idx] : idx;
+    const newRow = document.createElement('div');
+    newRow.style.cssText = 'display:grid;grid-template-columns:40px 1fr 1fr 1fr 80px 80px 80px 50px;gap:8px;align-items:center;padding:10px 0;';
+    newRow.innerHTML = `
+        <div style="text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--primary-light);color:var(--primary);font-weight:700;font-size:12px">${container.children.length + 1}</span></div>
+        <div><input type="text" value="第${label}关：自定义关卡" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"></div>
+        <div><select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>图书馆知识题库</option><option>历史文化题库</option><option>非遗知识题库</option></select></div>
+        <div><select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option selected>全部客观题</option><option>单选题</option><option>单选题+多选题</option><option>单选题+判断题</option><option>多选题+判断题</option></select></div>
+        <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+        <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+        <div><input type="number" value="60" min="0" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
+        <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer">删除</span></div>
+    `;
+    container.appendChild(newRow);
+    levelStandaloneId++;
+    updateLevelSummary();
+}
+
+function updateLevelSummary() {
+    const container = document.getElementById('levelStageList');
+    const summaryEl = document.getElementById('levelStageSummary');
+    if (!container || !summaryEl) return;
+    const rows = container.querySelectorAll('[style*="grid-template-columns:40px"]');
+    let totalQ = 0, totalS = 0;
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input[type=number]');
+        if (inputs.length >= 3) {
+            const count = parseInt(inputs[0].value) || 0;
+            const scorePer = parseInt(inputs[1].value) || 0;
+            totalQ += count;
+            totalS += count * scorePer;
+        }
+    });
+    summaryEl.innerHTML = `共 <strong>${rows.length}</strong> 关 · <strong>${totalQ}</strong> 题 · 总分 <strong>${totalS}</strong>`;
+}
+</script>
+</body>
+</html>

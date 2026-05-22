@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识问答活动管理系统 - 管理后台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --primary:#4A6CF7;--primary-hover:#3B5DE7;--primary-light:#EEF2FF;--primary-glow:rgba(74,108,247,.15);
+            --success:#10B981;--success-hover:#059669;--success-light:#ECFDF5;
+            --danger:#EF4444;--danger-hover:#DC2626;--danger-light:#FEF2F2;
+            --warning:#F59E0B;--warning-light:#FFFBEB;
+            --sidebar-bg:#0F172A;--sidebar-surface:#1E293B;--sidebar-hover:#334155;--sidebar-active:var(--primary);
+            --bg:#F1F5F9;--surface:#FFFFFF;--border:#E2E8F0;--border-light:#F1F5F9;
+            --text-primary:#0F172A;--text-secondary:#475569;--text-muted:#94A3B8;--text-inverse:#F8FAFC;
+            --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;
+            --shadow-sm:0 1px 2px rgba(0,0,0,.05);--shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+            --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);--shadow-xl:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);
+            --transition-fast:all .15s cubic-bezier(.4,0,.2,1);--transition-base:all .25s cubic-bezier(.4,0,.2,1);--transition-slow:all .4s cubic-bezier(.4,0,.2,1)
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text-primary);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+        .layout{display:flex;min-height:100vh}
+
+        /* ===== SIDEBAR ===== */
+        .sidebar{width:232px;background:var(--sidebar-bg);color:var(--text-inverse);position:fixed;height:100vh;overflow-y:auto;z-index:100;scrollbar-width:thin;scrollbar-color:#334155 transparent}
+        .sidebar::-webkit-scrollbar{width:4px}
+        .sidebar::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
+        .sidebar-logo{padding:22px 20px;background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);text-align:center;border-bottom:1px solid #1E293B}
+        .sidebar-logo h1{font-size:17px;color:#F1F5F9;margin-bottom:3px;font-weight:700;letter-spacing:-.3px}
+        .sidebar-logo p{font-size:11px;color:#64748B;letter-spacing:.5px}
+        .nav-group{padding:6px 0}
+        .nav-group-title{padding:10px 16px 4px;font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+        .nav-item{padding:9px 16px;cursor:pointer;transition:var(--transition-fast);border-left:3px solid transparent;display:flex;align-items:center;gap:10px;font-size:13px;color:#94A3B8;border-radius:0;margin:1px 8px 1px 0}
+        .nav-item:hover{background:var(--sidebar-hover);color:var(--text-inverse);border-radius:var(--radius-sm)}
+        .nav-item.active{background:var(--sidebar-active);border-left-color:var(--primary);color:#fff;border-radius:0 var(--radius-sm) var(--radius-sm) 0;box-shadow:0 0 20px rgba(74,108,247,.3)}
+        .nav-item .icon{width:20px;text-align:center;font-size:14px}
+
+        /* ===== MAIN ===== */
+        .main{margin-left:232px;flex:1;padding:20px 28px;min-height:100vh;background:var(--bg)}
+        .page-header{background:var(--surface);padding:18px 24px;border-radius:var(--radius-lg);margin-bottom:20px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border-light)}
+        .page-header h2{font-size:20px;color:var(--text-primary);font-weight:700;letter-spacing:-.3px}
+        .breadcrumb{font-size:12px;color:var(--text-muted)}
+        .breadcrumb a{color:var(--primary);text-decoration:none}
+
+        /* ===== CARDS ===== */
+        .card{background:var(--surface);padding:24px;border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);margin-bottom:20px;border:1px solid var(--border-light);transition:var(--transition-base)}
+        .card:hover{box-shadow:var(--shadow-md)}
+        .card-title{font-size:16px;font-weight:700;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid var(--primary);color:var(--text-primary);display:flex;align-items:center;gap:8px}
+
+        /* ===== STEP WIZARD ===== */
+        .step-wizard{display:flex;align-items:center;margin-bottom:28px;background:var(--surface);padding:18px 24px;border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);border:1px solid var(--border-light)}
+        .step-item{display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;transition:var(--transition-base)}
+        .step-num{width:30px;height:30px;border-radius:50%;background:var(--border);color:var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:var(--transition-base)}
+        .step-item.active .step-num{background:var(--primary);color:#fff;box-shadow:0 0 0 4px var(--primary-glow)}
+        .step-item.done .step-num{background:var(--success);color:#fff}
+        .step-label{font-size:13px;color:var(--text-muted);font-weight:500;transition:var(--transition-base)}
+        .step-item.active .step-label{color:var(--primary);font-weight:700}
+        .step-item.done .step-label{color:var(--success);font-weight:600}
+        .step-line{flex:1;height:2px;background:var(--border);margin:0 10px;transition:var(--transition-slow);position:relative;overflow:hidden}
+        .step-line.done{background:var(--success)}
+        .step-line.done::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,var(--success),var(--success));animation:stepLineFill .6s ease-out}
+        @keyframes stepLineFill{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+
+        /* ===== FORMS ===== */
+        .form-group{margin-bottom:16px}
+        .form-group>label{display:block;margin-bottom:5px;font-weight:600;font-size:13px;color:var(--text-secondary)}
+        .form-group>label .req{color:var(--danger);margin-right:2px}
+        .form-control{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;transition:var(--transition-fast);background:var(--surface);color:var(--text-primary)}
+        .form-control:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px var(--primary-glow)}
+        .form-control:hover:not(:focus){border-color:#94A3B8}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+        .radio-group,.checkbox-group{display:flex;gap:16px;flex-wrap:wrap}
+        .radio-item,.checkbox-item{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;padding:4px 0}
+        .radio-item input,.checkbox-item input{accent-color:var(--primary)}
+        .hint{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+        /* ===== SWITCH ===== */
+        .switch{position:relative;display:inline-block;width:44px;height:24px}
+        .switch input{opacity:0;width:0;height:0}
+        .sw-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#CBD5E1;transition:var(--transition-base);border-radius:24px}
+        .sw-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;transition:var(--transition-base);border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+        input:checked+.sw-slider{background:var(--primary)}
+        input:checked+.sw-slider:before{transform:translateX(20px)}
+        .sw-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light)}
+        .sw-row:last-child{border-bottom:none}
+        .sw-row .sw-label{font-size:13px;color:var(--text-secondary);font-weight:500}
+        .sw-row .sw-hint{font-size:12px;color:var(--text-muted);margin-top:2px}
+
+        /* ===== BUTTONS ===== */
+        .btn{padding:8px 18px;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:var(--transition-fast);font-weight:600;letter-spacing:-.1px;position:relative;overflow:hidden}
+        .btn-primary{background:var(--primary);color:#fff;box-shadow:0 1px 2px rgba(74,108,247,.3)}.btn-primary:hover{background:var(--primary-hover);box-shadow:0 4px 12px rgba(74,108,247,.4);transform:translateY(-1px)}
+        .btn-success{background:var(--success);color:#fff;box-shadow:0 1px 2px rgba(16,185,129,.3)}.btn-success:hover{background:var(--success-hover);box-shadow:0 4px 12px rgba(16,185,129,.4);transform:translateY(-1px)}
+        .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:var(--danger-hover)}
+        .btn-ghost{background:#F1F5F9;color:var(--text-secondary)}.btn-ghost:hover{background:#E2E8F0}
+        .btn-outline{background:var(--surface);color:var(--primary);border:1.5px solid var(--primary)}.btn-outline:hover{background:var(--primary-light)}
+        .btn:active{transform:translateY(0)}
+        .btn-group{display:flex;gap:8px;margin-top:18px}
+
+        /* ===== TABLE ===== */
+        .data-table{width:100%;border-collapse:collapse}
+        .data-table th,.data-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border-light);font-size:13px}
+        .data-table th{background:#F8FAFC;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+        .data-table tbody tr{transition:var(--transition-fast)}
+        .data-table tbody tr:hover td{background:#F8FAFC}
+        .data-table tbody tr:nth-child(even) td{background:#FAFBFC}
+        .data-table tbody tr:nth-child(even):hover td{background:#F1F5F9}
+        .data-table .actions{display:flex;gap:10px}
+        .data-table .actions span{transition:var(--transition-fast)}
+        .data-table .actions span:hover{opacity:.7}
+
+        /* ===== FILTER ===== */
+        .filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+        .filter-bar input,.filter-bar select{padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;transition:var(--transition-fast);background:var(--surface)}
+        .filter-bar input:focus,.filter-bar select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);outline:none}
+
+        /* ===== BADGE ===== */
+        .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.2px}
+        .badge-green{background:var(--success-light);color:#059669}
+        .badge-yellow{background:var(--warning-light);color:#B45309}
+        .badge-red{background:var(--danger-light);color:#B91C1C}
+        .badge-blue{background:var(--primary-light);color:#3730A3}
+
+        /* ===== TABS ===== */
+        .tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
+        .tab{padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:var(--transition-base);font-size:13px;color:var(--text-muted);font-weight:500}
+        .tab:hover{color:var(--primary);background:var(--primary-light);border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+        .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:700}
+        .tab-pane{display:none;animation:fadeIn .3s ease-out}.tab-pane.active{display:block}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ===== PAGE ===== */
+        .page{display:none;animation:pageIn .3s ease-out}.page.active{display:block}
+        @keyframes pageIn{from{opacity:0}to{opacity:1}}
+        .step-pane{display:none;animation:fadeIn .3s ease-out}.step-pane.active{display:block}
+
+        /* ===== INFO BOX ===== */
+        .info-box{padding:12px 16px;border-radius:var(--radius-md);margin-bottom:16px;font-size:13px;line-height:1.6;border-left:3px solid}
+        .info-box.blue{background:var(--primary-light);border-left-color:var(--primary);color:#312E81}
+        .info-box.yellow{background:var(--warning-light);border-left-color:var(--warning);color:#78350F}
+        .info-box.green{background:var(--success-light);border-left-color:var(--success);color:#064E3B}
+
+        /* ===== MODAL ===== */
+        .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
+        .modal-overlay.show{display:flex;animation:overlayIn .2s ease-out}
+        @keyframes overlayIn{from{opacity:0}to{opacity:1}}
+        .modal{background:var(--surface);border-radius:var(--radius-xl);width:90%;max-width:720px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:modalSlideIn .3s cubic-bezier(.16,1,.3,1)}
+        @keyframes modalSlideIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+        .modal-head{padding:16px 24px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center}
+        .modal-head h3{font-size:16px;color:var(--text-primary);font-weight:700}
+        .modal-close{font-size:22px;cursor:pointer;color:var(--text-muted);border:none;background:none;width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;transition:var(--transition-fast)}
+        .modal-close:hover{color:var(--text-primary);background:#F1F5F9}
+        .modal-body{padding:24px}
+        .modal-foot{padding:14px 24px;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:10px;background:#F8FAFC;border-radius:0 0 var(--radius-xl) var(--radius-xl)}
+
+        /* ===== RICH EDITOR ===== */
+        .rte-toolbar{display:flex;gap:6px;padding:10px;background:#F8FAFC;border:1.5px solid var(--border);border-bottom:none;border-radius:var(--radius-md) var(--radius-md) 0 0}
+        .rte-toolbar button{padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:12px;transition:var(--transition-fast);font-weight:500}
+        .rte-toolbar button:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .rte-body{min-height:180px;border:1.5px solid var(--border);border-radius:0 0 var(--radius-md) var(--radius-md);padding:14px;background:#FAFBFC;font-size:14px;line-height:1.6}
+        .rte-body:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px var(--primary-glow)}
+
+        /* ===== UPLOAD ZONE ===== */
+        .upload-zone{border:2px dashed var(--border);border-radius:var(--radius-md);padding:32px;text-align:center;cursor:pointer;transition:var(--transition-base)}
+        .upload-zone:hover{border-color:var(--primary);background:var(--primary-light)}
+        .upload-zone p{color:var(--text-muted);font-size:13px}
+
+        /* ===== CONFIG BLOCK ===== */
+        .config-block{background:#F8FAFC;border:1.5px solid var(--border-light);border-radius:var(--radius-md);padding:16px;margin-bottom:16px}
+        .config-block-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:12px}
+
+        /* ===== STAT CARDS ===== */
+        .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+        .stat-card{padding:24px;border-radius:var(--radius-lg);text-align:center;position:relative;overflow:hidden;transition:var(--transition-base)}
+        .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+        .stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.15)}
+        .stat-card h3{font-size:32px;margin-bottom:4px;font-weight:800;letter-spacing:-1px}
+        .stat-card p{font-size:13px;font-weight:600;letter-spacing:.3px}
+
+        /* ===== DRAG HANDLE ===== */
+        .drag-handle{cursor:grab;color:var(--border);font-size:16px;margin-right:6px;transition:var(--transition-fast)}
+        .drag-handle:hover{color:var(--text-muted)}
+
+        /* ===== SECTION CARD ===== */
+        .section-card{border:1.5px solid var(--border-light);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;background:#FAFBFC;transition:var(--transition-fast)}
+        .section-card:hover{border-color:var(--primary);box-shadow:var(--shadow-sm)}
+        .section-card .sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .section-card .sec-title{font-weight:700;font-size:13px;color:var(--primary)}
+
+        /* ===== QUESTION ITEM ===== */
+        .q-item{border:1.5px solid var(--border-light);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;background:var(--surface);transition:var(--transition-fast)}
+        .q-item:hover{border-color:var(--primary);box-shadow:var(--shadow-sm)}
+        .q-item .q-num{font-weight:700;color:var(--primary);min-width:24px}
+        .q-item .q-type{font-size:11px}
+        .q-item .q-content{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .q-item .q-score{color:var(--text-muted);font-size:12px;min-width:50px;text-align:right}
+        .q-item .q-actions{display:flex;gap:8px}
+
+        /* ===== RANK ===== */
+        .rank-1{color:#F59E0B;font-size:20px;font-weight:800}
+        .rank-2{color:#94A3B8;font-size:20px;font-weight:800}
+        .rank-3{color:#CD7F32;font-size:20px;font-weight:800}
+
+        /* ===== SCHEDULE TABLE ===== */
+        .schedule-table{width:100%;border-collapse:collapse}
+        .schedule-table th,.schedule-table td{padding:10px 12px;border:1px solid var(--border-light);font-size:13px;text-align:center}
+        .schedule-table th{background:#F1F5F9;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+        .schedule-table tbody tr:hover td{background:var(--primary-light)}
+
+        /* ===== ACTION LINKS ===== */
+        .act-link{color:var(--primary);cursor:pointer;text-decoration:none;font-size:13px;font-weight:500;transition:var(--transition-fast);padding:2px 0}
+        .act-link:hover{color:var(--primary-hover);border-bottom:1px solid var(--primary)}
+        .act-link.danger{color:var(--danger)}.act-link.danger:hover{border-bottom-color:var(--danger)}
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:1024px){.form-row{grid-template-columns:1fr}.stat-grid{grid-template-columns:1fr 1fr}}
+    </style>
+</head>
+<body>
+<div class="layout">
+<!-- ====== SIDEBAR ====== -->
+<aside class="sidebar">
+    <div class="sidebar-logo"><h1>📚 知识问答系统</h1><p>管理后台 v1.0</p></div>
+    <div class="nav-group">
+        <div class="nav-group-title">概览</div>
+        <div class="nav-item active" onclick="goPage('dashboard',this)"><span class="icon">📊</span>数据概览</div>
+    </div>
+    <div class="nav-group">
+        <div class="nav-group-title">活动管理</div>
+        <div class="nav-item" onclick="goPage('create-activity',this)"><span class="icon">➕</span>创建活动</div>
+        <div class="nav-item" onclick="goPage('activity-list',this)"><span class="icon">📋</span>活动列表</div>
+    </div>
+    <div class="nav-group">
+        <div class="nav-group-title">内容管理</div>
+        <div class="nav-item" onclick="goPage('question-bank',this)"><span class="icon">📝</span>题库管理</div>
+        <div class="nav-item" onclick="goPage('paper-mgmt',this)"><span class="icon">📄</span>试卷 / 题组管理</div>
+    </div>
+    <div class="nav-group">
+        <div class="nav-group-title">数据管理</div>
+        <div class="nav-item" onclick="goPage('registration',this)"><span class="icon">👥</span>报名情况</div>
+        <div class="nav-item" onclick="goPage('exam-records',this)"><span class="icon">📈</span>答题情况</div>
+        <div class="nav-item" onclick="goPage('unit-data',this)"><span class="icon">🏢</span>单位数据</div>
+    </div>
+    <div class="nav-group">
+        <div class="nav-group-title">运营</div>
+        <div class="nav-item" onclick="goPage('leaderboard',this)"><span class="icon">🏆</span>排行榜</div>
+        <div class="nav-item" onclick="goPage('certificates',this)"><span class="icon">🎓</span>证书管理</div>
+    </div>
+</aside>
+
+<!-- ====== MAIN CONTENT ====== -->
+<main class="main">
+
+<!-- ==================== DASHBOARD ==================== -->
+<section id="dashboard" class="page active">
+    <div class="page-header"><h2>📊 数据概览</h2><div class="breadcrumb">首页 / 数据概览</div></div>
+    <div class="card">
+        <div class="card-title">活动统计</div>
+        <div class="stat-grid">
+            <div class="stat-card" style="background:linear-gradient(135deg,#4A6CF7,#6366F1)"><h3 style="color:#fff">24</h3><p style="color:rgba(255,255,255,.85)">进行中活动</p></div>
+            <div class="stat-card" style="background:linear-gradient(135deg,#10B981,#34D399)"><h3 style="color:#fff">1,256</h3><p style="color:rgba(255,255,255,.85)">总参与人数</p></div>
+            <div class="stat-card" style="background:linear-gradient(135deg,#F59E0B,#FBBF24)"><h3 style="color:#fff">3,456</h3><p style="color:rgba(255,255,255,.85)">总答题次数</p></div>
+            <div class="stat-card" style="background:linear-gradient(135deg,#EF4444,#F87171)"><h3 style="color:#fff">89.5%</h3><p style="color:rgba(255,255,255,.85)">平均及格率</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== CREATE ACTIVITY (Step Wizard) ==================== -->
+<section id="create-activity" class="page">
+    <div class="page-header"><h2>➕ 创建知识问答活动</h2><div class="breadcrumb">首页 / 创建活动</div></div>
+    <!-- Step Wizard -->
+    <div class="step-wizard" id="stepWizard">
+        <div class="step-item active" onclick="goStep(1)"><span class="step-num">1</span><span class="step-label">基本信息</span></div><div class="step-line"></div>
+        <div class="step-item" onclick="goStep(2)"><span class="step-num">2</span><span class="step-label">活动介绍</span></div><div class="step-line"></div>
+        <div class="step-item" onclick="goStep(3)"><span class="step-label">报名配置</span><span class="step-num">3</span></div><div class="step-line"></div>
+        <div class="step-item" onclick="goStep(4)"><span class="step-num">4</span><span class="step-label">答题配置</span></div><div class="step-line"></div>
+        <div class="step-item" onclick="goStep(5)"><span class="step-num">5</span><span class="step-label">外观装修</span></div><div class="step-line"></div>
+        <div class="step-item" onclick="goStep(6)"><span class="step-num">6</span><span class="step-label">其他设置</span></div><div class="step-line"></div>
+        <div class="step-item" onclick="goStep(7)"><span class="step-num">7</span><span class="step-label">预览发布</span></div>
+    </div>
+
+    <!-- Step 1: 基本信息 -->
+    <div id="step1" class="step-pane active">
+        <div class="card">
+            <div class="card-title">基本信息</div>
+            <div class="form-group"><label><span class="req">*</span>活动名称</label><input class="form-control" placeholder="请输入活动名称"></div>
+            <div class="form-group"><label><span class="req">*</span>活动模式</label>
+                <div class="radio-group">
+                    <div class="radio-item"><input type="radio" name="mode" value="exam" checked><label>考试模式</label></div>
+                    <div class="radio-item"><input type="radio" name="mode" value="challenge"><label>每日答题闯关</label></div>
+                </div>
+                <p class="hint">发布后不可修改，避免已报名/已答题数据口径混乱</p>
+            </div>
+            <div class="form-group"><label>举办方式</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox" checked><label>线上活动</label></div>
+                    <div class="checkbox-item"><input type="checkbox"><label>线下活动</label></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>统计类别</label><select class="form-control"><option>请选择</option><option>阅读推广</option><option>文化竞赛</option><option>知识测评</option></select></div>
+                <div class="form-group"><label><span class="req">*</span>活动范围</label>
+                    <div style="display:flex;gap:8px"><select class="form-control" style="width:120px"><option>全国</option><option>省级</option><option>市级</option><option>本机构</option></select><select class="form-control"><option>-</option></select></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>单位角色</label><select class="form-control"><option>请选择</option><option>主办单位</option><option>承办单位</option><option>参赛单位</option></select></div>
+                <div class="form-group"><label><span class="req">*</span>是否需要报名</label>
+                    <div class="radio-group"><div class="radio-item"><input type="radio" name="needReg" value="1"><label>是</label></div><div class="radio-item"><input type="radio" name="needReg" value="0" checked><label>否</label></div></div>
+                </div>
+            </div>
+            <div class="form-group"><label>报名时间</label><div class="form-row"><input type="datetime-local" class="form-control"><input type="datetime-local" class="form-control" placeholder="结束时间"></div><p class="hint">报名结束时间不能晚于活动结束时间</p></div>
+            <div class="form-group"><label>组织机构</label>
+                <div class="form-row" style="margin-bottom:8px"><input class="form-control" placeholder="主办单位"><input class="form-control" placeholder="承办单位"></div>
+                <div class="form-row"><input class="form-control" placeholder="协办单位"><input class="form-control" placeholder="支持单位"></div>
+                <p class="hint">非必填，可配置多个承办/协办/支持单位</p>
+            </div>
+            <div class="btn-group"><button class="btn btn-primary" onclick="goStep(2)">下一步</button><button class="btn btn-ghost">取消</button></div>
+        </div>
+    </div>
+
+    <!-- Step 2: 活动介绍 -->
+    <div id="step2" class="step-pane">
+        <div class="card">
+            <div class="card-title">活动介绍</div>
+            <div class="info-box blue">💡 活动介绍作为用户端活动详情页核心内容，建议支持图片、文字、链接、表格等基础富文本能力。</div>
+            <div class="form-group"><label><span class="req">*</span>活动介绍</label>
+                <div class="rte-toolbar"><button>加粗</button><button>斜体</button><button>下划线</button><button>列表</button><button>图片</button><button>链接</button><button>表格</button></div>
+                <div class="rte-body" contenteditable="true">请输入活动背景、目标、参与对象、规则说明等内容...</div>
+            </div>
+            <div class="btn-group"><button class="btn btn-primary" onclick="goStep(3)">下一步</button><button class="btn btn-ghost" onclick="goStep(1)">上一步</button></div>
+        </div>
+    </div>
+
+    <!-- Step 3: 报名配置 -->
+    <div id="step3" class="step-pane">
+        <div class="card">
+            <div class="card-title">报名配置</div>
+            <div class="info-box blue">💡 若开启报名，用户需完成报名后才能答题；若未开启，用户可直接进入答题流程。</div>
+            <div class="form-group"><label><span class="req">*</span>是否需要报名</label>
+                <div class="radio-group"><div class="radio-item"><input type="radio" name="needReg2" value="1" id="regYes"><label for="regYes">是</label></div><div class="radio-item"><input type="radio" name="needReg2" value="0" checked id="regNo"><label for="regNo">否</label></div></div>
+            </div>
+            <div id="regConfigBlock">
+                <div class="form-group"><label>报名组别</label>
+                    <div class="config-block">
+                        <div style="display:flex;gap:8px;margin-bottom:8px"><input class="form-control" value="组别一" style="width:200px"><button class="btn btn-ghost" style="padding:4px 8px">✕</button></div>
+                        <div style="display:flex;gap:8px;margin-bottom:8px"><input class="form-control" value="组别二" style="width:200px"><button class="btn btn-ghost" style="padding:4px 8px">✕</button></div>
+                        <button class="btn btn-outline" style="font-size:12px">+ 添加组别</button>
+                    </div>
+                </div>
+                <div class="form-group"><label>报名表单字段</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item"><input type="checkbox" checked disabled><label>姓名（必填）</label></div>
+                        <div class="checkbox-item"><input type="checkbox" checked disabled><label>手机号（必填）</label></div>
+                        <div class="checkbox-item"><input type="checkbox" checked><label>选送单位</label></div>
+                        <div class="checkbox-item"><input type="checkbox"><label>身份证号</label></div>
+                        <div class="checkbox-item"><input type="checkbox"><label>职务/身份</label></div>
+                        <div class="checkbox-item"><input type="checkbox"><label>邮箱</label></div>
+                    </div>
+                    <button class="btn btn-outline" style="font-size:12px;margin-top:6px">+ 自定义字段</button>
+                </div>
+                <div class="form-group"><label>报名须知</label><textarea class="form-control" rows="3" placeholder="请输入报名前阅读说明"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>是否需要实名认证</label><label class="switch"><input type="checkbox"><span class="sw-slider"></span></label></div>
+                    <div class="form-group"><label>报名后是否可修改信息</label><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                </div>
+            </div>
+            <div class="btn-group"><button class="btn btn-primary" onclick="goStep(4)">下一步</button><button class="btn btn-ghost" onclick="goStep(2)">上一步</button></div>
+        </div>
+    </div>
+
+    <!-- Step 4: 答题配置 (Mode Toggle) -->
+    <div id="step4" class="step-pane">
+        <div class="card">
+            <div class="card-title">答题配置</div>
+            <div class="tabs" id="modeTabs">
+                <div class="tab active" onclick="switchModeTab('examConfig')">考试模式配置</div>
+                <div class="tab" onclick="switchModeTab('challengeConfig')">每日答题闯关配置</div>
+            </div>
+
+            <!-- === 考试模式 === -->
+            <div id="examConfig" class="tab-pane active">
+                <div class="info-box yellow">⚠️ 考试模式适合考试模式、测评、竞赛场景。考试模式偏正式测评，不建议首期设计复杂积分玩法。</div>
+                <div class="form-group"><label><span class="req">*</span>考试开放时间</label><div class="form-row"><input type="datetime-local" class="form-control" value="2026-06-09T09:00"><input type="datetime-local" class="form-control" value="2026-06-09T18:00"></div><p class="hint">用户可以进入考试、点击「开始答题」的时间范围</p></div>
+                <div class="form-row">
+                    <div class="form-group"><label><span class="req">*</span>考试时长（分钟）</label><input type="number" class="form-control" value="120"><p class="hint">用户点击「开始答题」后，单次考试最长可作答时间</p></div>
+                    <div class="form-group"><label><span class="req">*</span>每人答题次数</label>
+                        <div style="display:flex;gap:8px;align-items:center"><select class="form-control" style="width:140px"><option>1 次</option><option>2 次</option><option>N 次</option></select><input type="number" class="form-control" style="width:80px" placeholder="N" disabled></div>
+                        <p class="hint">多次答题成绩规则：建议取最高分作为有效成绩</p>
+                    </div>
+                </div>
+                <div class="form-group"><label>选择试卷</label>
+                    <table class="data-table"><thead><tr><th>序号</th><th>试卷名称</th><th>组卷模式</th><th>题目数量</th><th>总分</th><th>创建时间</th><th>操作</th></tr></thead>
+                    <tbody><tr><td>1</td><td>图书馆知识竞赛试卷</td><td><span class="badge badge-green">固定题目</span></td><td>50</td><td>100</td><td>2026-05-01</td><td><span style="color:#4A6CF7;cursor:pointer">选择</span></td></tr>
+                    <tr><td>2</td><td>历史文化知识测试</td><td><span class="badge badge-yellow">随机抽题</span></td><td>30</td><td>100</td><td>2026-05-03</td><td><span style="color:#4A6CF7;cursor:pointer">选择</span></td></tr></tbody></table>
+                    <button class="btn btn-outline" style="margin-top:8px;font-size:12px">+ 创建新试卷</button>
+                </div>
+                <div class="form-group"><label>防作弊设置</label>
+                    <div class="config-block">
+                        <div class="form-group"><label>切屏限制</label>
+                            <div style="display:flex;gap:8px;align-items:center"><input type="number" class="form-control" style="width:80px" value="3"><span>次，超过后</span><select class="form-control" style="width:160px"><option>弹出警告</option><option>强制交卷</option></select></div>
+                        </div>
+                        <div class="sw-row"><div><div class="sw-label">允许中断答题</div><div class="sw-hint">退出后可继续答题</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                    </div>
+                </div>
+                <div class="form-group"><label>答题规则</label>
+                    <div class="config-block">
+                        <div class="sw-row"><div class="sw-label">允许跳题</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                        <div class="sw-row"><div class="sw-label">显示答题卡</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                        <div class="sw-row"><div class="sw-label">超时自动交卷</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                        <div class="sw-row"><div class="sw-label">未答题提醒</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                        <div class="sw-row"><div class="sw-label">重复提交拦截</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>得分展示</label><select class="form-control"><option>提交后立即展示</option><option>活动结束后展示</option><option>不展示</option></select></div>
+                    <div class="form-group"><label>答案解析展示</label><select class="form-control"><option>提交后立即展示</option><option>活动结束后展示</option><option>不展示</option></select></div>
+                </div>
+                <div class="btn-group"><button class="btn btn-primary" onclick="goStep(5)">下一步</button><button class="btn btn-ghost" onclick="goStep(3)">上一步</button></div>
+            </div>
+
+            <!-- === 每日答题闯关模式 === -->
+            <div id="challengeConfig" class="tab-pane">
+                <div class="info-box green">🎯 每日答题闯关适合连续参与、每日学习、积分排行场景。更适合积分、连续参与、排行榜、单位榜等激励玩法。</div>
+                <div class="form-group"><label><span class="req">*</span>答题开放时间</label><div class="form-row"><input type="datetime-local" class="form-control" value="2026-06-09T09:00"><input type="datetime-local" class="form-control" value="2026-06-30T18:00"></div></div>
+                <div class="form-group"><label><span class="req">*</span>每日答题次数</label>
+                    <div class="radio-group">
+                        <div class="radio-item"><input type="radio" name="dailyN" checked><label>每天仅可答 1 次</label></div>
+                        <div class="radio-item"><input type="radio" name="dailyN"><label>每天可答</label><input type="number" style="width:56px;margin:0 4px" placeholder="N"><label>次</label></div>
+                        <div class="radio-item"><input type="radio" name="dailyN"><label>每天不限次</label></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>每人最多答题总次数</label><input type="number" class="form-control" placeholder="留空表示不限制"></div>
+                    <div class="form-group"><label><span class="req">*</span>计时方式</label>
+                        <div class="radio-group">
+                            <div class="radio-item"><input type="radio" name="timerMode"><label>闯关限时</label></div>
+                            <div class="radio-item"><input type="radio" name="timerMode"><label>每题限时</label></div>
+                            <div class="radio-item"><input type="radio" name="timerMode" checked><label>闯关限时 + 每题限时</label></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group"><label>每日题目设置</label>
+                    <div class="info-box blue">首期建议保留两种方式：<strong>① 题库随机抽题</strong>（每天规则一致）<strong>② 每日指定题库随机抽题</strong>（每天主题不同）</div>
+                    <div class="tabs" id="qSettingTabs">
+                        <div class="tab active" onclick="switchQTab('randomRule')">题库随机抽题</div>
+                        <div class="tab" onclick="switchQTab('dailyPlan')">每日指定题库随机抽题</div>
+                    </div>
+                    <!-- 题库随机抽题 -->
+                    <div id="randomRule" class="tab-pane active">
+                        <div class="config-block">
+                            <div class="config-block-title">抽题规则</div>
+                            <div class="form-row">
+                                <div class="form-group"><label>题库</label><select class="form-control"><option>图书馆知识题库</option><option>历史文化题库</option><option>非遗知识题库</option></select></div>
+                                <div class="form-group"><label>题型</label>
+                                    <div class="checkbox-group"><div class="checkbox-item"><input type="checkbox" checked><label>单选</label></div><div class="checkbox-item"><input type="checkbox" checked><label>多选</label></div><div class="checkbox-item"><input type="checkbox" checked><label>判断</label></div></div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>难度分布</label><div class="form-row-3"><input type="number" class="form-control" placeholder="简单" value="5"><input type="number" class="form-control" placeholder="中等" value="3"><input type="number" class="form-control" placeholder="困难" value="2"></div></div>
+                                <div class="form-group"><label>每题分值</label><input type="number" class="form-control" value="10"><p class="hint">满分默认 100 分</p></div>
+                            </div>
+                            <button class="btn btn-outline" style="font-size:12px;margin-top:6px">+ 添加规则</button>
+                        </div>
+                    </div>
+                    <!-- 每日指定题库随机抽题 -->
+                    <div id="dailyPlan" class="tab-pane">
+                        <table class="schedule-table">
+                            <thead><tr><th>日期</th><th>关卡名称</th><th>题库</th><th>抽取数量</th><th>每题分值</th><th>操作</th></tr></thead>
+                            <tbody>
+                                <tr><td>第 1 天</td><td>文学基础</td><td>图书馆知识题库</td><td>10</td><td>10</td><td><span style="color:#4A6CF7;cursor:pointer">编辑</span></td></tr>
+                                <tr><td>第 2 天</td><td>历史常识</td><td>历史文化题库</td><td>10</td><td>10</td><td><span style="color:#4A6CF7;cursor:pointer">编辑</span></td></tr>
+                                <tr><td>第 3 天</td><td>非遗文化</td><td>非遗知识题库</td><td>10</td><td>10</td><td><span style="color:#4A6CF7;cursor:pointer">编辑</span></td></tr>
+                            </tbody>
+                        </table>
+                        <button class="btn btn-outline" style="margin-top:8px;font-size:12px">+ 添加关卡</button>
+                    </div>
+                </div>
+                <div class="config-block">
+                    <div class="sw-row"><div><div class="sw-label">每日重新抽题</div><div class="sw-hint">同一用户每天多次答题时是否重新抽题</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                    <div class="sw-row"><div class="sw-label">题目顺序随机</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                    <div class="sw-row"><div class="sw-label">选项顺序随机</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                </div>
+                <div class="form-group"><label>每日得分计算规则</label><select class="form-control" style="width:240px"><option>每日最高分</option><option>每日最后一次得分</option></select></div>
+                <div class="form-group"><label>排名规则</label><select class="form-control" style="width:240px"><option>累计总积分</option><option>每日平均分</option></select></div>
+                <div class="form-group"><label>防作弊设置</label>
+                    <div class="config-block">
+                        <div class="form-group"><label>切屏限制</label><div style="display:flex;gap:8px;align-items:center"><input type="number" class="form-control" style="width:80px" value="3"><span>次，超过后</span><select class="form-control" style="width:160px"><option>弹出警告</option><option>强制交卷</option></select></div></div>
+                        <div class="sw-row"><div class="sw-label">允许中断答题</div><label class="switch"><input type="checkbox"><span class="sw-slider"></span></label></div>
+                    </div>
+                </div>
+                <div class="form-group"><label>答题规则</label>
+                    <div class="config-block">
+                        <div class="sw-row"><div class="sw-label">允许跳题</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                        <div class="sw-row"><div class="sw-label">显示答题卡</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                        <div class="sw-row"><div class="sw-label">立即显示成绩</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                        <div class="sw-row"><div class="sw-label">显示答题解析</div><label class="switch"><input type="checkbox"><span class="sw-slider"></span></label></div>
+                    </div>
+                </div>
+                <div class="btn-group"><button class="btn btn-primary" onclick="goStep(5)">下一步</button><button class="btn btn-ghost" onclick="goStep(3)">上一步</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 5: 外观装修 -->
+    <div id="step5" class="step-pane">
+        <div class="card">
+            <div class="card-title">外观装修</div>
+            <div class="form-row">
+                <div class="form-group"><label>主题色</label><input type="color" class="form-control" value="#4A6CF7" style="height:40px"></div>
+                <div class="form-group"><label>背景色</label><input type="color" class="form-control" value="#ffffff" style="height:40px"></div>
+            </div>
+            <div class="form-group"><label>活动封面图</label><div class="upload-zone"><p>📎 点击或拖拽上传封面图</p><p style="font-size:11px;margin-top:6px">建议尺寸：750×420px，支持 JPG/PNG</p></div></div>
+            <div class="form-group"><label>导航显隐设置</label>
+                <div class="config-block">
+                    <div class="sw-row"><div class="sw-label">活动首页</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                    <div class="sw-row"><div class="sw-label">排行榜</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                    <div class="sw-row"><div class="sw-label">活动动态</div><label class="switch"><input type="checkbox"><span class="sw-slider"></span></label></div>
+                    <div class="sw-row"><div class="sw-label">资源推荐</div><label class="switch"><input type="checkbox"><span class="sw-slider"></span></label></div>
+                </div>
+            </div>
+            <div class="form-group"><label>LOGO 配置</label><div class="upload-zone" style="padding:16px"><p>📎 上传主办方 LOGO（建议 200×60px）</p></div></div>
+            <div class="form-row">
+                <div class="form-group"><label>分享封面</label><div class="upload-zone" style="padding:12px"><p>📎 分享卡片封面</p></div></div>
+                <div class="form-group"><label>分享标题/描述</label><input class="form-control" placeholder="分享标题" style="margin-bottom:6px"><input class="form-control" placeholder="分享描述"></div>
+            </div>
+            <div class="btn-group"><button class="btn btn-primary" onclick="goStep(6)">下一步</button><button class="btn btn-ghost" onclick="goStep(4)">上一步</button></div>
+        </div>
+    </div>
+
+    <!-- Step 6: 其他设置 -->
+    <div id="step6" class="step-pane">
+        <div class="card">
+            <div class="card-title">其他设置</div>
+            <div class="form-group"><label>积分奖励设置</label>
+                <div class="config-block">
+                    <div class="form-row">
+                        <div class="form-group"><label>分享奖励（考试模式）</label><div style="display:flex;gap:6px;align-items:center"><input type="number" class="form-control" style="width:80px" value="5"><span>积分/次</span></div></div>
+                        <div class="form-group"><label>分享奖励（闯关模式）</label><div style="display:flex;gap:6px;align-items:center"><input type="number" class="form-control" style="width:80px" value="5"><span>积分/次</span></div></div>
+                    </div>
+                    <div class="form-group"><label>连续答题奖励（闯关模式）</label><div style="display:flex;gap:6px;align-items:center">连续<input type="number" class="form-control" style="width:60px" value="7">天，奖励<input type="number" class="form-control" style="width:60px" value="10">积分</div></div>
+                </div>
+            </div>
+            <div class="form-group"><label>功能捷径</label>
+                <div class="config-block">
+                    <div class="sw-row"><div class="sw-label">资料下载</div><label class="switch"><input type="checkbox"><span class="sw-slider"></span></label></div>
+                    <div class="sw-row"><div class="sw-label">问题答疑</div><label class="switch"><input type="checkbox"><span class="sw-slider"></span></label></div>
+                    <div class="sw-row"><div class="sw-label">官方活动群</div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+                </div>
+            </div>
+            <div class="btn-group"><button class="btn btn-primary" onclick="goStep(7)">下一步</button><button class="btn btn-ghost" onclick="goStep(5)">上一步</button></div>
+        </div>
+    </div>
+
+    <!-- Step 7: 预览发布 -->
+    <div id="step7" class="step-pane">
+        <div class="card">
+            <div class="card-title">预览与发布</div>
+            <div class="info-box yellow">⚠️ 发布后活动模式不可修改，请确认配置无误后再发布。</div>
+            <div class="config-block">
+                <div class="config-block-title">活动信息确认</div>
+                <div class="form-row">
+                    <div><strong>活动名称：</strong>全民阅读知识竞赛</div>
+                    <div><strong>活动模式：</strong>考试模式</div>
+                </div>
+                <div class="form-row" style="margin-top:6px">
+                    <div><strong>活动时间：</strong>2026-06-09 09:00 ~ 2026-06-09 18:00</div>
+                    <div><strong>是否报名：</strong>否</div>
+                </div>
+            </div>
+            <div class="btn-group"><button class="btn btn-success">🚀 发布活动</button><button class="btn btn-outline">💾 保存为草稿</button><button class="btn btn-ghost" onclick="goStep(6)">上一步</button></div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== ACTIVITY LIST ==================== -->
+<section id="activity-list" class="page">
+    <div class="page-header"><h2>📋 活动列表</h2><div class="breadcrumb">首页 / 活动管理 / 活动列表</div></div>
+    <div class="card">
+        <div class="filter-bar">
+            <input placeholder="活动名称"><select><option>全部模式</option><option>考试模式</option><option>每日答题闯关</option></select><select><option>全部状态</option><option>草稿</option><option>进行中</option><option>已结束</option></select>
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+        </div>
+        <table class="data-table"><thead><tr><th>序号</th><th>活动名称</th><th>活动模式</th><th>活动时间</th><th>参与人数</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>全民阅读知识竞赛</td><td><span class="badge badge-blue">考试模式</span></td><td>2026-06-09 ~ 06-09</td><td>128</td><td><span class="badge badge-green">进行中</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">停用</span></td></tr>
+            <tr><td>2</td><td>21天阅读闯关</td><td><span class="badge badge-green">每日答题闯关</span></td><td>2026-06-01 ~ 06-30</td><td>256</td><td><span class="badge badge-green">进行中</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">停用</span></td></tr>
+            <tr><td>3</td><td>图书馆知识测评</td><td><span class="badge badge-blue">考试模式</span></td><td>2026-05-01 ~ 05-15</td><td>89</td><td><span class="badge badge-yellow">已结束</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">复制</span></td></tr>
+        </tbody></table>
+    </div>
+</section>
+
+<!-- ==================== QUESTION BANK ==================== -->
+<section id="question-bank" class="page">
+    <div class="page-header"><h2>📝 题库管理</h2><div class="breadcrumb">首页 / 内容管理 / 题库管理</div></div>
+    <div class="card">
+        <div class="filter-bar">
+            <input placeholder="题库名称"><select><option>全部状态</option><option>启用</option><option>停用</option></select>
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+            <button class="btn btn-success" style="margin-left:auto" onclick="showModal('createBankModal')">+ 创建题库</button>
+        </div>
+        <table class="data-table"><thead><tr><th>序号</th><th>题库名称</th><th>题目数量</th><th>创建人</th><th>创建时间</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>图书馆知识题库</td><td>256</td><td>管理员</td><td>2026-05-01</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('questionMgmtModal')">管理题目</span><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">导出</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+            <tr><td>2</td><td>历史文化题库</td><td>189</td><td>管理员</td><td>2026-05-03</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('questionMgmtModal')">管理题目</span><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">导出</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+            <tr><td>3</td><td>非遗知识题库</td><td>124</td><td>管理员</td><td>2026-05-05</td><td><span class="badge badge-yellow">停用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('questionMgmtModal')">管理题目</span><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">导出</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+        </tbody></table>
+    </div>
+</section>
+
+<!-- ==================== PAPER / QUESTION GROUP ==================== -->
+<section id="paper-mgmt" class="page">
+    <div class="page-header"><h2>📄 试卷 / 题组管理</h2><div class="breadcrumb">首页 / 内容管理 / 试卷与题组</div></div>
+    <div class="card">
+        <div class="filter-bar">
+            <input placeholder="试卷/题组名称"><select><option>全部组卷模式</option><option>固定题目</option><option>随机抽题</option><option>闯关固定题组</option><option>闯关随机题组</option></select><select><option>全部状态</option><option>启用</option><option>停用</option></select>
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+            <button class="btn btn-success" style="margin-left:auto" onclick="showModal('createPaperModal')">+ 创建试卷/题组</button>
+        </div>
+        <table class="data-table"><thead><tr><th>序号</th><th>名称</th><th>类型</th><th>组卷模式</th><th>题目数量</th><th>总分</th><th>及格分</th><th>创建人</th><th>创建时间</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>图书馆知识竞赛试卷</td><td><span class="badge badge-blue">考试</span></td><td><span class="badge badge-green">固定题目</span></td><td>50</td><td>100</td><td>60</td><td>管理员</td><td>2026-05-01</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">复制</span><span style="color:#4A6CF7;cursor:pointer">预览</span><span style="color:#4A6CF7;cursor:pointer">停用</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+            <tr><td>2</td><td>历史文化知识测试</td><td><span class="badge badge-blue">考试</span></td><td><span class="badge badge-yellow">随机抽题</span></td><td>30</td><td>100</td><td>60</td><td>管理员</td><td>2026-05-03</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">复制</span><span style="color:#4A6CF7;cursor:pointer">预览</span><span style="color:#4A6CF7;cursor:pointer">停用</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+            <tr><td>3</td><td>文学基础关卡</td><td><span class="badge badge-green">闯关</span></td><td><span class="badge badge-green">固定题组</span></td><td>10</td><td>100</td><td>60</td><td>管理员</td><td>2026-05-05</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">复制</span><span style="color:#4A6CF7;cursor:pointer">预览</span><span style="color:#4A6CF7;cursor:pointer">停用</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+            <tr><td>4</td><td>每日随机闯关题组</td><td><span class="badge badge-green">闯关</span></td><td><span class="badge badge-yellow">随机题组</span></td><td>10</td><td>100</td><td>-</td><td>管理员</td><td>2026-05-06</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">复制</span><span style="color:#4A6CF7;cursor:pointer">预览</span><span style="color:#4A6CF7;cursor:pointer">停用</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+        </tbody></table>
+    </div>
+</section>
+
+<!-- ==================== REGISTRATION ==================== -->
+<section id="registration" class="page">
+    <div class="page-header"><h2>👥 报名情况</h2><div class="breadcrumb">首页 / 数据管理 / 报名情况</div></div>
+    <div class="card">
+        <div class="filter-bar">
+            <input placeholder="用户编号"><input placeholder="答题者"><input placeholder="手机号码"><select><option>全部答题状态</option><option>已报名</option><option>已答题</option><option>未答题</option></select><input placeholder="选送单位">
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+        </div>
+        <div class="tabs"><div class="tab active">组别一</div><div class="tab">组别二</div><div class="tab">全部</div></div>
+        <table class="data-table"><thead><tr><th>序号</th><th>用户编号</th><th>所属组别</th><th>姓名</th><th>手机号</th><th>选送单位</th><th>报名时间</th><th>答题状态</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>U001</td><td>组别一</td><td>张三</td><td>138****1234</td><td>市图书馆</td><td>2026-05-10 10:30</td><td><span class="badge badge-green">已答题</span></td></tr>
+            <tr><td>2</td><td>U002</td><td>组别一</td><td>李四</td><td>139****5678</td><td>省文化馆</td><td>2026-05-11 14:20</td><td><span class="badge badge-yellow">未答题</span></td></tr>
+            <tr><td>3</td><td>U003</td><td>组别二</td><td>王五</td><td>136****9012</td><td>区图书馆</td><td>2026-05-12 09:15</td><td><span class="badge badge-green">已答题</span></td></tr>
+        </tbody></table>
+    </div>
+</section>
+
+<!-- ==================== EXAM RECORDS ==================== -->
+<section id="exam-records" class="page">
+    <div class="page-header"><h2>📈 答题情况</h2><div class="breadcrumb">首页 / 数据管理 / 答题情况</div></div>
+    <div class="card">
+        <div class="filter-bar">
+            <input placeholder="姓名"><input placeholder="手机号"><input placeholder="选送单位"><select><option>全部状态</option><option>未开始</option><option>进行中</option><option>已交卷</option></select>
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+        </div>
+        <table class="data-table"><thead><tr><th>序号</th><th>姓名</th><th>手机号</th><th>选送单位</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>张三</td><td>138****1234</td><td>市图书馆</td><td><span class="badge badge-green">已交卷</span></td><td>2026-05-10</td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('examRecordModal')">考试记录</span><span style="color:#4A6CF7;cursor:pointer">证书</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+            <tr><td>2</td><td>李四</td><td>139****5678</td><td>省文化馆</td><td><span class="badge badge-yellow">进行中</span></td><td>2026-05-11</td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('examRecordModal')">考试记录</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+            <tr><td>3</td><td>王五</td><td>136****9012</td><td>区图书馆</td><td><span class="badge badge-green">已交卷</span></td><td>2026-05-12</td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('examRecordModal')">考试记录</span><span style="color:#4A6CF7;cursor:pointer">证书</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+        </tbody></table>
+    </div>
+</section>
+
+<!-- ==================== UNIT DATA ==================== -->
+<section id="unit-data" class="page">
+    <div class="page-header"><h2>🏢 单位数据</h2><div class="breadcrumb">首页 / 数据管理 / 单位数据</div></div>
+    <div class="card">
+        <div class="filter-bar">
+            <input placeholder="单位名称"><select><option>全部排名类型</option><option>单位总分榜</option><option>单位参与榜</option><option>单位平均分榜</option></select>
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+            <button class="btn btn-outline" style="margin-left:auto">📥 导出数据</button>
+        </div>
+        <div class="info-box blue">📊 单位平均分 = 单位内有效参与用户的个人有效成绩之和 ÷ 单位内有效参与用户数（最低参与人数门槛：不少于5人）</div>
+        <table class="data-table"><thead><tr><th>排名</th><th>单位名称</th><th>有效参与人数</th><th>单位总积分</th><th>单位平均分</th><th>单位完成率</th><th>操作</th></tr></thead>
+        <tbody>
+            <tr><td class="rank-1">🥇 1</td><td>市图书馆</td><td>45</td><td><strong>4,280</strong></td><td>95.1</td><td>89%</td><td><span style="color:#4A6CF7;cursor:pointer">详情</span></td></tr>
+            <tr><td class="rank-2">🥈 2</td><td>省文化馆</td><td>38</td><td><strong>3,650</strong></td><td>96.1</td><td>85%</td><td><span style="color:#4A6CF7;cursor:pointer">详情</span></td></tr>
+            <tr><td class="rank-3">🥉 3</td><td>区图书馆</td><td>32</td><td><strong>2,980</strong></td><td>93.1</td><td>82%</td><td><span style="color:#4A6CF7;cursor:pointer">详情</span></td></tr>
+            <tr><td>4</td><td>大学图书馆</td><td>28</td><td><strong>2,560</strong></td><td>91.4</td><td>78%</td><td><span style="color:#4A6CF7;cursor:pointer">详情</span></td></tr>
+        </tbody></table>
+    </div>
+</section>
+
+<!-- ==================== LEADERBOARD ==================== -->
+<section id="leaderboard" class="page">
+    <div class="page-header"><h2>🏆 排行榜管理</h2><div class="breadcrumb">首页 / 运营 / 排行榜</div></div>
+    <div class="card">
+        <div class="tabs" id="lbTabs">
+            <div class="tab active" onclick="switchLbTab('lbTotal')">个人总榜</div>
+            <div class="tab" onclick="switchLbTab('lbDaily')">每日榜</div>
+            <div class="tab" onclick="switchLbTab('lbStreak')">连续参与榜</div>
+            <div class="tab" onclick="switchLbTab('lbUnitScore')">单位总分榜</div>
+            <div class="tab" onclick="switchLbTab('lbUnitPart')">单位参与榜</div>
+            <div class="tab" onclick="switchLbTab('lbUnitAvg')">单位平均分榜</div>
+        </div>
+        <div id="lbTotal" class="tab-pane active">
+            <div class="info-box blue">排序规则：累计总积分 > 有效参与天数 > 累计用时 > 最早达成时间</div>
+            <table class="data-table"><thead><tr><th>排名</th><th>姓名</th><th>手机号</th><th>选送单位</th><th>累计总积分</th><th>有效参与天数</th><th>累计用时</th><th>最早达成</th></tr></thead>
+            <tbody><tr><td class="rank-1">🥇 1</td><td>张三</td><td>138****1234</td><td>市图书馆</td><td><strong>980</strong></td><td>15</td><td>45min</td><td>2026-05-10</td></tr>
+            <tr><td class="rank-2">🥈 2</td><td>李四</td><td>139****5678</td><td>省文化馆</td><td><strong>950</strong></td><td>14</td><td>50min</td><td>2026-05-11</td></tr>
+            <tr><td class="rank-3">🥉 3</td><td>王五</td><td>136****9012</td><td>区图书馆</td><td><strong>920</strong></td><td>13</td><td>55min</td><td>2026-05-12</td></tr></tbody></table>
+        </div>
+        <div id="lbDaily" class="tab-pane">
+            <div class="info-box blue">排序规则：当日得分 > 用时 > 提交时间</div>
+            <div class="filter-bar"><input type="date" value="2026-06-09"><button class="btn btn-primary">查询</button></div>
+            <table class="data-table"><thead><tr><th>排名</th><th>姓名</th><th>手机号</th><th>选送单位</th><th>当日得分</th><th>用时</th><th>提交时间</th></tr></thead>
+            <tbody><tr><td class="rank-1">🥇 1</td><td>张三</td><td>138****1234</td><td>市图书馆</td><td><strong>100</strong></td><td>8min</td><td>09:15</td></tr></tbody></table>
+        </div>
+        <div id="lbStreak" class="tab-pane">
+            <div class="info-box blue">排序规则：连续参与天数越多越靠前</div>
+            <table class="data-table"><thead><tr><th>排名</th><th>姓名</th><th>手机号</th><th>选送单位</th><th>连续参与天数</th><th>累计总积分</th></tr></thead>
+            <tbody><tr><td class="rank-1">🥇 1</td><td>张三</td><td>138****1234</td><td>市图书馆</td><td><strong>15天</strong></td><td>980</td></tr></tbody></table>
+        </div>
+        <div id="lbUnitScore" class="tab-pane">
+            <div class="info-box blue">排序规则：单位总积分 > 有效参与人数 > 单位平均分 > 单位完成率</div>
+            <table class="data-table"><thead><tr><th>排名</th><th>单位名称</th><th>有效参与人数</th><th>单位总积分</th><th>单位平均分</th><th>单位完成率</th></tr></thead>
+            <tbody><tr><td class="rank-1">🥇 1</td><td>市图书馆</td><td>45</td><td><strong>4,280</strong></td><td>95.1</td><td>89%</td></tr></tbody></table>
+        </div>
+        <div id="lbUnitPart" class="tab-pane">
+            <div class="info-box blue">排序规则：有效参与人数越多越靠前</div>
+            <table class="data-table"><thead><tr><th>排名</th><th>单位名称</th><th>有效参与人数</th><th>总报名人数</th><th>参与率</th></tr></thead>
+            <tbody><tr><td class="rank-1">🥇 1</td><td>市图书馆</td><td><strong>45</strong></td><td>52</td><td>86.5%</td></tr></tbody></table>
+        </div>
+        <div id="lbUnitAvg" class="tab-pane">
+            <div class="info-box blue">单位平均分 = 单位内有效参与用户的个人有效成绩之和 ÷ 单位内有效参与用户数（最低参与人数门槛：5人）</div>
+            <table class="data-table"><thead><tr><th>排名</th><th>单位名称</th><th>有效参与人数</th><th>成绩总和</th><th>单位平均分</th></tr></thead>
+            <tbody><tr><td class="rank-1">🥇 1</td><td>省文化馆</td><td>38</td><td>3,650</td><td><strong>96.1</strong></td></tr></tbody></table>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== CERTIFICATES ==================== -->
+<section id="certificates" class="page">
+    <div class="page-header"><h2>🎓 证书管理</h2><div class="breadcrumb">首页 / 运营 / 证书管理</div></div>
+    <div class="card">
+        <div class="filter-bar">
+            <input placeholder="姓名"><input placeholder="手机号"><select><option>全部发放状态</option><option>已发放</option><option>待发放</option><option>发放失败</option></select>
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+            <button class="btn btn-success" style="margin-left:auto">批量发放</button>
+        </div>
+        <table class="data-table"><thead><tr><th>序号</th><th>姓名</th><th>手机号</th><th>活动名称</th><th>证书类型</th><th>发证对象</th><th>发放状态</th><th>发放时间</th><th>操作</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>张三</td><td>138****1234</td><td>全民阅读知识竞赛</td><td>荣誉证书</td><td>排名前3</td><td><span class="badge badge-green">已发放</span></td><td>2026-05-10</td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">查看</span><span style="color:#4A6CF7;cursor:pointer">下载</span></td></tr>
+            <tr><td>2</td><td>李四</td><td>139****5678</td><td>全民阅读知识竞赛</td><td>参与证书</td><td>达标用户</td><td><span class="badge badge-yellow">待发放</span></td><td>-</td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">发放</span></td></tr>
+        </tbody></table>
+    </div>
+</section>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Create Bank Modal -->
+<div class="modal-overlay" id="createBankModal">
+    <div class="modal" style="max-width:480px">
+        <div class="modal-head"><h3>创建题库</h3><button class="modal-close" onclick="hideModal('createBankModal')">&times;</button></div>
+        <div class="modal-body">
+            <div class="form-group"><label><span class="req">*</span>题库名称</label><input class="form-control" placeholder="请输入题库名称"></div>
+            <div class="form-group"><label>题库说明</label><textarea class="form-control" rows="3" placeholder="请输入题库说明"></textarea></div>
+            <div class="form-group"><label>状态</label><div class="radio-group"><div class="radio-item"><input type="radio" name="bankStatus" checked><label>启用</label></div><div class="radio-item"><input type="radio" name="bankStatus"><label>停用</label></div></div></div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-primary" onclick="hideModal('createBankModal')">确定</button><button class="btn btn-ghost" onclick="hideModal('createBankModal')">取消</button></div>
+    </div>
+</div>
+
+<!-- Question Management Modal -->
+<div class="modal-overlay" id="questionMgmtModal">
+    <div class="modal" style="max-width:900px">
+        <div class="modal-head"><h3>管理题目 - 图书馆知识题库</h3><button class="modal-close" onclick="hideModal('questionMgmtModal')">&times;</button></div>
+        <div class="modal-body">
+            <div class="filter-bar">
+                <input placeholder="题目内容"><select><option>全部题型</option><option>单选</option><option>多选</option><option>判断</option><option>填空</option></select><select><option>全部难度</option><option>简单</option><option>中等</option><option>困难</option></select><select><option>全部状态</option><option>启用</option><option>停用</option></select>
+                <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+                <button class="btn btn-success" onclick="showModal('addQuestionModal')">+ 添加题目</button>
+                <button class="btn btn-outline">批量导入</button>
+                <button class="btn btn-outline">批量导出</button>
+                <button class="btn btn-danger">批量删除</button>
+            </div>
+            <table class="data-table"><thead><tr><th><input type="checkbox"></th><th>序号</th><th>题目内容</th><th>题型</th><th>难度</th><th>创建时间</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+                <tr><td><input type="checkbox"></td><td>1</td><td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">《四库全书》是哪个皇帝下令编纂的？</td><td><span class="badge badge-blue">单选</span></td><td><span class="badge badge-green">简单</span></td><td>2026-05-01</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('addQuestionModal')">编辑</span><span style="color:#4A6CF7;cursor:pointer">预览</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+                <tr><td><input type="checkbox"></td><td>2</td><td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">以下哪些属于中国四大发明？</td><td><span class="badge badge-yellow">多选</span></td><td><span class="badge badge-yellow">中等</span></td><td>2026-05-01</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('addQuestionModal')">编辑</span><span style="color:#4A6CF7;cursor:pointer">预览</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+                <tr><td><input type="checkbox"></td><td>3</td><td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">《红楼梦》的作者是曹雪芹。</td><td><span class="badge badge-green">判断</span></td><td><span class="badge badge-green">简单</span></td><td>2026-05-02</td><td><span class="badge badge-green">启用</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer" onclick="showModal('addQuestionModal')">编辑</span><span style="color:#4A6CF7;cursor:pointer">预览</span><span style="color:#EF4444;cursor:pointer">删除</span></td></tr>
+            </tbody></table>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="hideModal('questionMgmtModal')">关闭</button></div>
+    </div>
+</div>
+
+<!-- Add Question Modal -->
+<div class="modal-overlay" id="addQuestionModal">
+    <div class="modal" style="max-width:640px">
+        <div class="modal-head"><h3>添加题目</h3><button class="modal-close" onclick="hideModal('addQuestionModal')">&times;</button></div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group"><label><span class="req">*</span>题型</label><select class="form-control"><option>单选题</option><option>多选题</option><option>判断题</option><option>填空题</option></select></div>
+                <div class="form-group"><label>题目分类</label><select class="form-control"><option>文学</option><option>历史</option><option>非遗</option><option>图书馆知识</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>难度</label><select class="form-control"><option>简单</option><option>中等</option><option>困难</option></select></div>
+                <div class="form-group"><label>状态</label><div class="radio-group"><div class="radio-item"><input type="radio" name="qStatus" checked><label>启用</label></div><div class="radio-item"><input type="radio" name="qStatus"><label>停用</label></div></div></div>
+            </div>
+            <div class="form-group"><label><span class="req">*</span>题目内容</label><textarea class="form-control" rows="3" placeholder="请输入题目内容（最多5000字）"></textarea></div>
+            <div class="form-group"><label>题目图片</label><div class="upload-zone" style="padding:12px"><p>📎 上传题目配图（可选）</p></div></div>
+            <div class="form-group"><label>选项</label>
+                <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center"><span style="width:24px;font-weight:600;color:#4A6CF7">A</span><input class="form-control" placeholder="选项A内容"><input type="radio" name="answer" style="margin-left:4px"><span style="font-size:12px;color:#94A3B8">正确</span></div>
+                <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center"><span style="width:24px;font-weight:600;color:#4A6CF7">B</span><input class="form-control" placeholder="选项B内容"><input type="radio" name="answer" style="margin-left:4px"><span style="font-size:12px;color:#94A3B8">正确</span></div>
+                <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center"><span style="width:24px;font-weight:600;color:#4A6CF7">C</span><input class="form-control" placeholder="选项C内容"><input type="radio" name="answer" style="margin-left:4px"><span style="font-size:12px;color:#94A3B8">正确</span></div>
+                <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center"><span style="width:24px;font-weight:600;color:#4A6CF7">D</span><input class="form-control" placeholder="选项D内容"><input type="radio" name="answer" style="margin-left:4px"><span style="font-size:12px;color:#94A3B8">正确</span></div>
+                <button class="btn btn-outline" style="font-size:12px">+ 添加选项</button>
+            </div>
+            <div class="form-group"><label>答案解析</label><textarea class="form-control" rows="2" placeholder="请输入答案解析（最多2000字）"></textarea></div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-primary" onclick="hideModal('addQuestionModal')">保存</button><button class="btn btn-ghost" onclick="hideModal('addQuestionModal')">取消</button></div>
+    </div>
+</div>
+
+<!-- Create Paper Modal -->
+<div class="modal-overlay" id="createPaperModal">
+    <div class="modal" style="max-width:780px">
+        <div class="modal-head"><h3>创建试卷 / 题组</h3><button class="modal-close" onclick="hideModal('createPaperModal')">&times;</button></div>
+        <div class="modal-body">
+            <div class="info-box blue">💡 请选择组卷模式。考试模式使用「试卷」，闯关模式使用「题组」。</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+                <div style="border:2px solid #4A6CF7;border-radius:8px;padding:16px;cursor:pointer;text-align:center;background:#F8FAFF">
+                    <div style="font-weight:600;color:#4A6CF7;margin-bottom:4px">固定题目</div>
+                    <div style="font-size:12px;color:#64748B">人工指定题目组成试卷</div>
+                </div>
+                <div style="border:2px solid #E2E8F0;border-radius:8px;padding:16px;cursor:pointer;text-align:center">
+                    <div style="font-weight:600;color:#475569;margin-bottom:4px">随机抽题</div>
+                    <div style="font-size:12px;color:#64748B">按规则从题库随机抽题</div>
+                </div>
+                <div style="border:2px solid #E2E8F0;border-radius:8px;padding:16px;cursor:pointer;text-align:center">
+                    <div style="font-weight:600;color:#475569;margin-bottom:4px">闯关固定题组</div>
+                    <div style="font-size:12px;color:#64748B">闯关模式人工指定题目</div>
+                </div>
+                <div style="border:2px solid #E2E8F0;border-radius:8px;padding:16px;cursor:pointer;text-align:center">
+                    <div style="font-weight:600;color:#475569;margin-bottom:4px">闯关随机题组</div>
+                    <div style="font-size:12px;color:#64748B">闯关模式按规则抽题</div>
+                </div>
+            </div>
+            <div class="form-group"><label><span class="req">*</span>试卷名称</label><input class="form-control" placeholder="请输入试卷名称"></div>
+            <div class="form-row">
+                <div class="form-group"><label>试卷说明</label><input class="form-control" placeholder="选填"></div>
+                <div class="form-group"><label><span class="req">*</span>及格分数</label><input type="number" class="form-control" value="60"></div>
+            </div>
+            <div class="form-group"><label>大题列表</label>
+                <div class="section-card">
+                    <div class="sec-head"><div><span class="drag-handle">⋮⋮</span><span class="sec-title">一、单选题（5题/50分）</span></div><div><span style="color:#4A6CF7;cursor:pointer;font-size:12px">添加题目</span><span style="color:#4A6CF7;cursor:pointer;font-size:12px;margin-left:8px">编辑</span><span style="color:#EF4444;cursor:pointer;font-size:12px;margin-left:8px">删除</span></div></div>
+                    <div class="q-item"><span class="drag-handle">⋮⋮</span><span class="q-num">1</span><span class="q-content">《四库全书》是哪个皇帝下令编纂的？</span><span class="q-type"><span class="badge badge-blue">单选</span></span><span class="q-score">10分</span><div class="q-actions"><span style="color:#EF4444;cursor:pointer;font-size:12px">移除</span></div></div>
+                    <div class="q-item"><span class="drag-handle">⋮⋮</span><span class="q-num">2</span><span class="q-content">世界上现存最早的有确切日期的雕版印刷品是？</span><span class="q-type"><span class="badge badge-blue">单选</span></span><span class="q-score">10分</span><div class="q-actions"><span style="color:#EF4444;cursor:pointer;font-size:12px">移除</span></div></div>
+                </div>
+                <button class="btn btn-outline" style="font-size:12px">+ 添加大题</button>
+            </div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-primary" onclick="hideModal('createPaperModal')">保存</button><button class="btn btn-ghost" onclick="hideModal('createPaperModal')">取消</button></div>
+    </div>
+</div>
+
+<!-- Exam Record Detail Modal -->
+<div class="modal-overlay" id="examRecordModal">
+    <div class="modal" style="max-width:640px">
+        <div class="modal-head"><h3>考试记录 - 张三</h3><button class="modal-close" onclick="hideModal('examRecordModal')">&times;</button></div>
+        <div class="modal-body">
+            <table class="data-table"><thead><tr><th>考试名称</th><th>得分</th><th>总分</th><th>及格分</th><th>状态</th><th>是否及格</th><th>开始时间</th><th>交卷时间</th></tr></thead>
+            <tbody>
+                <tr><td>图书馆知识竞赛试卷</td><td><strong>92</strong></td><td>100</td><td>60</td><td><span class="badge badge-green">已交卷</span></td><td><span class="badge badge-green">及格</span></td><td>09:00</td><td>10:52</td></tr>
+                <tr><td>历史文化知识测试</td><td><strong>78</strong></td><td>100</td><td>60</td><td><span class="badge badge-green">已交卷</span></td><td><span class="badge badge-green">及格</span></td><td>14:00</td><td>15:30</td></tr>
+            </tbody></table>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="hideModal('examRecordModal')">关闭</button></div>
+    </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// Page navigation
+function goPage(pageId, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    if (el) el.classList.add('active');
+}
+
+// Step wizard
+function goStep(n) {
+    document.querySelectorAll('.step-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.step-item').forEach((s, i) => {
+        s.classList.remove('active', 'done');
+        if (i < n - 1) {
+            s.classList.add('done');
+            s.querySelector('.step-num').innerHTML = '&#10003;';
+        } else {
+            s.querySelector('.step-num').textContent = i + 1;
+        }
+        if (i === n - 1) s.classList.add('active');
+    });
+    document.querySelectorAll('.step-line').forEach((l, i) => {
+        l.classList.toggle('done', i < n - 1);
+    });
+    document.getElementById('step' + n).classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// Mode tabs (exam vs challenge)
+function switchModeTab(id) {
+    const parent = document.getElementById('modeTabs');
+    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    document.getElementById('examConfig').classList.remove('active');
+    document.getElementById('challengeConfig').classList.remove('active');
+    document.getElementById(id).classList.add('active');
+}
+
+// Question setting tabs
+function switchQTab(id) {
+    const parent = document.getElementById('qSettingTabs');
+    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    document.getElementById('randomRule').classList.remove('active');
+    document.getElementById('dailyPlan').classList.remove('active');
+    document.getElementById(id).classList.add('active');
+}
+
+// Leaderboard tabs
+function switchLbTab(id) {
+    const parent = document.getElementById('lbTabs');
+    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    parent.parentElement.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+// Modal show/hide
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
+});
+</script>
+</body>
+</html>
