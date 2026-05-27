@@ -10,7 +10,7 @@ registerPage('activity-list', () => {
         <div class="form-row-4" style="margin-bottom:var(--spacing-md)">
             <div class="form-group"><label>活动名称</label><input class="form-control" placeholder="请输入活动名称"></div>
             <div class="form-group"><label>活动工具</label><select class="form-control"><option>全部工具</option><option>知识问答</option><option>任务打卡</option><option>征集类</option></select></div>
-            <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>考试模式</option><option>每日答题</option><option>答题闯关</option></select></div>
+            <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>在线考试</option><option>每日答题</option><option>趣味闯关</option></select></div>
             <div class="form-group"><label>活动状态</label><select class="form-control"><option>全部状态</option><option>未发布</option><option>预告中</option><option>进行中</option><option>已结束</option><option>已下架</option></select></div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:var(--spacing-sm)">
@@ -26,8 +26,9 @@ registerPage('activity-list', () => {
 
     <!-- Activity Cards -->
     <div style="display:flex;flex-direction:column;gap:var(--spacing-xs)">
-        ${activityCard({title:'获奖名单+文末福利|『锦绣华服·智传千年』华服...',status:'未发布',statusCls:'badge-status-unpublished',tool:'知识问答',toolCls:'badge-quiz',grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
-        ${activityCard({title:'【第十六届"华政杯"全国法律翻译大赛】打卡赛...',status:'预告中',statusCls:'badge-status-upcoming',tool:'任务打卡',toolCls:'badge-green',grad:'linear-gradient(135deg,var(--warning),var(--warning-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:false})}
+        ${activityCard({title:'阅读成长知识竞赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'知识问答',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
+        ${activityCard({title:'华服知识测评',status:'进行中',statusCls:'badge-status-ongoing',tool:'知识问答',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
+        ${activityCard({title:'法律翻译知识初赛',status:'已结束',statusCls:'badge-status-ended',tool:'知识问答',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--warning),var(--warning-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:false})}
         ${activityCard({title:'舍不得的丽江——丽江礼物"文创大赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'任务打卡',toolCls:'badge-green',grad:'linear-gradient(135deg,var(--success),var(--success-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true})}
         ${activityCard({title:'【第十六届"华政杯"全国法律翻译大赛】打卡赛...',status:'已结束',statusCls:'badge-status-ended',tool:'任务打卡',toolCls:'badge-green',grad:'linear-gradient(135deg,var(--text-tertiary),var(--text-quaternary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,series:true})}
         ${activityCard({title:'知识问答+文末福利|『锦绣华服·智传千年』华服...',status:'已下架',statusCls:'badge-status-offline',tool:'知识问答',toolCls:'badge-quiz',grad:'linear-gradient(135deg,var(--danger),var(--danger-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true})}
@@ -84,6 +85,7 @@ function activityCard(c) {
             </div>
             <div style="display:flex;align-items:center;gap:var(--spacing-sm);margin-bottom:var(--spacing-xs)">
                 <span class="badge ${c.toolCls}">${c.tool}</span>
+                ${renderScorePublishProgressBadge(c.scorePublishProgress)}
             </div>
             <div style="display:flex;align-items:center;gap:var(--spacing-lg);font-size:var(--font-size-xs);color:var(--text-tertiary);flex-wrap:wrap">
                 <span>🕐 ${c.time}</span>
@@ -97,6 +99,7 @@ function activityCard(c) {
             <div class="top-nav-icon" title="二维码">📱</div>
         </div>
         <div style="display:flex;align-items:center;gap:var(--spacing-xxs);flex-shrink:0;border-left:1px solid var(--border-color-light);padding-left:var(--spacing-md);${c.series ? 'margin-top:8px' : ''}">
+            ${renderQuizPublishScoreButton(c.scorePublishProgress, c)}
             ${c.canManage
                 ? `<button class="btn btn-primary btn-sm" onclick="${c.manageType === 'quiz' ? `enterQuizActivityManage('${escHtml(c.title)}', '${escHtml(c.time)}')` : `navigateTo('activity-manage')`}">进入管理</button>
                    <button class="btn btn-outline btn-sm" onclick="${c.manageType === 'quiz' ? `navigateTo('quiz-activity-create', { params: { mode: 'edit' } })` : `navigateTo('activity-create')`}">编辑活动</button>`
@@ -127,7 +130,7 @@ function renderQuizActivityList() {
     <div class="card" style="padding:var(--spacing-lg) var(--spacing-xl);margin-bottom:var(--spacing-lg)">
         <div class="form-row-4" style="margin-bottom:var(--spacing-md)">
             <div class="form-group"><label>活动名称</label><input class="form-control" placeholder="请输入活动名称"></div>
-            <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>考试模式</option><option>每日答题</option><option>答题闯关</option></select></div>
+            <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>在线考试</option><option>每日答题</option><option>趣味闯关</option></select></div>
             <div class="form-group"><label>活动状态</label><select class="form-control"><option>全部状态</option><option>未发布</option><option>预告中</option><option>进行中</option><option>已结束</option><option>已下架</option></select></div>
             <div style="display:flex;align-items:flex-end;gap:var(--spacing-sm);justify-content:flex-end">
                 <button class="btn btn-primary">🔍 搜索</button>
@@ -151,7 +154,8 @@ function renderQuizActivityList() {
         ${quizCard({
             title: '阅启新篇·读享时光 —— 阅途成长共读计划',
             status: '进行中', statusCls: 'badge-status-ongoing',
-            mode: '考试模式',
+            mode: '在线考试',
+            scorePublishProgress: { published: 3, total: 5, reviewing: 1, pending: 1 },
             time: '2026-03-06 09:00 至 2026-03-26 23:59',
             host: '上海市图书馆',
             creator: '林月  2026-03-01 10:30',
@@ -162,6 +166,7 @@ function renderQuizActivityList() {
             title: '第十六届"华政杯"全国法律翻译大赛 · 知识初赛',
             status: '预告中', statusCls: 'badge-status-upcoming',
             mode: '每日答题',
+            scorePublishProgress: { published: 3, total: 5, reviewing: 1, pending: 1 },
             time: '2026-04-01 09:00 至 2026-04-15 22:00',
             host: '华东政法大学图书馆',
             creator: '周贺贺  2026-03-10 14:00',
@@ -171,7 +176,8 @@ function renderQuizActivityList() {
         ${quizCard({
             title: '红色经典诵读 · 党史知识闯关赛',
             status: '进行中', statusCls: 'badge-status-ongoing',
-            mode: '答题闯关',
+            mode: '知识问答',
+            scorePublishProgress: { published: 3, total: 5, reviewing: 1, pending: 1 },
             time: '2026-02-20 09:00 至 2026-05-01 23:59',
             host: '复旦大学图书馆',
             creator: '王默  2026-02-15 16:20',
@@ -181,7 +187,7 @@ function renderQuizActivityList() {
         ${quizCard({
             title: '2026 春季全民读书月 · 图书馆知识测评',
             status: '已结束', statusCls: 'badge-status-ended',
-            mode: '考试模式',
+            mode: '在线考试',
             time: '2026-01-10 09:00 至 2026-02-10 23:59',
             host: '上海图书馆',
             creator: '林月  2026-01-05 11:00',
@@ -191,7 +197,7 @@ function renderQuizActivityList() {
         ${quizCard({
             title: '新员工入职 · 图书馆业务知识考核',
             status: '未发布', statusCls: 'badge-status-unpublished',
-            mode: '考试模式',
+            mode: '在线考试',
             time: '— 待发布',
             host: '上海市图书馆',
             creator: '孙七  2026-03-18 09:40',
@@ -229,6 +235,7 @@ function quizCard(c) {
             </div>
             <div class="quiz-list-tags">
                 <span class="badge badge-mode">${c.mode}</span>
+                ${renderScorePublishProgressBadge(c.scorePublishProgress)}
             </div>
             <div class="quiz-list-meta">
                 <span>活动时间：${c.time}</span>
@@ -239,11 +246,46 @@ function quizCard(c) {
             </div>
         </div>
         <div class="quiz-list-actions">
-            <button class="btn btn-ghost btn-sm">活动页面</button>
+            ${renderQuizPublishScoreButton(c.scorePublishProgress, c)}
             ${primaryAction}
             ${secondaryAction}
         </div>
     </div>`;
+}
+
+function renderScorePublishProgressBadge(progress) {
+    if (!progress || !progress.total) return '';
+    const published = Number(progress.published || 0);
+    const total = Number(progress.total || 0);
+    const reviewing = Number(progress.reviewing || 0);
+    const pending = Number(progress.pending || 0);
+    const tooltip = `待发布：${pending}&#10;已发布：${published}`;
+    return `
+      <span class="score-publish-progress-badge tooltip" data-tooltip="${tooltip}">
+        <strong>成绩发布</strong>
+        <em>${published}/${total}</em>
+      </span>`;
+}
+
+function renderQuizPublishScoreButton(progress, activity = {}) {
+    if (!progress || !progress.total) return '';
+    const enabled = Number(progress.pending || 0) > 0;
+    const tooltip = `待发布：${Number(progress?.pending || 0)}&#10;已发布：${Number(progress?.published || 0)}`;
+    const activityName = escHtml(activity.title || currentManageActivity.name);
+    const activityTime = escHtml(activity.time || currentManageActivity.time);
+    const activityStatus = escHtml(activity.status || '进行中');
+    return `
+      <span class="quiz-publish-score-tooltip tooltip" data-tooltip="${tooltip}">
+        <button class="btn btn-outline btn-sm ${enabled ? 'quiz-publish-score-btn' : 'quiz-publish-score-btn is-disabled'}" ${enabled ? `onclick="enterQuizPublishScorePage('${activityName}', '${activityTime}', '${activityStatus}')"` : 'disabled'}>去发布成绩</button>
+      </span>`;
+}
+
+function enterQuizPublishScorePage(activityName, activityTime, activityStatus) {
+    currentManageActivity.name = activityName;
+    currentManageActivity.type = '知识问答';
+    currentManageActivity.status = activityStatus || '进行中';
+    currentManageActivity.time = activityTime;
+    navigateTo('paper-review');
 }
 
 // ===== ACTIVITY CREATE (5-step wizard with quiz config integrated) =====
@@ -324,8 +366,8 @@ function renderStep1() {
             <div class="form-row">
                 <div class="form-group"><label><span class="req">*</span> 活动模式</label>
                     <div class="radio-group">
-                        <div class="radio-item"><input type="radio" name="actMode" checked onchange="activityMode='exam'"><label>考试模式</label></div>
-                        <div class="radio-item"><input type="radio" name="actMode" onchange="activityMode='challenge'"><label>每日答题闯关</label></div>
+                        <div class="radio-item"><input type="radio" name="actMode" checked onchange="activityMode='exam'"><label>在线考试</label></div>
+                        <div class="radio-item"><input type="radio" name="actMode" onchange="activityMode='challenge'"><label>每日趣味闯关</label></div>
                         <div class="radio-item"><input type="radio" name="actMode" onchange="activityMode='level'"><label>闯关模式</label></div>
                     </div>
                     <p class="hint">发布后不可修改</p>
@@ -395,7 +437,7 @@ function addRandomDrawRule() {
     <div><label>题型</label><select>${standardAnswerQuestionTypeOptions()}</select></div>
     <div><label>抽取数量</label><input type="number" value="10" min="1"></div>
     <div><label>每题分值</label><input type="number" value="10" min="1"></div>
-    <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDrawRuleRow(this)" title="删除本条规则" aria-label="删除本条规则"><span aria-hidden="true">🗑</span></button></div>
+    <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDrawRuleRow(this)" title="删除本条规则" aria-label="删除本条规则"><span class="trash-icon" aria-hidden="true"></span></button></div>
   `;
   container.appendChild(newRow);
   updateDrawRuleDeleteButtons(container);
@@ -472,12 +514,12 @@ function renderStep4() {
             <div class="mode-selector" style="grid-template-columns:1fr 1fr 1fr">
                 <div class="mode-card${activityMode === 'exam' ? ' selected' : ''}" onclick="activityMode='exam';goStep(4)">
                     <div class="mode-tag">考试</div><div class="mode-icon">📝</div>
-                    <div class="mode-title">考试模式</div>
-                    <div class="mode-desc">面向考试模式、测评、竞赛场景。从试卷库选择试卷。</div>
+                    <div class="mode-title">在线考试</div>
+                    <div class="mode-desc">面向在线考试、测评、竞赛场景。从试卷库选择试卷。</div>
                 </div>
                 <div class="mode-card${activityMode === 'challenge' ? ' selected' : ''}" onclick="activityMode='challenge';goStep(4)">
                     <div class="mode-tag">每日</div><div class="mode-icon">🎯</div>
-                    <div class="mode-title">每日答题闯关模式</div>
+                    <div class="mode-title">每日趣味闯关模式</div>
                     <div class="mode-desc">面向连续参与、每日学习、积分排行场景。使用抽题规则。</div>
                 </div>
                 <div class="mode-card${activityMode === 'level' ? ' selected' : ''}" onclick="activityMode='level';goStep(4)">
@@ -505,7 +547,7 @@ function renderStep4() {
     </div>`;
 }
 
-// ===== 考试模式 Config — Mind Map Aligned =====
+// ===== 在线考试 Config — Mind Map Aligned =====
 function renderExamConfig() {
     return `
     <!-- 1. 答题时间 -->
@@ -583,7 +625,7 @@ function renderExamConfig() {
             <div class="cfg-row">
                 <div class="cfg-row-label"><span class="req">*</span> 选择试卷 <span class="help-tip" title="选择试卷作为考试题目来源，支持固定题目和随机抽题">?</span></div>
                 <div class="cfg-row-control">
-                    <div class="info-box blue" style="margin-bottom:12px">💡 考试模式使用<strong>试卷</strong>作为题目来源。请先在「试卷管理」中创建试卷（支持固定题目和随机抽题），然后在此选择试卷。<strong>抽题规则</strong>在创建随机抽题时配置，不属于活动配置。</div>
+                    <div class="info-box blue" style="margin-bottom:12px">💡 在线考试使用<strong>试卷</strong>作为题目来源。请先在「试卷管理」中创建试卷（支持固定题目和随机抽题），然后在此选择试卷。<strong>抽题规则</strong>在创建随机抽题时配置，不属于活动配置。</div>
                     <div class="paper-select-card selected" onclick="this.parentElement.querySelectorAll('.paper-select-card').forEach(c=>c.classList.remove('selected'));this.classList.add('selected')">
                         <div class="paper-radio"></div>
                         <div style="flex:1">
@@ -714,20 +756,20 @@ function renderExamConfig() {
     </div>`;
 }
 
-// ===== 每日答题闯关模式 Config — Mind Map Aligned =====
+// ===== 每日趣味闯关模式 Config — Mind Map Aligned =====
 function renderChallengeConfig() {
     return `
     <!-- 1. 答题时间 -->
     <div class="cfg-panel" id="chPanel1">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('chPanel1')">
             <div class="cfg-panel-icon blue">⏱</div>
-            <div><div class="cfg-panel-title">答题时间</div><div class="cfg-panel-subtitle">设置答题开放时间、每日时段与每题限时</div></div>
+            <div><div class="cfg-panel-title">答题时间</div><div class="cfg-panel-subtitle">设置答题开放日期、每日时段与每题限时</div></div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
         </div>
         <div class="cfg-panel-body">
             <div class="cfg-row">
-                <div class="cfg-row-label"><span class="req">*</span> 答题开放时间 <span class="help-tip" title="设置活动整体开放时间范围">?</span></div>
+                <div class="cfg-row-label"><span class="req">*</span> 答题开放日期 <span class="help-tip" title="设置活动整体开放时间范围">?</span></div>
                 <div class="cfg-row-control">
                     <div style="display:flex;gap:8px;align-items:center">
                         <input type="datetime-local" class="form-control" value="2026-06-01T09:00">
@@ -808,7 +850,7 @@ function renderChallengeConfig() {
                                     <div><label>题型</label><select>${standardAnswerQuestionTypeOptions()}</select></div>
                                     <div><label>抽取数量</label><input type="number" value="10" min="1"></div>
                                     <div><label>每题分值</label><input type="number" value="10" min="1"></div>
-                                    <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDrawRuleRow(this)" title="删除本条规则" aria-label="删除本条规则" disabled><span aria-hidden="true">🗑</span></button></div>
+                                    <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDrawRuleRow(this)" title="删除本条规则" aria-label="删除本条规则" disabled><span class="trash-icon" aria-hidden="true"></span></button></div>
                                 </div>
                             </div>
                             <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addRandomDrawRule()">+ 添加规则</button>
@@ -1116,14 +1158,14 @@ function renderLevelModeConfig() {
                         <div><label>题型</label><select>${standardAnswerQuestionTypeOptions()}</select></div>
                         <div><label>抽取数量</label><input type="number" value="10" min="1"></div>
                         <div><label>每题分值</label><input type="number" value="10" min="1"></div>
-                        <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDrawRuleRow(this)" title="删除本条规则" aria-label="删除本条规则"><span aria-hidden="true">🗑</span></button></div>
+                        <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDrawRuleRow(this)" title="删除本条规则" aria-label="删除本条规则"><span class="trash-icon" aria-hidden="true"></span></button></div>
                     </div>
                     <div class="draw-rule">
                         <div><label>题库</label><select><option>历史文化题库</option><option>图书馆知识题库</option></select></div>
                         <div><label>题型</label><select>${standardAnswerQuestionTypeOptions('单选题')}</select></div>
                         <div><label>抽取数量</label><input type="number" value="5" min="1"></div>
                         <div><label>每题分值</label><input type="number" value="10" min="1"></div>
-                        <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDrawRuleRow(this)" title="删除本条规则" aria-label="删除本条规则"><span aria-hidden="true">🗑</span></button></div>
+                        <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDrawRuleRow(this)" title="删除本条规则" aria-label="删除本条规则"><span class="trash-icon" aria-hidden="true"></span></button></div>
                     </div>
                 </div>
                 <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addRandomDrawRule()">+ 添加规则</button>

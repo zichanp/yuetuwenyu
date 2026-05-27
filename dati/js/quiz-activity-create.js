@@ -9,7 +9,7 @@ let quizTotalScore = 100;
 let quizActivityName = '2026“文脉之光”中国国家版本馆文创设计大赛';
 let levelCurrentIdx = 0;
 let levelQuestionMode = 'random';   // 'random' | 'fixed'
-let quizNeedSignup = true;
+const quizNeedSignup = true;
 let quizSignupStart = '';
 let quizSignupEnd = '';
 
@@ -61,13 +61,15 @@ let quizOrgUnits = [
 
 // Exam config state (demo-level singleton shared across groups for prototype)
 let examFormat = 'phased-unified';
+let dailyExamAdded = false;
 let phasedCurrentIdx = 0;  // active phase in the left-list when examFormat === 'phased'
 let phasedDragIdx = -1;    // dragged phase index when reordering the left-list
+let phasedPaperDrawerTab = 'select'; // 'select' | 'create'
 let phasedConfig = {
     phases: [
         {
-            name: '第1期',
-            theme: '考试模式',
+            name: '第一场',
+            theme: '在线考试',
             subtitle: '',
             startDate: '2026-06-09',
             endDate: '2026-06-09',
@@ -82,6 +84,23 @@ let phasedConfig = {
             expanded: true
         }
     ],
+};
+let dailyExamCurrentIdx = 0;
+let dailyExamConfig = {
+    startDate: '2026-06-09',
+    endDate: '2026-06-15',
+    makeUpPolicy: 'void',
+    duration: 60,
+    dailyStart: '09:00',
+    dailyEnd: '18:00',
+    papers: [
+        {
+            date: '2026-06-09',
+            name: '第1天',
+            theme: '阅读常识',
+            configured: false
+        }
+    ]
 };
 let examConfig = {
     paperMode: 'fixed',  // 'fixed' (指定单套试卷) | 'userChoice' (用户自选试卷)
@@ -123,11 +142,13 @@ let examConfig = {
 let dailyScoreConfig = {
     maxDailyAttempts: 1,
     dailyScoreRule: 'highest',       // highest | last
-    qualifiedScore: 60
+    qualifiedScoreEnabled: true,
+    qualifiedScore: 60,
+    singleWrongTerminate: false
 };
 let dailyTimeConfig = {
-    startTime: '2026-06-09',
-    endTime: '2026-07-09',
+    startTime: '2026-06-09T06:00',
+    endTime: '2026-07-09T23:59',
     dailyStart: '06:00',
     dailyEnd: '23:59',
     timeLimitEnabled: false,
@@ -142,6 +163,12 @@ let dailyStreakReward = {
         { days: 7, points: 10 }
     ]
 };
+let dailyPointsConfig = {
+    share: { enabled: false, points: 5, maxDailyTimes: 1 },
+    answer: { enabled: true, points: 1 },
+    streak: { enabled: false, days: 7, points: 10 },
+    cumulative: { enabled: false, days: 30, points: 30 }
+};
 let dailyPlanCurrentIdx = 0;
 let dailyPlanConfig = {
     days: [
@@ -149,35 +176,22 @@ let dailyPlanConfig = {
             date: '2026-06-09',
             theme: '第一天：阅读常识',
             rules: [
-                { source: '我的题库', bank: '图书馆知识题库', type: '全部标准答案题', count: 10, score: 1 },
-                { source: '我的题库', bank: '历史文化题库', type: '单选题', count: 5, score: 2 }
+                { source: '我的题库', bank: '图书馆知识题库', type: '全部标准答案题', count: 10, timeLimitSeconds: 30, score: 1 },
+                { source: '我的题库', bank: '历史文化题库', type: '单选题', count: 5, timeLimitSeconds: 30, score: 2 }
             ]
         }
     ]
 };
 let dailyFixedCurrentIdx = 0;
+let dailyBatchRuleApplied = false;
+let dailyBatchDraftRules = [];
 let dailyFixedConfig = {
-    days: [
-        {
-            date: '2026-06-09',
-            theme: '第一天：阅读常识',
-            questions: [
-                { id: 'dfq-001', sourceId: 'pool-001', content: '《四库全书》是哪个皇帝下令编纂的？', type: '单选题', bank: '图书馆知识题库', score: 10 },
-                { id: 'dfq-002', sourceId: 'pool-002', content: '世界上现存最早的有确切日期的雕版印刷品是？', type: '单选题', bank: '图书馆知识题库', score: 10 },
-                { id: 'dfq-003', sourceId: 'pool-003', content: '以下哪些属于非物质文化遗产？', type: '多选题', bank: '历史文化题库', score: 10 },
-                { id: 'dfq-004', sourceId: 'pool-004', content: '《四库全书》是清代乾隆年间编纂的。', type: '判断题', bank: '历史文化题库', score: 10 },
-                { id: 'dfq-005', sourceId: 'pool-005', content: '中国最早的公共图书馆建于哪个城市？', type: '单选题', bank: '图书馆知识题库', score: 10 },
-                { id: 'dfq-006', sourceId: 'pool-006', content: 'ISBN是国际标准书号的简称。', type: '判断题', bank: '图书馆知识题库', score: 10 },
-                { id: 'dfq-007', sourceId: 'pool-007', content: '图书馆的四大基本职能包括？', type: '多选题', bank: '图书馆知识题库', score: 10 },
-                { id: 'dfq-008', sourceId: 'pool-008', content: '中国图书馆分类法简称____。', type: '填空题', bank: '图书馆知识题库', score: 10 },
-                { id: 'dfq-010', sourceId: 'pool-010', content: '请按图书借阅流程排序。', type: '排序题', bank: '图书馆知识题库', score: 20 }
-            ]
-        }
-    ]
+    days: []
 };
-let dailyRandomRules = [
-    { bank: '图书馆知识题库', type: '全部标准答案题', count: 50, score: 2 }
+let dailyBatchRuleTemplate = [
+    { bank: '图书馆知识题库', type: '全部标准答案题', count: 50, timeLimitSeconds: 30, score: 2 }
 ];
+let dailyRandomRules = [];
 
 const DAILY_FIXED_QUESTION_POOL = [
     { id: 'pool-001', content:'《四库全书》是哪个皇帝下令编纂的？', type:'单选题', bank:'图书馆知识题库', status:'启用' },
@@ -193,44 +207,44 @@ const DAILY_FIXED_QUESTION_POOL = [
     { id: 'pool-011', content:'已停用的旧版阅读规则题目', type:'单选题', bank:'图书馆知识题库', status:'停用' }
 ];
 
-// Level data (for 答题闯关 mode)
+// Level data (for 趣味闯关 mode)
 let levelConfig = {
-    startTime: '2026-06-09',
-    endTime: '2026-07-09',
+    startTime: '2026-06-09T06:00',
+    endTime: '2026-07-09T23:59',
     dailyStart: '09:00',
     dailyEnd: '18:00'
 };
 let levels = [
-    { name: '第一关 阅读常识', questions: 50, totalScore: 100, passScore: 60, configured: true, rules: [{ bank: '图书馆知识题库', type: '全部标准答案题', count: 50, score: 2 }], fixedQuestions: [] },
-    { name: '第二关 历史文化', questions: 50, totalScore: 150, passScore: 90, configured: true, rules: [{ bank: '历史文化题库', type: '全部标准答案题', count: 50, score: 3 }], fixedQuestions: [] },
-    { name: '第三关 非遗知识', questions: 0, totalScore: 0, passScore: 0, configured: false, rules: [], fixedQuestions: [] }
+    { name: '第一关 阅读常识', questions: 50, totalScore: 100, passScore: 60, passQuestions: 30, maxAttempts: 0, configured: true, rules: [{ bank: '图书馆知识题库', type: '全部标准答案题', count: 50, timeLimitSeconds: 30, score: 2 }], fixedQuestions: [] },
+    { name: '第二关 历史文化', questions: 50, totalScore: 150, passScore: 90, passQuestions: 30, maxAttempts: 0, configured: true, rules: [{ bank: '历史文化题库', type: '全部标准答案题', count: 50, timeLimitSeconds: 30, score: 3 }], fixedQuestions: [] },
+    { name: '第三关 非遗知识', questions: 0, totalScore: 0, passScore: 0, passQuestions: 0, maxAttempts: 0, configured: false, rules: [], fixedQuestions: [] }
 ];
 
 const QUIZ_MODES = [
     {
-        key: 'exam', icon: '📝', title: '考试模式',
+        key: 'exam', icon: '📝', title: '在线考试',
         decision: '一次性完成一场考试，提交后自动出成绩。',
         bestFor: '线上考试、知识竞赛、测评考试、统一考核',
-        defaultRules: ['提交试卷后自动展示成绩', '活动结束后展示答题解析', '需人工阅卷的活动，全部答卷完成阅卷后展示成绩', '支持固定题目或随机抽题', '支持多期主题考试模式'],
+        defaultRules: ['提交试卷后自动展示成绩', '活动结束后展示答题解析', '需人工阅卷的活动，全部答卷完成阅卷后展示成绩', '支持固定题目或随机抽题', '支持多期主题在线考试'],
         configure: ['考试形式与试卷', '答题时间'],
         color: 'var(--primary)', bgColor: 'var(--primary-light)',
-        scene: '考试模式、知识竞赛、线上测评'
+        scene: '在线考试、知识竞赛、线上测评'
     },
     {
         key: 'daily', icon: '🎯', title: '每日答题',
         decision: '每天开放一次答题，适合持续参与和累计统计。',
         bestFor: '每日一答、每日学习、连续答题、21 天知识问答',
         defaultRules: ['完成一次“每日答题”后自动展示成绩', '每题后展示解析：答完每题后展示正确答案和解析', '展示累计成绩：展示活动期间累计成绩', '支持从题库随机抽题', '参与次数大于 1 时可设置每日成绩取值'],
-        configure: ['答题开放时间', '题目来源', '参与次数与成绩', '默认答题规则'],
+        configure: ['答题开放日期', '题目来源', '每日答题规则', '默认答题规则'],
         color: 'var(--success)', bgColor: 'var(--success-light)',
         scene: '每日一答、每日练习、知识学习'
     },
     {
-        key: 'level', icon: '⚔️', title: '答题闯关',
-        decision: '按关卡逐步解锁，达到分数后进入下一关。',
+        key: 'level', icon: '⚔️', title: '趣味闯关',
+        decision: '按关卡逐步解锁，满足过关条件后进入下一关。',
         bestFor: '关卡挑战、分阶段学习、知识闯关、互动答题',
-        defaultRules: ['默认按达标分数判断通关', '关卡按顺序开放，无需配置开放日期', '每题后展示答案解析'],
-        configure: ['关卡列表', '每关题目来源', '达标分数', '每关最多挑战次数'],
+        defaultRules: ['默认按答对题数判断过关', '关卡按顺序开放，无需配置开放日期', '每题后展示答案解析'],
+        configure: ['关卡列表', '每关题目来源', '过关条件', '单关最多挑战次数'],
         color: 'var(--warning-600)', bgColor: 'var(--warning-light)',
         scene: '关卡挑战、分阶段学习、打卡式答题'
     }
@@ -315,9 +329,6 @@ function renderQuizStepContent(step) {
 }
 
 function renderQuizStepBasicInfo() {
-    const needSignup = !!quizNeedSignup;
-    const signupStartText = quizSignupStart ? quizSignupStart : '▦ 开始日期';
-    const signupEndText = quizSignupEnd ? quizSignupEnd : '结束日期';
     return `
     <section class="quiz-config-card">
         <div class="qc-form-row">
@@ -369,42 +380,134 @@ function renderQuizStepBasicInfo() {
     </section>
     <section class="quiz-config-card compact">
         <div class="qc-form-row">
-            <label>是否需要报名</label>
-            <div class="qc-radios">
-                <label><input type="radio" name="quizNeedSignup" ${needSignup ? 'checked' : ''} onchange="setQuizNeedSignup(true)"> 是</label>
-                <label><input type="radio" name="quizNeedSignup" ${!needSignup ? 'checked' : ''} onchange="setQuizNeedSignup(false)"> 否</label>
+            <label><span class="req">*</span>报名时间</label>
+            <div class="qc-date-range qc-date-range-picker">
+                <input type="datetime-local" value="${getDateTimeLocalValue(quizSignupStart)}" onchange="setQuizSignupTime('start', this.value)">
+                <strong>至</strong>
+                <input type="datetime-local" value="${getDateTimeLocalValue(quizSignupEnd)}" onchange="setQuizSignupTime('end', this.value)">
             </div>
         </div>
-        ${needSignup ? `
-        <div class="qc-form-row">
-            <label><span class="req">*</span>报名时间</label>
-            <div class="qc-date-range">
-                <span onclick="editQuizSignupTime()">${signupStartText}</span>
-                <strong>至</strong>
-                <span onclick="editQuizSignupTime()">${signupEndText}</span>
-            </div>
-        </div>` : ''}
     </section>
+    ${quizActivityMode === 'daily' ? renderDailyTimeBasicInfoCard() : ''}
+    ${quizActivityMode === 'daily' ? renderDailyScoreBasicInfoCard() : ''}
+    ${quizActivityMode === 'level' ? renderLevelTimeBasicInfoCard() : ''}
+    ${renderPracticeBasicInfoCard()}
     <section class="quiz-config-card org-card">
         ${renderQuizOrgUnits()}
     </section>`;
 }
 
-function setQuizNeedSignup(next) {
-    quizNeedSignup = !!next;
-    if (!quizNeedSignup) {
-        quizSignupStart = '';
-        quizSignupEnd = '';
-        // When signup is disabled, registration form config should not be required nor shown.
-        // Keep a consistent state by clearing form config flags.
-        (groups || []).forEach(g => {
-            g.formConfigured = false;
-            g.formFieldCount = 0;
-            g.formRealName = false;
-            g.updatedAt = nowStamp();
-        });
+function renderDailyTimeBasicInfoCard() {
+    return `
+    <section class="quiz-config-card compact">
+        <div class="qc-card-title-row">
+            <div class="cfg-panel-icon green">⏱</div>
+            <div>
+                <div class="qc-card-title">每日答题时间配置</div>
+                <div class="qc-card-subtitle">开放日期、每日时段</div>
+            </div>
+        </div>
+        ${renderDailyTimeFields({ context: 'main' })}
+    </section>`;
+}
+
+function renderDailyScoreBasicInfoCard() {
+    normalizeDailyScoreConfig();
+    return `
+    <section class="quiz-config-card compact">
+        <div class="qc-card-title-row">
+            <div class="cfg-panel-icon green">🔄</div>
+            <div>
+                <div class="qc-card-title">每日答题规则</div>
+                <div class="qc-card-subtitle">每日答题次数与过程规则</div>
+            </div>
+        </div>
+        ${renderDailyScoreConfigRows()}
+    </section>`;
+}
+
+function renderDailyScoreConfigRows() {
+    normalizeDailyScoreConfig();
+    const allowMultiDailyAttempts = Number(dailyScoreConfig.maxDailyAttempts) > 1;
+    return `
+        <div class="dev-rule-note">
+            <strong>研发规则</strong>
+            <span>后台统计默认同时展示“累计总分”和“达标天数”；管理员可按需开启达标分数。</span>
+        </div>
+        <div class="cfg-row" data-dev-rule="daily.maxDailyAttempts 控制本区块条件渲染：<=1 时隐藏 dailyScoreRule 和 averageDaily；>1 时展示。">
+            <div class="cfg-row-label"><span class="req">*</span> 每人每天最多答题次数</div>
+            <div class="cfg-row-control">
+                <div class="num-input"><input type="number" value="${dailyScoreConfig.maxDailyAttempts}" min="1" onchange="setDailyScoreField('maxDailyAttempts',this.value)"><span class="unit">次</span></div>
+                <div class="cfg-row-hint">0 表示不限。</div>
+            </div>
+        </div>
+        ${allowMultiDailyAttempts ? `
+        <div class="cfg-row" data-dev-rule="仅当 maxDailyAttempts > 1 时展示；否则当天成绩直接取唯一一次答题成绩。">
+            <div class="cfg-row-label">每日成绩取值</div>
+            <div class="cfg-row-control">
+                <div class="radio-pills">
+                    <div class="radio-pill ${dailyScoreConfig.dailyScoreRule==='highest'?'active':''}" onclick="setDailyScoreField('dailyScoreRule','highest')"><input type="radio" name="dailyScoreRule" ${dailyScoreConfig.dailyScoreRule==='highest'?'checked':''}>每日最高分</div>
+                    <div class="radio-pill ${dailyScoreConfig.dailyScoreRule==='last'?'active':''}" onclick="setDailyScoreField('dailyScoreRule','last')"><input type="radio" name="dailyScoreRule" ${dailyScoreConfig.dailyScoreRule==='last'?'checked':''}>最后一次成绩</div>
+                </div>
+                <div class="cfg-row-hint">同一天多次答题时，用该规则确定当天计入总成绩的分数。</div>
+            </div>
+        </div>
+        ` : ''}
+        <div class="cfg-row" data-dev-rule="开启后，用户答错任意 1 题即结束本次每日答题。">
+            <div class="cfg-row-label">单题错误终止</div>
+            <div class="cfg-row-control">
+                <div class="qc-radios practice-radio-options" role="radiogroup" aria-label="单题错误终止">
+                    <label>
+                        <input type="radio" name="dailySingleWrongTerminate" ${dailyScoreConfig.singleWrongTerminate ? 'checked' : ''} onchange="setDailyScoreField('singleWrongTerminate', true)">
+                        <span>是</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="dailySingleWrongTerminate" ${!dailyScoreConfig.singleWrongTerminate ? 'checked' : ''} onchange="setDailyScoreField('singleWrongTerminate', false)">
+                        <span>否</span>
+                    </label>
+                </div>
+                <div class="cfg-row-hint">开启后，答题过程中答错 1 题即终止当前答题。</div>
+            </div>
+        </div>`;
+}
+
+function renderDailyQualifiedScoreRow() {
+    normalizeDailyScoreConfig();
+    return `
+        <div class="cfg-row" data-dev-rule="开启后，后台按当天计入成绩 >= qualifiedScore 记为 1 个达标天数。">
+            <div class="cfg-row-label">达标分数</div>
+            <div class="cfg-row-control">
+                <div style="display:flex;gap:8px;align-items:center">
+                    <label class="switch" style="margin-right:8px"><input type="checkbox" ${dailyScoreConfig.qualifiedScoreEnabled ? 'checked' : ''} onchange="setDailyScoreField('qualifiedScoreEnabled',this.checked)"><span class="sw-slider"></span></label>
+                    ${dailyScoreConfig.qualifiedScoreEnabled ? `<div class="num-input"><input type="number" value="${dailyScoreConfig.qualifiedScore}" min="0" onchange="setDailyScoreField('qualifiedScore',this.value)"><span class="unit">分</span></div>` : ''}
+                </div>
+                <div class="cfg-row-hint">开启后，当天计入成绩达到该分数，即记为 1 个达标天数。</div>
+            </div>
+        </div>`;
+}
+
+function renderLevelTimeBasicInfoCard() {
+    return `
+    <section class="quiz-config-card compact">
+        <div class="qc-card-title-row">
+            <div class="cfg-panel-icon blue">⏱</div>
+            <div>
+                <div class="qc-card-title">趣味闯关时间配置</div>
+                <div class="qc-card-subtitle">开放日期、每日时段</div>
+            </div>
+        </div>
+        ${renderLevelTimeFields({ context: 'main' })}
+    </section>`;
+}
+
+function renderPracticeBasicInfoCard() {
+    if (quizActivityMode === 'daily') {
+        return renderActivityPracticeConfigPanel('daily', '是否开放刷题练习', '每日答题可同步提供题库刷题，练习成绩不影响每日答题累计总分和达标天数。', 'basic-info');
     }
-    quizGoStep(1);
+    if (quizActivityMode === 'level') {
+        return renderActivityPracticeConfigPanel('level', '是否开放刷题练习', '可为整个趣味闯关活动开放题库刷题，帮助用户在正式闯关前复习；练习成绩不影响通关判断和关卡成绩。', 'basic-info');
+    }
+    return '';
 }
 
 function setQuizActivityMode(mode) {
@@ -423,14 +526,10 @@ function setQuizActivityMode(mode) {
     quizGoStep(1);
 }
 
-function editQuizSignupTime() {
-    if (!quizNeedSignup) return;
-    const start = window.prompt('请输入报名开始时间（示例：2026-06-01 09:00）', quizSignupStart || '2026-06-01 09:00');
-    if (start === null) return;
-    const end = window.prompt('请输入报名结束时间（示例：2026-06-10 18:00）', quizSignupEnd || '2026-06-10 18:00');
-    if (end === null) return;
-    quizSignupStart = (start || '').trim();
-    quizSignupEnd = (end || '').trim();
+function setQuizSignupTime(which, value) {
+    const nextValue = formatDateTimeLocalForStorage(value);
+    if (which === 'start') quizSignupStart = nextValue;
+    else quizSignupEnd = nextValue;
     quizGoStep(1);
 }
 
@@ -516,37 +615,37 @@ function getCurrentQuizModeForAppearance() {
 function getLeaderboardRuleConfig(mode = getCurrentQuizModeForAppearance()) {
     const configs = {
         exam: {
-            modeTitle: '考试模式',
+            modeTitle: '在线考试',
             title: '得分排行榜',
-            modalTitle: '设置排行榜规则 - 考试模式',
+            modalTitle: '设置排行榜规则 - 在线考试',
             summary: '当前规则：得分排行榜，展示前',
             columns: ['姓名', '总得分'],
             metric: '总得分',
-            sortText: '总得分（高→低）＞ 交卷时间（早→晚）',
-            note: '适用于考试模式，按用户最终有效成绩生成排行榜。',
+            sortText: '按得分高到低，同分按用时短优先',
+            note: '适用于在线考试，按用户最终有效成绩生成排行榜。',
             detail: ''
         },
         daily: {
             modeTitle: '每日答题',
-            title: '达标天数排行榜',
+            title: '分数排行榜',
             modalTitle: '设置排行榜规则 - 每日答题',
-            summary: '当前规则：达标天数排行榜，展示前',
-            columns: ['姓名', '达标天数', '总得分'],
-            metric: '达标天数',
-            sortText: '达标天数（高→低）＞ 总得分（高→低）＞ 最早达标时间（早→晚）',
-            note: '适用于每日答题，按用户活动期间达到达标分数的天数生成排行榜。',
-            detail: '每天是否达标由每日答题配置中的达标分数判断；总得分用于同达标天数时的排序。'
+            summary: '当前规则：分数排行榜，展示前',
+            columns: ['姓名', '总积分', '题目数', '答题时间'],
+            metric: '总积分',
+            sortText: '总积分（高→低）＞ 题目数（高→低）＞ 答题时间（早→晚）',
+            note: '适用于每日答题，按用户总积分、题目数和答题时间生成分数排行榜。',
+            detail: '题目数为用户每日答题累计完成题目数量；答题时间仅用于总积分与题目数相同时的排序。'
         },
         level: {
-            modeTitle: '答题闯关',
-            title: '闯关数量排行榜',
-            modalTitle: '设置排行榜规则 - 答题闯关',
-            summary: '当前规则：闯关数量排行榜，展示前',
-            columns: ['姓名', '通关关卡数', '总得分', '用时'],
+            modeTitle: '趣味闯关',
+            title: '分数排行榜',
+            modalTitle: '设置排行榜规则 - 趣味闯关',
+            summary: '当前规则：分数排行榜，展示前',
+            columns: ['姓名', '通关关卡数', '总用时', '答对题目数量'],
             metric: '通关关卡数',
-            sortText: '通关关卡数（高→低）＞ 总得分（高→低）＞ 用时（短→长）',
-            note: '适用于答题闯关，按用户已通关关卡数量生成排行榜。',
-            detail: '用时为用户通关已完成关卡的累计有效用时；仅用于通关关卡数与总得分相同时的排序。'
+            sortText: '通关关卡数（高→低）＞ 总用时（短→长）＞ 答对题目数量（高→低）',
+            note: '适用于趣味闯关，按用户通关关卡数、总用时和答对题目数量生成分数排行榜。',
+            detail: '总用时为用户闯关过程的累计有效用时；答对题目数量仅用于通关关卡数与总用时相同时的排序。'
         }
     };
     return configs[mode] || configs.exam;
@@ -716,53 +815,9 @@ function renderLeaderboardNavNote(rule, setting) {
 }
 
 function renderQuizStepOtherSettings() {
-    const hasDailyModeConfigured = groups.some(g => g.quizMode === 'daily');
-    const dailyStreakEnabled = !!dailyStreakReward.enabled;
+    const hasDailyModeConfigured = quizActivityMode === 'daily' || groups.some(g => g.quizMode === 'daily');
     return `
-    ${hasDailyModeConfigured ? `
-    <section class="quiz-config-card other-card reward-card">
-        <h3>积分奖励配置</h3>
-        <p>仅当创建的答题模式包含「每日答题」时生效</p>
-        <div class="reward-box" style="font-weight:600">
-            <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
-                <div>
-                    <div style="font-size:16px;color:#1f1f1f;font-weight:800">连续天数答题奖励</div>
-                    <div style="margin-top:4px;color:#8c8c8c;font-size:13px;font-weight:600">按连续答题天数达到里程碑发放积分（可配置多个档位）。</div>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" ${dailyStreakEnabled ? 'checked' : ''} onchange="setDailyStreakEnabled(this.checked)">
-                    <span class="sw-slider"></span>
-                </label>
-            </div>
-            ${dailyStreakEnabled ? `
-            <div style="margin-top:14px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-                    <div style="color:#8c8c8c;font-size:13px;font-weight:700">奖励档位</div>
-                    <button class="btn btn-ghost btn-sm" type="button" onclick="addDailyStreakMilestone()">+ 添加档位</button>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:10px">
-                    ${(dailyStreakReward.milestones || []).map((m, idx) => `
-                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                            <span style="color:#8c8c8c;font-size:13px">连续</span>
-                            <input type="number" min="1" value="${Number(m.days) || 1}" style="width:80px;height:36px;border:1px solid #e1e1e1;border-radius:6px;text-align:center" onchange="setDailyStreakMilestoneField(${idx},'days',this.value)">
-                            <span style="color:#8c8c8c;font-size:13px">天，奖励</span>
-                            <input type="number" min="0" value="${Number(m.points) || 0}" style="width:80px;height:36px;border:1px solid #e1e1e1;border-radius:6px;text-align:center" onchange="setDailyStreakMilestoneField(${idx},'points',this.value)">
-                            <span style="color:#8c8c8c;font-size:13px">积分</span>
-                            <button class="btn btn-ghost btn-sm" type="button" onclick="removeDailyStreakMilestone(${idx})">删除</button>
-                        </div>
-                    `).join('')}
-                </div>
-                <div style="margin-top:10px;color:#8c8c8c;font-size:12px;line-height:1.6">
-                    规则说明：当用户连续答题天数达到配置档位时发放对应积分；档位需按天数递增且不能重复。
-                </div>
-                <div style="margin-top:6px;color:#8c8c8c;font-size:12px;line-height:1.6">
-                    建议：常见配置如 3 天/7 天/14 天等；如需“每日固定奖励”，请在题目得分或其他积分规则中处理（本区仅做连签里程碑奖励）。
-                </div>
-            </div>
-            ` : ''}
-        </div>
-    </section>
-    ` : ''}
+    ${hasDailyModeConfigured ? renderDailyPointsConfigPanel() : ''}
     <section class="quiz-config-card other-card">
         <h3>功能捷径</h3>
         <p>配置活动详情页底部「功能入口」弹窗中展示的功能捷径</p>
@@ -798,6 +853,90 @@ function renderQuizStepOtherSettings() {
     </section>`;
 }
 
+function renderDailyPointsConfigPanel() {
+    const rows = [
+        {
+            key: 'share',
+            name: '分享奖励',
+            desc: '用户分享活动可获得积分',
+            controls: `
+                <label>每次</label>
+                <input type="number" min="0" value="${dailyPointsConfig.share.points}" onchange="setDailyPointsConfig('share','points',this.value)">
+                <span>积分</span>
+                <label>每日最多</label>
+                <input type="number" min="0" value="${dailyPointsConfig.share.maxDailyTimes}" onchange="setDailyPointsConfig('share','maxDailyTimes',this.value)">
+                <span>次</span>
+            `,
+            note: '参考打卡活动'
+        },
+        {
+            key: 'answer',
+            name: '答题奖励',
+            desc: '每答对一道题可获得积分',
+            controls: `
+                <label>每题</label>
+                <input type="number" min="0" value="${dailyPointsConfig.answer.points}" onchange="setDailyPointsConfig('answer','points',this.value)">
+                <span>积分</span>
+            `,
+            note: '按题累计'
+        },
+        {
+            key: 'streak',
+            name: '连续答题奖励',
+            desc: '连续答题达到指定天数额外奖励积分',
+            controls: `
+                <label>连续</label>
+                <input type="number" min="1" value="${dailyPointsConfig.streak.days}" onchange="setDailyPointsConfig('streak','days',this.value)">
+                <span>天，奖励</span>
+                <input type="number" min="0" value="${dailyPointsConfig.streak.points}" onchange="setDailyPointsConfig('streak','points',this.value)">
+                <span>积分</span>
+            `,
+            note: '如连续 7 天奖励'
+        },
+        {
+            key: 'cumulative',
+            name: '累计答题奖励',
+            desc: '累计答题达到指定天数奖励积分',
+            controls: `
+                <label>累计</label>
+                <input type="number" min="1" value="${dailyPointsConfig.cumulative.days}" onchange="setDailyPointsConfig('cumulative','days',this.value)">
+                <span>天，奖励</span>
+                <input type="number" min="0" value="${dailyPointsConfig.cumulative.points}" onchange="setDailyPointsConfig('cumulative','points',this.value)">
+                <span>积分</span>
+            `,
+            note: '如累计 30 天奖励'
+        }
+    ];
+    return `
+    <section class="quiz-config-card other-card daily-points-card">
+        <h3>积分配置</h3>
+        <div class="daily-points-list">
+            ${rows.map(row => `
+                <div class="daily-points-row">
+                    <label class="switch mini">
+                        <input type="checkbox" ${dailyPointsConfig[row.key].enabled ? 'checked' : ''} onchange="setDailyPointsConfig('${row.key}','enabled',this.checked)">
+                        <span class="sw-slider"></span>
+                    </label>
+                    <div class="daily-points-main">
+                        <strong>${row.name}</strong>
+                        <span>${row.desc}</span>
+                    </div>
+                    <div class="daily-points-controls">${row.controls}</div>
+                    <em>${row.note}</em>
+                </div>
+            `).join('')}
+        </div>
+    </section>`;
+}
+
+function setDailyPointsConfig(rule, field, value) {
+    if (!dailyPointsConfig[rule]) return;
+    dailyPointsConfig[rule][field] = field === 'enabled'
+        ? !!value
+        : Math.max(field === 'days' ? 1 : 0, Number(value) || 0);
+    rerenderMain();
+}
+
 function renderQuizCreateActions() {
     return `
     <div class="quiz-create-actionbar">
@@ -823,7 +962,7 @@ function renderGroupCard(g, i) {
         ? `${g.formFieldCount} 个字段${g.formRealName ? ' · 实名认证' : ''}`
         : '设置报名字段、实名信息与提交规则';
     const quizSummary = g.quizConfigured
-        ? `${modeTitle} · ${g.quizQCount} 题 · ${g.quizTotal} 分 · ${g.quizAttemptsText || '-'}`
+        ? `${modeTitle} · ${g.quizQCount} 题${selectedMode === 'level' ? '' : ` · ${g.quizTotal} 分`} · ${g.quizAttemptsText || '-'}`
         : `${modeTitle} · 配置试卷、时间与作答规则`;
     const menuOpen = groupMenuOpenIdx === i;
     const nameInputWidth = Math.min(220, Math.max(80, Array.from(g.name || '').length * 18 + 28));
@@ -839,9 +978,7 @@ function renderGroupCard(g, i) {
                 <button class="gc-menu-btn" onclick="toggleGroupMenu(${i}, event)" title="更多操作">⋯</button>
                 ${menuOpen ? `
                 <div class="gc-menu" onclick="event.stopPropagation()">
-                    <div class="gc-menu-item" onclick="previewGroup(${i});closeGroupMenus()">👁 预览</div>
                     <div class="gc-menu-item" onclick="copyGroup(${i});closeGroupMenus()">⧉ 复制组别</div>
-                    <div class="gc-menu-item ${g.quizConfigured?'':'disabled'}" onclick="${g.quizConfigured?`openCopyQuizConfig(${i});closeGroupMenus()`:''}">⮌ 复制答题配置到其他组别</div>
                     <div class="gc-menu-divider"></div>
                     <div class="gc-menu-item danger" onclick="openDeleteGroup(${i});closeGroupMenus()">🗑 删除组别</div>
                 </div>` : ''}
@@ -1288,10 +1425,12 @@ function renderFullscreenModal() {
     <div class="quiz-fs-dialog" role="dialog" aria-modal="true" onclick="event.stopPropagation()">
     <!-- Header -->
     <div class="quiz-fs-header">
-        <div class="qfh-left">
-            <div class="qfh-left-stack">
-                <div class="qfh-title">${g.name} · 答题配置</div>
-                ${headerModeInfo || `<div class="qfh-subtitle">请配置当前组别的答题规则。</div>`}
+        <div class="qfh-nav">
+            <button class="qfh-back" onclick="closeQuizConfig()">‹ 返回上一级</button>
+            <span class="qfh-nav-sep"></span>
+            <div class="qfh-title-stack">
+                <div class="qfh-nav-title">${g.name} · 试卷管理</div>
+                ${headerModeInfo ? `<div class="qfh-nav-mode">${headerModeInfo}</div>` : ''}
             </div>
         </div>
         <button class="quiz-fs-close" onclick="closeQuizConfig()">✕</button>
@@ -1304,11 +1443,12 @@ function renderFullscreenModal() {
 
     <!-- Footer -->
     <div class="quiz-fs-footer">
-        <div>
-            ${''}
-        </div>
-        <div class="btn-group">
-            <button class="btn btn-ghost" onclick="closeQuizConfig()">取消</button><button class="btn btn-ghost" onclick="saveGroupQuizConfigKeepOpen()">💾 保存配置</button><button class="btn btn-ghost" onclick="previewGroup(fsGroupIdx)">👁 预览</button><button class="btn btn-primary" onclick="saveGroupQuizConfig()">保存并返回</button>
+        <div class="quiz-fs-footer-meta">当前配置会保存并直接绑定到本次场次。</div>
+        <div class="quiz-fs-footer-actions">
+            <button class="btn btn-ghost" onclick="closeQuizConfig()">取消</button>
+            <button class="btn btn-ghost" onclick="saveGroupQuizConfigKeepOpen()">保存配置</button>
+            <button class="btn btn-outline" onclick="previewGroup(fsGroupIdx)">预览</button>
+            <button class="btn btn-primary" onclick="saveGroupQuizConfig()">保存并返回</button>
         </div>
     </div>
     </div>
@@ -1411,6 +1551,7 @@ function renderQuizTotalScorePanel(options = {}) {
     const hint = options.hint || '发布后，试卷总分不支持修改，请确认后再发布活动。';
     const panelId = options.panelId || 'quizTotalScorePanel';
     const onSelect = options.onSelect || 'setQuizTotalScore';
+    const extraRows = options.extraRows || '';
     return `
     <div class="cfg-panel global-score-panel" id="${panelId}">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('${panelId}')">
@@ -1431,6 +1572,7 @@ function renderQuizTotalScorePanel(options = {}) {
                     <div class="cfg-row-hint">${hint}</div>
                 </div>
             </div>
+            ${extraRows}
         </div>
     </div>`;
 }
@@ -1451,6 +1593,28 @@ function setCurrentLevelTotalScore(score) {
     refreshFsModal();
 }
 
+function getLevelPassQuestions(level = getCurrentLevel()) {
+    const questionCount = getLevelQuestionCount(level);
+    const fallback = Math.ceil(questionCount * 0.6);
+    const value = Number(level?.passQuestions);
+    if (!questionCount) return 0;
+    if (!value) return fallback;
+    return Math.min(questionCount, Math.max(0, value));
+}
+
+function getLevelMaxAttempts(level = getCurrentLevel()) {
+    return Math.max(0, Number(level?.maxAttempts) || 0);
+}
+
+function getLevelQuestionValidationState(level = getCurrentLevel()) {
+    const questionCount = getLevelQuestionCount(level);
+    if (!questionCount) return { state: 'missing-rules', questionCount, passQuestions: 0 };
+    const passQuestions = getLevelPassQuestions(level);
+    if (passQuestions < 1) return { state: 'missing-pass', questionCount, passQuestions };
+    if (passQuestions > questionCount) return { state: 'pass-over', questionCount, passQuestions };
+    return { state: 'ok', questionCount, passQuestions };
+}
+
 function getRuleTotal(rules) {
     return (rules || []).reduce((sum, rule) => sum + (Number(rule.count ?? rule.qCount) || 0) * (Number(rule.score ?? rule.perScore) || 0), 0);
 }
@@ -1466,15 +1630,17 @@ function getScoreValidationState(rules, targetScore = quizTotalScore) {
     return { state: 'ok', current, target, diff: 0 };
 }
 
-function renderScoreRuleNotice(rules, targetScore = quizTotalScore) {
+function renderScoreRuleNotice(rules, targetScore = quizTotalScore, options = {}) {
+    const totalLabel = options.totalLabel || '每日总分';
+    const ruleLabel = options.ruleLabel || '抽题规则';
     const result = getScoreValidationState(rules, targetScore);
     const cls = result.state === 'ok' ? 'ok' : result.state === 'over' ? 'error' : 'warn';
     const messageMap = {
-        'missing-total': '请先选择每日总分。',
-        'missing-rules': '请先配置题目来源和抽题规则。',
+        'missing-total': `请先选择${totalLabel}。`,
+        'missing-rules': `请先配置题目来源和${ruleLabel}。`,
         under: `当前已配置 ${result.current} 分，还差 ${result.diff} 分，请继续补充题目或调整每题分值。`,
-        over: `当前已配置 ${result.current} 分，已超出每日总分 ${result.diff} 分，请调整题目数量或每题分值。`,
-        ok: `分值配置正确，当前每日总分为 ${result.target} 分。`
+        over: `当前已配置 ${result.current} 分，已超出${totalLabel} ${result.diff} 分，请调整题目数量或每题分值。`,
+        ok: `分值配置正确，当前${totalLabel}为 ${result.target} 分。`
     };
     return `
     <div class="score-rule-notice ${cls}">
@@ -1482,7 +1648,7 @@ function renderScoreRuleNotice(rules, targetScore = quizTotalScore) {
             <strong>已配置总分：${result.current} / ${result.target || '-'} 分</strong>
             <span>${result.state === 'ok' ? '校验通过' : '待调整'}</span>
         </div>
-        <p>本次每日总分为 ${result.target || '-'} 分，请确保所有抽题规则的分值之和等于该总分。</p>
+        <p>本次${totalLabel}为 ${result.target || '-'} 分，请确保所有${ruleLabel}的分值之和等于该分数。</p>
         <p>${messageMap[result.state]}</p>
     </div>`;
 }
@@ -1537,17 +1703,35 @@ function getActiveScoreRules() {
 }
 
 function getDailySourceValidationState() {
-    if (dailyQMode === 'fixed') return getDailyFixedValidationState();
     const timeState = getDailyTimeValidationState();
     if (timeState.state !== 'ok') return { ...timeState, current: 0, target: Number(quizTotalScore) || 0, diff: 0 };
-    return getScoreValidationState(dailyRandomRules);
+    syncDailyDateConfigsWithOpenRange();
+    const days = dailyFixedConfig.days || [];
+    if (!days.length) return { state: 'missing-date', current: 0, target: Number(quizTotalScore) || 0, diff: 0 };
+    const batchState = getScoreValidationState(dailyRandomRules);
+    for (let i = 0; i < days.length; i += 1) {
+        const day = days[i];
+        if (day.isOpen === false) continue;
+        const status = getDailyDateStatus(day);
+        if (status.key === 'fixed') {
+            const fixedState = getDailyFixedDayValidationState(day, i, timeState);
+            if (fixedState.state !== 'ok') return fixedState;
+            continue;
+        }
+        if (status.key === 'batch') {
+            if (batchState.state !== 'ok') return { ...batchState, dayIndex: i, day };
+            continue;
+        }
+        return { state: 'missing-rules', current: 0, target: Number(quizTotalScore) || 0, diff: Number(quizTotalScore) || 0, dayIndex: i, day };
+    }
+    return { state: 'ok', current: Number(quizTotalScore) || 0, target: Number(quizTotalScore) || 0, diff: 0 };
 }
 
 function getDailyTimeValidationMessage(result, modeLabel) {
     const msgMap = {
-        'missing-time': `${modeLabel}：请先配置答题开放时间。`,
+        'missing-time': `${modeLabel}：请先配置答题开放日期。`,
         'invalid-time-range': `${modeLabel}：答题开放结束时间不能早于开始时间。`,
-        'missing-daily-window': `${modeLabel}：请先配置每日答题时段。`,
+        'missing-daily-window': `${modeLabel}：请先配置答题时段。`,
         'invalid-daily-window': `${modeLabel}：每日答题结束时刻必须晚于开始时刻。`,
         'invalid-time-limit': `${modeLabel}：每题限时不能低于 5 秒。`
     };
@@ -1555,11 +1739,13 @@ function getDailyTimeValidationMessage(result, modeLabel) {
 }
 
 function getDailySourceValidationMessage(result, mode = dailyQMode) {
-    const modeLabel = mode === 'fixed' ? '每日固定题目' : '每日随机抽题';
+    const modeLabel = '每日答题配置';
+    if (result.state === 'missing-date') return `${modeLabel}：请先在基本信息中配置答题开放日期。`;
+    if (result.state === 'missing-rules' && result.day) return `${modeLabel}：${formatDateLabel(result.day.date)} 尚未配置批量规则或固定题。`;
     if (mode === 'fixed') {
         const dayLabel = result.dayIndex >= 0 ? `第 ${result.dayIndex + 1} 天` : '当前日期';
         const timeMsg = getDailyTimeValidationMessage(result, modeLabel);
-        if (timeMsg) return timeMsg.replace('请先配置答题开放时间。', '请先在“每日固定题目计划”中配置答题开放时间。');
+        if (timeMsg) return timeMsg.replace('请先配置答题开放日期。', '请先在“每日固定题目计划”中配置答题开放日期。');
         const fixedMsgMap = {
             'missing-date': `${modeLabel}：缺少 ${formatDateLabel(result.missingDate)} 的固定题目计划，请按开放日期生成或补充日期。`,
             'duplicate-date': `${modeLabel}：${dayLabel} 日期重复，请调整日期计划。`,
@@ -1599,10 +1785,33 @@ function getLevelValidationMessage(result) {
     return msgMap[result.state] || '请检查每个关卡分数配置。';
 }
 
+function getLevelRandomValidationMessage(result) {
+    const msgMap = {
+        'missing-total': '请先选择每个关卡分数。',
+        'missing-rules': '请先配置至少 1 条关卡抽题规则。',
+        under: `当前关卡抽题规则总分不足，已配置 ${result.current} 分，还差 ${result.diff} 分，请调整后再继续。`,
+        over: `当前关卡抽题规则总分超出，已配置 ${result.current} 分，超出 ${result.diff} 分，请调整后再继续。`,
+        ok: '关卡抽题规则分值配置正确。'
+    };
+    return msgMap[result.state] || '请检查每个关卡抽题规则配置。';
+}
+
+function getLevelQuestionValidationMessage(result) {
+    const msgMap = {
+        'missing-rules': '请先配置至少 1 道题目。',
+        'missing-pass': '请设置至少答对 1 题过关。',
+        'pass-over': `过关题数不能超过当前题目数量 ${result.questionCount} 题。`,
+        ok: '关卡题目配置正确。'
+    };
+    return msgMap[result.state] || '请检查关卡题目配置。';
+}
+
 function validateScoreRulesForMode(mode, { silent = false } = {}) {
     if (mode === 'exam') {
-        const missingPaper = !phasedConfig.phases.length || !phasedConfig.phases.every(phase => phase.paper);
-        if (missingPaper && !silent) alert('考试模式：请先选择试卷。');
+        const missingPhasePaper = !phasedConfig.phases.length || !phasedConfig.phases.every(phase => phase.paper);
+        const missingDailyPaper = dailyExamAdded && (!dailyExamConfig.papers.length || !dailyExamConfig.papers.every(day => day.paper));
+        const missingPaper = missingPhasePaper || missingDailyPaper;
+        if (missingPaper && !silent) alert('在线考试：请先选择试卷。');
         return !missingPaper;
     }
     if (mode === 'daily') {
@@ -1624,11 +1833,10 @@ function validateScoreRulesForMode(mode, { silent = false } = {}) {
 function validateAllLevelScoreRules({ silent = false } = {}) {
     for (let i = 0; i < levels.length; i += 1) {
         const level = levels[i];
-        const result = levelQuestionMode === 'fixed'
-            ? getLevelFixedValidationState(level)
-            : getScoreValidationState(getLevelRules(level), level.totalScore);
+        const result = getLevelQuestionValidationState(level);
         if (result.state !== 'ok') {
-            if (!silent) alert(`答题闯关：第 ${i + 1} 关 ${getLevelValidationMessage(result)}`);
+            const message = getLevelQuestionValidationMessage(result);
+            if (!silent) alert(`趣味闯关：第 ${i + 1} 关 ${message}`);
             levelCurrentIdx = i;
             refreshFsModal();
             return false;
@@ -1676,28 +1884,28 @@ function applyExamToGroup() {
     g.quizMode = fsQuizMode;
     g.updatedAt = nowStamp();
     if (fsQuizMode === 'exam') {
-        const qCount = phasedConfig.phases.reduce((sum, phase) => sum + (phase.paper?.qCount || 0), 0);
-        const total  = phasedConfig.phases.reduce((sum, phase) => sum + (phase.paper?.total || 0), 0);
+        const phaseQCount = phasedConfig.phases.reduce((sum, item) => sum + (item.paper?.qCount || 0), 0);
+        const phaseTotal = phasedConfig.phases.reduce((sum, item) => sum + (item.paper?.total || 0), 0);
+        const dailyQCount = dailyExamAdded ? (dailyExamConfig.papers || []).reduce((sum, item) => sum + (item.paper?.qCount || 0), 0) : 0;
+        const dailyTotal = dailyExamAdded ? (dailyExamConfig.papers || []).reduce((sum, item) => sum + (item.paper?.total || 0), 0) : 0;
+        const qCount = phaseQCount + dailyQCount;
+        const total = phaseTotal + dailyTotal;
         g.quizQCount = qCount;
         g.quizTotal = total;
-        g.quizAttemptsText = phasedConfig.phases.length === 1
+        const phaseText = phasedConfig.phases.length === 1
             ? `单场考试 · 每人 ${phasedConfig.phases[0]?.attempts || 1} 次`
             : `${phasedConfig.phases.length} 期考试`;
+        g.quizAttemptsText = dailyExamAdded ? `${phaseText} · 每日一卷 ${dailyExamConfig.papers.length} 天` : phaseText;
     } else if (fsQuizMode === 'daily') {
-        if (dailyQMode === 'fixed') {
-            const days = dailyFixedConfig.days || [];
-            g.quizQCount = days.reduce((sum, day) => sum + getDailyFixedDayQuestionCount(day), 0);
-            g.quizTotal = days.reduce((sum, day) => sum + getDailyFixedDayScore(day), 0);
-            g.quizAttemptsText = `${days.length} 天固定题目`;
-        } else {
-            const rules = dailyRandomRules || [];
-            g.quizQCount = rules.reduce((sum, rule) => sum + (Number(rule.count ?? rule.qCount) || 0), 0);
-            g.quizTotal = rules.reduce((sum, rule) => sum + (Number(rule.count ?? rule.qCount) || 0) * (Number(rule.score ?? rule.perScore) || 0), 0);
-            g.quizAttemptsText = `每日 ${dailyScoreConfig.maxDailyAttempts || 1} 次`;
-        }
+        syncDailyDateConfigsWithOpenRange();
+        const days = dailyFixedConfig.days || [];
+        const openDays = days.filter(day => day.isOpen !== false);
+        g.quizQCount = openDays.reduce((sum, day) => sum + getDailyDayQuestionCount(day), 0);
+        g.quizTotal = openDays.length * (Number(quizTotalScore) || 0);
+        g.quizAttemptsText = `${openDays.length} 天 · 每日 ${dailyScoreConfig.maxDailyAttempts || 1} 次`;
     } else if (fsQuizMode === 'level') {
         g.quizQCount = (levels || []).reduce((sum, level) => sum + getLevelQuestionCount(level), 0);
-        g.quizTotal = (levels || []).reduce((sum, level) => sum + (Number(level.totalScore) || 0), 0);
+        g.quizTotal = 0;
         g.quizAttemptsText = `${(levels || []).length} 关 · ${levelQuestionMode === 'fixed' ? '固定题目' : '随机抽题'}`;
     }
 }
@@ -1721,7 +1929,7 @@ function computeExamTotal() {
 }
 
 // ===============================
-// EXAM MODE CONFIG (考试模式)
+// EXAM MODE CONFIG (在线考试)
 // ===============================
 function renderExamModeConfig() {
     const g = groups[fsGroupIdx] || { name: '' };
@@ -1742,8 +1950,14 @@ function renderUnifiedPhaseConfig(pc) {
     return `
     <div class="phase-config-shell">
         <div class="phase-section-header">
-            <div class="phase-section-title">考试配置</div>
-            <div class="phase-section-subtitle">默认 1 场考试，按需继续新增即可。</div>
+            <div>
+                <div class="phase-section-title">考试配置</div>
+                <div class="phase-section-subtitle">默认展示普通答题，按需继续新增场次或每日一卷。</div>
+            </div>
+            <div class="phase-section-actions">
+                <button class="btn btn-outline btn-sm" type="button" onclick="addPhase()">+ 添加场次</button>
+                <button class="btn btn-primary btn-sm" type="button" onclick="openAddDailyExamModal()">+ 每日一卷</button>
+            </div>
         </div>
         <div class="cfg-panel phase-main-panel" id="examPhaseConfig">
             <div class="cfg-panel-body">
@@ -1752,10 +1966,166 @@ function renderUnifiedPhaseConfig(pc) {
                 </div>
             </div>
         </div>
-        <div class="phase-panel-footer">
-            <button class="phase-add-card" onclick="addPhase()">
-                <span>+ 添加考试场次</span>
-            </button>
+        ${dailyExamAdded ? renderDailyExamModeConfig(groups[fsGroupIdx] || { name: '' }) : ''}
+    </div>`;
+}
+
+function renderDailyExamModeConfig(g) {
+    normalizeDailyExamPapers();
+    return `
+    <div class="phase-config-shell daily-exam-shell">
+        ${renderDailyExamPaperPanel()}
+        ${renderDailyExamRulePanel()}
+    </div>`;
+}
+
+function renderDailyExamPaperPanel() {
+    normalizeDailyExamPapers();
+    const days = dailyExamConfig.papers || [];
+    return `
+    <div class="cfg-panel" id="dailyExamPapers">
+        <div class="cfg-panel-head" onclick="toggleCfgPanel('dailyExamPapers')">
+            <div class="cfg-panel-icon green">📄</div>
+            <div><div class="cfg-panel-title">每日试卷配置</div><div class="cfg-panel-subtitle">按开放日期自动生成每日配置项</div></div>
+            <div class="daily-exam-head-actions">
+                <button class="btn btn-outline btn-sm daily-exam-edit-btn" type="button" onclick="event.stopPropagation();openEditDailyExamModal()">编辑</button>
+                <span class="cfg-panel-badge essential">必填</span>
+                <span class="cfg-panel-arrow">▼</span>
+            </div>
+        </div>
+        <div class="cfg-panel-body">
+            ${renderDailyExamConfigSummary(days)}
+            ${renderDailyExamDateBuilder(days)}
+        </div>
+    </div>`;
+}
+
+function renderDailyExamConfigSummary(days) {
+    const start = `${formatDateLabel(dailyExamConfig.startDate)} ${dailyExamConfig.dailyStart || '09:00'}`;
+    const end = `${formatDateLabel(dailyExamConfig.endDate)} ${dailyExamConfig.dailyEnd || '18:00'}`;
+    return `
+    <div class="daily-exam-config-summary">
+        <div>
+            <span>开放时间</span>
+            <strong>${start} 至 ${end}</strong>
+        </div>
+        <div>
+            <span>每卷考试时长</span>
+            <strong>${dailyExamConfig.duration || 60} 分钟</strong>
+        </div>
+        <div>
+            <span>已生成日期</span>
+            <strong>${days.length} 天</strong>
+        </div>
+    </div>`;
+}
+
+function renderDailyExamDateBuilder(days) {
+    if (!days.length) {
+        return '<div class="daily-fixed-empty">请先配置考试开放日期，系统会按日期范围生成每日一卷计划。</div>';
+    }
+    return `
+    <div class="phase-card-stack daily-exam-card-stack">
+        ${days.map((day, i) => renderDailyExamConfigCard(day, i)).join('')}
+    </div>`;
+}
+
+function renderDailyExamConfigCard(day, i) {
+    return `
+    <div class="group-card rich gc-${day.paper ? 'done' : 'empty'} phase-config-card daily-exam-config-card">
+        <div class="gc-stripe"></div>
+        <div class="gc-body">
+            <div class="gc-head-row phase-head-row">
+                <span class="gc-drag" title="日期由开放时间自动生成">⠿</span>
+                <div class="phase-head-title-wrap">
+                    <div class="phase-config-card-title">${escapeHtml(day.name || `第${i + 1}天`)}</div>
+                    <div class="phase-config-card-sub">${formatDateLabel(day.date)} · ${day.theme || '在线考试'}</div>
+                </div>
+                <span class="phase-chip ${day.paper ? 'ok' : 'warn'}">${day.paper ? '已完成配置' : '未完成配置'}</span>
+            </div>
+            <div class="phase-config-card-body">
+                <div class="phase-block">
+                    <div class="phase-block-title">日期信息</div>
+                    <div class="cfg-row">
+                        <div class="cfg-row-label"><span class="req">*</span> 答题日期</div>
+                        <div class="cfg-row-control">
+                            <input class="form-control" value="${formatDateLabel(day.date)}" readonly>
+                            <div class="cfg-row-hint">日期由每日一卷开放日期范围自动生成。</div>
+                        </div>
+                    </div>
+                    <div class="cfg-row" style="border-bottom:none">
+                        <div class="cfg-row-label"><span class="req">*</span> 主题名称</div>
+                        <div class="cfg-row-control">
+                            <input class="form-control" value="${escapeAttr(day.theme || '')}" onchange="setDailyExamDayField(${i},'theme',this.value)" placeholder="如：第1天：阅读常识">
+                        </div>
+                    </div>
+                </div>
+                <div class="phase-block">
+                    <div class="phase-block-title">试卷配置</div>
+                    <div class="cfg-row" style="border-bottom:none">
+                        <div class="cfg-row-label"><span class="req">*</span> 选择试卷</div>
+                        <div class="cfg-row-control">
+                            ${renderDailyExamSinglePaperCard(day, i)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderDailyExamSinglePaperCard(day, index) {
+    const paper = day?.paper;
+    return `
+    <div class="daily-exam-paper-card ${paper ? 'configured' : ''}">
+        <div class="daily-exam-paper-head">
+            <div>
+                <div class="daily-exam-paper-title">当天试卷</div>
+                <div class="cfg-row-hint">试卷配置复用在线考试的试卷选择与创建逻辑。</div>
+            </div>
+            <span class="phase-chip ${paper ? 'ok' : 'warn'}">${paper ? '已配置' : '未配置'}</span>
+        </div>
+        ${paper ? `
+            <div class="paper-source-card selected" style="cursor:default">
+                <div class="psc-title">📄 ${paper.name} <span style="margin-left:6px">${paperModeBadges(paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${paper.status || '启用'}</span></div>
+                <div class="psc-meta-grid">
+                    <div><span class="psc-meta-lbl">题目数量：</span><span class="psc-meta-val">${paper.qCount} 题</span></div>
+                    <div><span class="psc-meta-lbl">试卷总分：</span><span class="psc-meta-val">${paper.total} 分</span></div>
+                    <div><span class="psc-meta-lbl">组卷方式：</span><span class="psc-meta-val">${paper.mode || '固定题目'}</span></div>
+                    <div><span class="psc-meta-lbl">题型构成：</span><span class="psc-meta-val">${paper.composition || '—'}</span></div>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="btn btn-outline btn-sm" onclick="pickDailyExamPaper(${index})">更换试卷</button>
+                    <button class="btn btn-primary btn-sm" onclick="createDailyExamPaper(${index})">+ 试卷配置</button>
+                    <button class="btn btn-ghost btn-sm" onclick="clearDailyExamPaper(${index})">清空试卷</button>
+                    <button class="btn btn-ghost btn-sm" onclick="navigateTo('paper-mgmt')">查看试卷</button>
+                </div>
+            </div>` : `
+            <div class="paper-pick-zone" onclick="createDailyExamPaper(${index})">
+                <div class="ppz-icon">+</div>
+                <div class="ppz-text">试卷配置</div>
+            </div>`}
+    </div>`;
+}
+
+function renderDailyExamRulePanel() {
+    return `
+    <div class="cfg-panel" id="dailyExamRules">
+        <div class="cfg-panel-head" onclick="toggleCfgPanel('dailyExamRules')">
+            <div class="cfg-panel-icon green">🔒</div>
+            <div><div class="cfg-panel-title">解锁与作答规则</div><div class="cfg-panel-subtitle">每日一卷固定规则与补考处理</div></div>
+            <span class="cfg-panel-badge essential">必填</span>
+            <span class="cfg-panel-arrow">▼</span>
+        </div>
+        <div class="cfg-panel-body">
+            <div class="info-box blue" style="margin-bottom:12px">每日一卷固定为每天解锁 1 套、每卷仅允许 1 次作答；提交后锁定，不支持重复进入同一日试卷。</div>
+            ${renderDeveloperRuleList([
+                '移动端用户端在开放日期范围内展示每日试卷列表。',
+                '每日仅自动解锁当日卷，未到当天不可提前作答。',
+                '每套试卷仅允许 1 次作答机会，提交后即锁定。',
+                '固定题目和随机抽题试卷均复用在线考试试卷管理的组卷业务流程。',
+                '后台仅负责配置开放日期和每日试卷，不涉及用户端自动解锁模块实现。'
+            ])}
         </div>
     </div>`;
 }
@@ -1774,13 +2144,13 @@ function renderExamOverview(g, ec, qCount, total, statusOk) {
         <div class="qmdc-ov-title">
             <span class="qmdc-ov-emoji">📝</span>
             <div>
-                <div class="qmdc-ov-name">考试模式</div>
+                <div class="qmdc-ov-name">在线考试</div>
                 <div class="qmdc-ov-desc">适用于线上考试、知识竞赛、测评考试等正式答题场景。支持固定题目、随机组卷、考试时长、及格分和成绩排名。</div>
             </div>
         </div>
         <div class="qmdc-ov-grid">
             <div class="qmdc-ov-cell"><div class="qmdc-ov-lbl">当前组别</div><div class="qmdc-ov-val">${g.name || '—'}</div></div>
-            <div class="qmdc-ov-cell"><div class="qmdc-ov-lbl">答题模式</div><div class="qmdc-ov-val">考试模式</div></div>
+            <div class="qmdc-ov-cell"><div class="qmdc-ov-lbl">答题模式</div><div class="qmdc-ov-val">在线考试</div></div>
             <div class="qmdc-ov-cell"><div class="qmdc-ov-lbl">题目来源</div><div class="qmdc-ov-val">${srcText}</div></div>
             <div class="qmdc-ov-cell"><div class="qmdc-ov-lbl">题目数量</div><div class="qmdc-ov-val">${qCount} 题</div></div>
             <div class="qmdc-ov-cell"><div class="qmdc-ov-lbl">试卷总分</div><div class="qmdc-ov-val">${total} 分</div></div>
@@ -1790,13 +2160,13 @@ function renderExamOverview(g, ec, qCount, total, statusOk) {
     </div>`;
 }
 
-// ---- module 1: 选择试卷 ----
+// ---- module 1: 题目配置 ----
 function renderExamModule1(ec, qCount, total) {
     return `
     <div class="cfg-panel" id="examQSource">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('examQSource')">
             <div class="cfg-panel-icon blue">📄</div>
-            <div><div class="cfg-panel-title">选择试卷</div><div class="cfg-panel-subtitle">请选择当前单场考试使用的试卷。试卷可在「试卷管理」模块中提前配置。</div></div>
+            <div><div class="cfg-panel-title">题目配置</div><div class="cfg-panel-subtitle">在当前页面配置本场考试题目，或从题库选择题目。</div></div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
         </div>
@@ -1849,18 +2219,18 @@ function renderFixedPaperBlock(paper) {
     if (!paper) {
         return `
         <div class="cfg-row">
-            <div class="cfg-row-label"><span class="req">*</span> 选择试卷</div>
+            <div class="cfg-row-label"><span class="req">*</span> 题目配置</div>
             <div class="cfg-row-control">
                 <div class="paper-pick-zone" onclick="pickExamPaper()">
                     <div class="ppz-icon">+</div>
-                    <div class="ppz-text">选择试卷</div>
+                    <div class="ppz-text">配置题目</div>
                 </div>
             </div>
         </div>`;
     }
     return `
     <div class="cfg-row">
-        <div class="cfg-row-label"><span class="req">*</span> 选择试卷</div>
+        <div class="cfg-row-label"><span class="req">*</span> 题目配置</div>
         <div class="cfg-row-control">
             <div class="paper-source-card selected" style="cursor:default">
                 <div class="psc-title">📄 ${paper.name} <span style="margin-left:6px">${paperModeBadges(paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${paper.status||'启用'}</span></div>
@@ -2043,55 +2413,32 @@ function getPracticeConfig(mode) {
     return activityPracticeConfig[mode];
 }
 
-function renderActivityPracticeConfigPanel(mode, title = '练习模式', subtitle = '可选配置练习入口，当前仅支持题库刷题，可不启用。', placement = '') {
-    const cfg = getPracticeConfig(mode);
+function renderActivityPracticeConfigPanel(mode, title = '是否开放刷题练习', subtitle = '可选配置练习入口，当前仅支持题库刷题，可不启用。', placement = '') {
     const panelId = `practiceConfig_${mode}${placement ? `_${placement}` : ''}`;
-    const selected = cfg.bank;
+    const enabled = !!getPracticeConfig(mode).bank;
     return `
     <div class="cfg-panel activity-practice-panel" id="${panelId}">
-        <div class="cfg-panel-head" onclick="toggleCfgPanel('${panelId}')">
+        <div class="cfg-panel-head">
             <div class="cfg-panel-icon green">🧩</div>
-            <div><div class="cfg-panel-title">${title}</div><div class="cfg-panel-subtitle">${subtitle}</div></div>
-            <span class="cfg-panel-badge optional">可选</span>
-            <span class="cfg-panel-arrow">▼</span>
+            <div>
+                <div class="cfg-panel-title">练习模式</div>
+                <div class="cfg-panel-subtitle">可选开放题库刷题入口，练习成绩不影响正式答题结果</div>
+            </div>
         </div>
         <div class="cfg-panel-body">
-            <div class="practice-layout">
-                <div class="practice-layout-row">
-                    <div class="practice-layout-label">练习模式</div>
-                    <div class="practice-layout-content">
-                        <div class="practice-embed-mode-stack">
-                            ${renderActivityPracticeOptionBlock(mode, 'bank', '题库刷题', '基于已配置题库进行刷题练习，答题后即时展示对错、正确答案和解析。启用后，用户端显示练习入口；未启用时不展示入口。')}
-                        </div>
+            <div class="practice-radio-row">
+                <div class="practice-radio-title">${title}</div>
+                <div class="practice-radio-content">
+                    <div class="qc-radios practice-radio-options" role="radiogroup" aria-label="${title}">
+                        <label>
+                            <input type="radio" name="activityPractice_${mode}" ${enabled ? 'checked' : ''} onchange="setActivityPracticeOpen('${mode}', true)">
+                            <span>是</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="activityPractice_${mode}" ${!enabled ? 'checked' : ''} onchange="setActivityPracticeOpen('${mode}', false)">
+                            <span>否</span>
+                        </label>
                     </div>
-                </div>
-                ${selected ? renderActivityPracticeBaseConfig(mode) : ''}
-            </div>
-        </div>
-    </div>`;
-}
-
-function renderActivityPracticeBaseConfig(mode) {
-    const cfg = getPracticeConfig(mode);
-    const nameValue = cfg.name || quizActivityName || '自动带入活动名称';
-    return `
-    <div class="practice-base-config">
-        <div class="practice-layout-row">
-            <div class="practice-layout-label"><span class="req">*</span>练习活动名称</div>
-            <div class="practice-layout-content">
-                <div class="practice-name-field">
-                    <input class="form-control" value="${escapeAttr(nameValue)}" onchange="setActivityPracticeField('${mode}','name',this.value)">
-                    <span>· 题库练习</span>
-                </div>
-            </div>
-        </div>
-        <div class="practice-layout-row">
-            <div class="practice-layout-label"><span class="req">*</span>练习开放时间范围</div>
-            <div class="practice-layout-content">
-                <div class="time-range">
-                    <input type="datetime-local" class="form-control" value="${cfg.startTime || ''}" onchange="setActivityPracticeField('${mode}','startTime',this.value)">
-                    <span>至</span>
-                    <input type="datetime-local" class="form-control" value="${cfg.endTime || ''}" onchange="setActivityPracticeField('${mode}','endTime',this.value)">
                 </div>
             </div>
         </div>
@@ -2125,6 +2472,18 @@ function toggleActivityPracticeMode(mode, key, checked) {
     refreshFsModal();
 }
 
+function toggleActivityPracticeOpen(mode, event) {
+    if (event) event.stopPropagation();
+    const cfg = getPracticeConfig(mode);
+    cfg.bank = !cfg.bank;
+    refreshFsModal();
+}
+
+function setActivityPracticeOpen(mode, enabled) {
+    getPracticeConfig(mode).bank = enabled;
+    refreshFsModal();
+}
+
 function setActivityPracticeField(mode, field, value) {
     getPracticeConfig(mode)[field] = value;
 }
@@ -2151,7 +2510,7 @@ function renderExamModule7(ec) {
                 '允许跳题：用户可跳过当前题后续再答。',
                 '显示答题卡：用户可通过答题卡切换题目。',
                 '支持提前交卷：用户可在考试时长结束前主动交卷。',
-                '提交后展示成绩：考试模式固定为交卷后自动展示成绩。',
+                '提交后展示成绩：在线考试固定为交卷后自动展示成绩。',
                 '答题解析规则：默认为“活动结束后展示答题解析”，管理员无需配置。',
                 '人工阅卷成绩展示：需人工阅卷的答题活动，默认在全部答卷完成阅卷后展示成绩。',
                 '用户端展示位置：默认展示在正式答题详情页。'
@@ -2180,7 +2539,7 @@ function renderPhasedOverview(g, pc) {
         <div class="qmdc-ov-title">
             <span class="qmdc-ov-emoji">🗓</span>
             <div>
-                <div class="qmdc-ov-name">考试模式 · 多期主题考试</div>
+                <div class="qmdc-ov-name">在线考试 · 多期主题考试</div>
                 <div class="qmdc-ov-desc">适用于同一个活动中按时间开放多期主题试卷的考试场景。每一期可独立配置主题、开放时间、试卷和排名规则，用户只能在对应期次开放时间内参与答题。</div>
             </div>
         </div>
@@ -2213,18 +2572,13 @@ function renderPhasedModule3And4(pc) {
             <span class="cfg-panel-arrow">▼</span>
         </div>
         <div class="cfg-panel-body">
-            <div class="phased-split">
-                <div class="phased-list">
-                    <div class="phased-list-head">
-                        <span>期次列表</span>
-                        <button class="btn btn-outline btn-sm" onclick="addPhase()">+ 新增</button>
-                    </div>
-                    <div class="phased-list-body">
-                        ${pc.phases.map((p, i) => renderPhaseListItem(p, i, idx)).join('')}
-                    </div>
+            <div class="phased-tabs-shell">
+                <div class="phased-tabs-bar">
+                    ${pc.phases.map((p, i) => renderPhaseTab(p, i, idx)).join('')}
+                    <button class="phased-tab-add" type="button" onclick="addPhase()">+ 新增考试场次</button>
                 </div>
-                <div class="phased-detail">
-                    ${cur ? renderPhaseDetail(cur, idx) : '<div style="padding:40px;text-align:center;color:var(--text-tertiary)">暂无期次，请点击左侧「+ 新增」添加</div>'}
+                <div class="phased-tab-detail">
+                    ${cur ? renderPhaseDetail(cur, idx) : '<div style="padding:40px;text-align:center;color:var(--text-tertiary)">暂无期次，请点击上方「+ 新增考试场次」添加</div>'}
                 </div>
             </div>
         </div>
@@ -2240,29 +2594,27 @@ function phaseStatusBadge(p) {
     return '<span class="phase-status ps-active">进行中</span>';
 }
 
-function renderPhaseListItem(p, i, activeIdx) {
+function renderPhaseTab(p, i, activeIdx) {
     const fmtDate = (d) => (d || '').slice(5, 10).replace('-', '.');
     const dateRange = `${fmtDate(p.startDate)} - ${fmtDate(p.endDate)}`;
-    const cfgStatus = p.configured ? '<span class="phase-chip ok">已完成配置</span>' : '<span class="phase-chip warn">未完成配置</span>';
+    const cfgStatus = p.configured ? '已完成配置' : '未完成配置';
     return `
-    <div class="phase-list-item ${i===activeIdx?'active':''}" draggable="true" onclick="selectPhase(${i})" ondragstart="startPhaseDrag(event,${i})" ondragover="event.preventDefault()" ondrop="dropPhase(event,${i})" ondragend="endPhaseDrag()">
-        <div class="pli-main">
-            <div class="pli-drag-handle" title="拖拽调整顺序" aria-label="拖拽调整顺序">⋮⋮</div>
-            <div class="pli-content">
-                <div class="pli-head">
-                    <span class="pli-seq">${p.name}</span>
-                    ${phaseStatusBadge(p)}
-                </div>
-                <div class="pli-theme">${p.theme || '未命名主题'}</div>
-                <div class="pli-date">📅 ${dateRange}</div>
-                <div class="pli-chips">${cfgStatus}</div>
-            </div>
-        </div>
-        <div class="pli-actions">
-            <button class="pli-ic-btn" title="复制期次" onclick="event.stopPropagation();copyPhase(${i})">⧉</button>
-            <button class="pli-ic-btn danger" title="删除期次" onclick="event.stopPropagation();deletePhase(${i})">×</button>
-        </div>
-    </div>`;
+    <button class="phase-tab ${i===activeIdx?'active':''}" type="button" draggable="true" onclick="selectPhase(${i})" ondragstart="startPhaseDrag(event,${i})" ondragover="event.preventDefault()" ondrop="dropPhase(event,${i})" ondragend="endPhaseDrag()">
+        <span class="phase-tab-drag" title="拖拽调整顺序" aria-label="拖拽调整顺序">⋮⋮</span>
+        <span class="phase-tab-main">
+            <span class="phase-tab-top">
+                <strong>${p.name}</strong>
+                ${phaseStatusBadge(p)}
+            </span>
+            <span class="phase-tab-theme">${p.theme || '未命名主题'}</span>
+            <span class="phase-tab-meta">📅 ${dateRange}</span>
+            <span class="phase-tab-chip ${p.configured ? 'ok' : 'warn'}">${cfgStatus}</span>
+        </span>
+        <span class="phase-tab-actions">
+            <button class="pli-ic-btn" type="button" title="复制期次" onclick="event.stopPropagation();copyPhase(${i})">⧉</button>
+            <button class="pli-ic-btn danger" type="button" title="删除期次" onclick="event.stopPropagation();deletePhase(${i})">×</button>
+        </span>
+    </button>`;
 }
 
 function formatPaperTypeScores(paper) {
@@ -2275,35 +2627,43 @@ function formatPaperTypeScores(paper) {
 function paperModeBadges(paper) {
     const mode = paper.mode || '固定题目';
     const modeCls = mode === '固定题目' ? 'badge-green' : 'badge-blue';
-    const strategyText = paper.randomStrategy === 'differentPerUser' || paper.randomStrategy === 'perAttempt'
-        ? '每人试卷不同'
-        : '';
+    const strategyText = mode === '随机抽题' ? '时间触发抽题' : '';
     return `<span class="badge ${modeCls}" style="font-size:11px">${mode}</span>${strategyText ? `<span class="badge badge-yellow" style="font-size:11px;margin-left:6px">${strategyText}</span>` : ''}`;
 }
 
 function renderPhaseDetail(p, i) {
     return `
         <div class="phase-block">
+        <div class="phase-block-title">场次信息</div>
+        <div class="cfg-row" style="border-bottom:none">
+            <div class="cfg-row-label"><span class="req">*</span> 场次名称</div>
+            <div class="cfg-row-control">
+                <input class="form-control" value="${escapeAttr(p.name || formatPhaseCardTitle(i))}" onchange="setPhaseField(${i},'name',this.value)">
+            </div>
+        </div>
+    </div>
+
+        <div class="phase-block">
         <div class="phase-block-title">1. 时间规则</div>
         <div class="cfg-row">
             <div class="cfg-row-label"><span class="req">*</span> 开放时间</div>
             <div class="cfg-row-control">
                 <div style="display:flex;gap:8px;align-items:center">
-                    <input type="date" class="form-control" value="${p.startDate}" onchange="setPhaseField(${i},'startDate',this.value)">
+                    <input type="datetime-local" class="form-control" value="${getDateTimeLocalValue(p.startDate, p.dailyStart || '09:00')}" onchange="setPhaseField(${i},'startDate',this.value)">
                     <span style="color:var(--text-tertiary)">至</span>
-                    <input type="date" class="form-control" value="${p.endDate}" onchange="setPhaseField(${i},'endDate',this.value)">
+                    <input type="datetime-local" class="form-control" value="${getDateTimeLocalValue(p.endDate, p.dailyEnd || '18:00')}" onchange="setPhaseField(${i},'endDate',this.value)">
                 </div>
             </div>
         </div>
         <div class="cfg-row">
-            <div class="cfg-row-label"><span class="req">*</span> 答题时段</div>
+            <div class="cfg-row-label"><span class="req">*</span> 每日答题时段</div>
             <div class="cfg-row-control">
-                <div style="display:flex;gap:12px;align-items:center;max-width:430px">
-                    <input type="time" class="form-control" value="${p.dailyStart || '00:00'}" onchange="setPhaseField(${i},'dailyStart',this.value)">
-                    <span style="color:var(--text-tertiary);font-weight:600">至</span>
-                    <input type="time" class="form-control" value="${p.dailyEnd || '23:59'}" onchange="setPhaseField(${i},'dailyEnd',this.value)">
+                <div style="display:flex;gap:8px;align-items:center">
+                    <input type="time" class="form-control" value="${p.dailyStart || '09:00'}" onchange="setPhaseField(${i},'dailyStart',this.value)">
+                    <span style="color:var(--text-tertiary)">至</span>
+                    <input type="time" class="form-control" value="${p.dailyEnd || '18:00'}" onchange="setPhaseField(${i},'dailyEnd',this.value)">
                 </div>
-                <div class="cfg-row-hint">期次开放期间内，每日 ${p.dailyStart || '00:00'} 至 ${p.dailyEnd || '23:59'} 可进入本期考试。</div>
+                <div class="cfg-row-hint">在开放时间范围内，每天仅该时段允许进入考试，例如 09:00 至 17:00。</div>
             </div>
         </div>
         ${i > 0 ? `
@@ -2332,8 +2692,8 @@ function renderPhaseDetail(p, i) {
             <div class="cfg-row-label"><span class="req">*</span> 选择试卷</div>
             <div class="cfg-row-control">
                 ${p.paper ? `
-                <div class="paper-source-card selected" style="cursor:default">
-                    <div class="psc-title">📄 ${p.paper.name} <span style="margin-left:6px">${paperModeBadges(p.paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${p.paper.status}</span></div>
+                    <div class="paper-source-card selected" style="cursor:default">
+                        <div class="psc-title">📄 ${p.paper.name} <span style="margin-left:6px">${paperModeBadges(p.paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${p.paper.status}</span></div>
                     <div class="psc-meta-grid">
                         <div><span class="psc-meta-lbl">题目数量：</span><span class="psc-meta-val">${p.paper.qCount} 题</span></div>
                         <div><span class="psc-meta-lbl">题型分值：</span><span class="psc-meta-val">${formatPaperTypeScores(p.paper)}</span></div>
@@ -2343,20 +2703,22 @@ function renderPhaseDetail(p, i) {
                         <div><span class="psc-meta-lbl">试卷状态：</span><span class="psc-meta-val">${p.paper.status || '启用'}</span></div>
                     </div>
                     ${p.paper.referenced ? '<div class="cfg-row-hint" style="margin-top:8px;color:var(--warning)">当前试卷已被活动引用，为保证考试数据一致性，试卷总分不支持修改。</div>' : ''}
-                    <div style="margin-top:10px;display:flex;gap:8px">
+                    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
                         <button class="btn btn-outline btn-sm" onclick="pickPhasePaper(${i})">更换试卷</button>
+                        <button class="btn btn-primary btn-sm" onclick="createPhasePaper(${i})">+ 试卷配置</button>
                         <button class="btn btn-ghost btn-sm" onclick="navigateTo('paper-mgmt')">查看试卷</button>
                     </div>
                 </div>` : `
-                <div class="paper-pick-zone" onclick="pickPhasePaper(${i})">
+                <div class="paper-pick-zone" onclick="createPhasePaper(${i})">
                     <div class="ppz-icon">+</div>
-                    <div class="ppz-text">选择试卷</div>
+                    <div class="ppz-text">试卷配置</div>
                 </div>`}
+                <div class="cfg-row-hint" style="margin-top:8px">也可以直接在当前场次下新建试卷，再回填到本场配置中。</div>
             </div>
         </div>
     </div>
 
-    ${renderActivityPracticeConfigPanel(`exam_phase_${i}`, '练习模式', '可为本场考试同步开放题库刷题，练习成绩不计入正式考试成绩、排名或评奖。', `phase_${i}`)}
+    ${renderActivityPracticeConfigPanel(`exam_phase_${i}`, '是否开放刷题练习', '可为本场考试同步开放题库刷题，练习成绩不计入正式考试成绩、排名或评奖。', `phase_${i}`)}
 
     `;
 }
@@ -2370,10 +2732,9 @@ function renderPhaseConfigCard(p, i) {
             <div class="gc-head-row phase-head-row">
                 <span class="gc-drag" title="拖拽排序">⠿</span>
                 <div class="phase-head-title-wrap">
-                    <div class="phase-config-card-title">${formatPhaseCardTitle(i)}</div>
-                    <div class="phase-config-card-sub">${p.theme || '设置试卷、时间和练习模式'}</div>
+                    <div class="phase-config-card-title">${escapeHtml(p.name || formatPhaseCardTitle(i))}</div>
+                    <div class="phase-config-card-sub">${p.theme || '设置试卷、时间和是否开放刷题练习'}</div>
                 </div>
-                ${phaseStatusBadge(p)}
                 <span class="phase-chip ${p.configured ? 'ok' : 'warn'}">${p.configured ? '已完成配置' : '未完成配置'}</span>
                 <div class="phase-config-card-actions">
                     <button class="pli-ic-btn" title="复制期次" onclick="copyPhase(${i})">⧉</button>
@@ -2389,7 +2750,7 @@ function renderPhaseConfigCard(p, i) {
 
 function formatPhaseCardTitle(index) {
     const cn = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-    return `第 ${cn[index] || (index + 1)} 场`;
+    return `第${cn[index] || (index + 1)}场`;
 }
 
 // ---- phased exam mutators ----
@@ -2417,7 +2778,7 @@ function dropPhase(e, targetIdx) {
 }
 function endPhaseDrag() {
     phasedDragIdx = -1;
-    document.querySelectorAll('.phase-list-item.dragging').forEach(el => el.classList.remove('dragging'));
+    document.querySelectorAll('.phase-tab.dragging').forEach(el => el.classList.remove('dragging'));
 }
 function addPhase() {
     const n = phasedConfig.phases.length + 1;
@@ -2431,6 +2792,235 @@ function addPhase() {
     phasedCurrentIdx = phasedConfig.phases.length - 1;
     refreshFsModal();
 }
+
+function openAddDailyExamModal() {
+    openDailyExamConfigModal({ mode: 'add' });
+}
+
+function openEditDailyExamModal() {
+    openDailyExamConfigModal({ mode: 'edit' });
+}
+
+function openDailyExamConfigModal({ mode = 'add' } = {}) {
+    const isEdit = mode === 'edit';
+    const defaultStart = getDateTimeLocalValue(dailyExamConfig.startDate || '2026-06-09', '00:00');
+    const defaultEnd = getDateTimeLocalValue(dailyExamConfig.endDate || dailyExamConfig.startDate || '2026-06-09', '23:59');
+    const defaultDailyStart = dailyExamConfig.dailyStart || '09:00';
+    const defaultDailyEnd = dailyExamConfig.dailyEnd || '18:00';
+    const defaultDays = getDailyExamModalGeneratedDays(defaultStart, defaultEnd);
+    openModal(isEdit ? '编辑每日一卷' : '添加每日一卷', `
+        <div class="form-group">
+            <label><span class="req">*</span> 场次名称</label>
+            <input id="dailyExamModalName" class="form-control" value="${escapeAttr(dailyExamConfig.name || '每日一卷')}" placeholder="请输入场次名称">
+        </div>
+        <div class="form-group">
+            <label><span class="req">*</span> 答题开放时间</label>
+            <div class="date-range-control">
+                <input id="dailyExamModalStart" type="datetime-local" class="form-control" value="${defaultStart}">
+                <span>至</span>
+                <input id="dailyExamModalEnd" type="datetime-local" class="form-control" value="${defaultEnd}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label><span class="req">*</span> 每日时段</label>
+            <div class="date-range-control daily-exam-time-range">
+                <input id="dailyExamModalDailyStart" type="time" class="form-control" value="${defaultDailyStart}">
+                <span>至</span>
+                <input id="dailyExamModalDailyEnd" type="time" class="form-control" value="${defaultDailyEnd}">
+            </div>
+            <p class="hint">每天仅该时段允许进入当日试卷。</p>
+        </div>
+        <div class="form-group">
+            <label><span class="req">*</span> 每卷考试时长</label>
+            <div class="num-input"><input id="dailyExamModalDuration" type="number" class="form-control" min="1" value="${dailyExamConfig.duration || 60}"><span class="unit">分钟</span></div>
+        </div>
+        <div class="daily-exam-generate-hint" id="dailyExamGenerateHint">按当前开放时间将生成 <strong>${defaultDays}</strong> 天每日试卷。</div>
+    `, () => {
+        const name = document.getElementById('dailyExamModalName')?.value.trim();
+        const start = document.getElementById('dailyExamModalStart')?.value;
+        const end = document.getElementById('dailyExamModalEnd')?.value;
+        const dailyStart = document.getElementById('dailyExamModalDailyStart')?.value;
+        const dailyEnd = document.getElementById('dailyExamModalDailyEnd')?.value;
+        const duration = document.getElementById('dailyExamModalDuration')?.value;
+        if (!name || !start || !end || !dailyStart || !dailyEnd) {
+            alert('请填写场次名称、答题开放时间和每日时段。');
+            return false;
+        }
+        if (end <= start) {
+            alert('答题开放结束时间必须晚于开始时间。');
+            return false;
+        }
+        if (dailyEnd <= dailyStart) {
+            alert('每日时段结束时刻必须晚于开始时刻。');
+            return false;
+        }
+        if (isEdit) {
+            confirmSaveDailyExamConfig(name, start, end, duration, dailyStart, dailyEnd);
+            return false;
+        }
+        saveDailyExamFromModal(name, start, end, duration, dailyStart, dailyEnd);
+    }, { confirmText: isEdit ? '确认保存' : '确认' });
+    bindDailyExamModalGeneratedHint();
+}
+
+function getDailyExamModalGeneratedDays(start, end) {
+    const [startDate] = String(start || '').split('T');
+    const [endDate] = String(end || '').split('T');
+    return getDateRangeList(startDate, endDate).length;
+}
+
+function bindDailyExamModalGeneratedHint() {
+    const startInput = document.getElementById('dailyExamModalStart');
+    const endInput = document.getElementById('dailyExamModalEnd');
+    const hint = document.getElementById('dailyExamGenerateHint');
+    if (!startInput || !endInput || !hint) return;
+    const updateHint = () => {
+        const days = getDailyExamModalGeneratedDays(startInput.value, endInput.value);
+        hint.innerHTML = days
+            ? `按当前开放时间将生成 <strong>${days}</strong> 天每日试卷。`
+            : '请填写有效的开放时间，系统将自动计算生成天数。';
+    };
+    startInput.addEventListener('change', updateHint);
+    endInput.addEventListener('change', updateHint);
+    startInput.addEventListener('input', updateHint);
+    endInput.addEventListener('input', updateHint);
+}
+
+function saveDailyExamFromModal(name, start, end, duration, dailyStart, dailyEnd) {
+    const [startDate] = String(start).split('T');
+    const [endDate] = String(end).split('T');
+    dailyExamConfig.name = name;
+    dailyExamConfig.startDate = startDate;
+    dailyExamConfig.endDate = endDate;
+    dailyExamConfig.dailyStart = dailyStart || '09:00';
+    dailyExamConfig.dailyEnd = dailyEnd || '18:00';
+    dailyExamConfig.duration = Math.max(1, Number(duration) || 1);
+    dailyExamAdded = true;
+    normalizeDailyExamPapers();
+    refreshFsModal();
+}
+
+function confirmSaveDailyExamConfig(name, start, end, duration, dailyStart, dailyEnd) {
+    const [startDate] = String(start).split('T');
+    const [endDate] = String(end).split('T');
+    const nextDates = getDateRangeList(startDate, endDate);
+    const currentDates = new Set((dailyExamConfig.papers || []).map(item => item.date));
+    const keptCount = nextDates.filter(date => currentDates.has(date)).length;
+    const removedCount = Math.max(0, currentDates.size - keptCount);
+    openModal('确认保存每日一卷配置？', `
+        <div class="info-box yellow">
+            <strong>确认保存后，系统将按新的开放日期范围重新生成每日试卷日期。</strong>
+            <p style="margin-top:8px">仍在新日期范围内的日期会保留原有试卷配置；超出新范围的 ${removedCount} 个日期配置将不再显示。</p>
+        </div>
+        <div class="daily-exam-confirm-summary">
+            <div><span>新开放时间</span><strong>${formatDateLabel(startDate)} ${String(start).split('T')[1] || '09:00'} 至 ${formatDateLabel(endDate)} ${String(end).split('T')[1] || '18:00'}</strong></div>
+            <div><span>每日时段</span><strong>${dailyStart} 至 ${dailyEnd}</strong></div>
+            <div><span>将生成日期</span><strong>${nextDates.length} 天</strong></div>
+            <div><span>每卷考试时长</span><strong>${Math.max(1, Number(duration) || 1)} 分钟</strong></div>
+        </div>
+    `, () => {
+        saveDailyExamFromModal(name, start, end, duration, dailyStart, dailyEnd);
+    }, { confirmText: '确认保存' });
+}
+
+function clonePaperForConfig(paper) {
+    if (!paper) return null;
+    return {
+        name: paper.name,
+        mode: paper.mode,
+        randomStrategy: paper.randomStrategy,
+        retakeStrategy: paper.retakeStrategy,
+        qCount: paper.qCount ?? paper.count ?? 0,
+        total: paper.total || 0,
+        subjective: paper.subjective || 0,
+        typeScores: paper.typeScores || [],
+        composition: paper.composition || (paper.mode === '固定题目' ? '固定题目' : '随机抽题'),
+        scope: paper.scope || '考试活动',
+        status: paper.status || '已发布',
+        referenced: !!paper.referenced,
+        updatedAt: paper.updatedAt || ''
+    };
+}
+
+function buildDailyExamPaperItem(date, index, previous) {
+    return {
+        date,
+        name: previous?.name || `第${index + 1}天`,
+        theme: previous?.theme || `第${index + 1}天：在线考试`,
+        paper: previous?.paper || null,
+        configured: !!previous?.paper
+    };
+}
+
+function normalizeDailyExamPapers() {
+    if (!dailyExamConfig || typeof dailyExamConfig !== 'object') return;
+    const dates = getDateRangeList(dailyExamConfig.startDate, dailyExamConfig.endDate);
+    if (!Array.isArray(dailyExamConfig.papers)) dailyExamConfig.papers = [];
+    if (!dates.length) {
+        dailyExamConfig.papers = [];
+        dailyExamCurrentIdx = 0;
+        return;
+    }
+    const byDate = new Map(dailyExamConfig.papers.map(item => [item.date, item]));
+    dailyExamConfig.papers = dates.map((date, index) => buildDailyExamPaperItem(date, index, byDate.get(date)));
+    dailyExamCurrentIdx = Math.min(dailyExamCurrentIdx, dailyExamConfig.papers.length - 1);
+}
+
+function setDailyExamField(key, val) {
+    if (key === 'duration') dailyExamConfig.duration = Math.max(1, Number(val) || 1);
+    else dailyExamConfig[key] = val;
+    if (key === 'startDate' || key === 'endDate') normalizeDailyExamPapers();
+    refreshFsModal();
+}
+
+function regenerateDailyExamPapers() {
+    normalizeDailyExamPapers();
+    refreshFsModal();
+}
+
+function selectDailyExamDay(idx) {
+    const days = dailyExamConfig.papers || [];
+    dailyExamCurrentIdx = Math.min(Math.max(0, idx), Math.max(0, days.length - 1));
+    refreshFsModal();
+}
+
+function setDailyExamDayField(indexOrKey, keyOrVal, maybeVal) {
+    const hasIndex = typeof indexOrKey === 'number';
+    const index = hasIndex ? indexOrKey : dailyExamCurrentIdx;
+    const key = hasIndex ? keyOrVal : indexOrKey;
+    const val = hasIndex ? maybeVal : keyOrVal;
+    const day = dailyExamConfig.papers?.[index];
+    if (!day) return;
+    day[key] = val;
+    dailyExamCurrentIdx = index;
+    refreshFsModal();
+}
+
+function clearDailyExamPaper(index = dailyExamCurrentIdx) {
+    const day = dailyExamConfig.papers?.[index];
+    if (!day) return;
+    day.paper = null;
+    day.configured = false;
+    dailyExamCurrentIdx = index;
+    refreshFsModal();
+}
+
+function pickDailyExamPaper(index = dailyExamCurrentIdx) {
+    dailyExamCurrentIdx = index;
+    paperDrawerTarget = `daily-exam-${index}`;
+    phasedPaperDrawerTab = 'select';
+    paperDrawerOpen = true;
+    refreshFsModal();
+}
+
+function createDailyExamPaper(index = dailyExamCurrentIdx) {
+    dailyExamCurrentIdx = index;
+    paperDrawerTarget = `daily-exam-${index}`;
+    phasedPaperDrawerTab = 'create';
+    paperDrawerOpen = true;
+    refreshFsModal();
+}
+
 function copyPhase(i) {
     const src = phasedConfig.phases[i]; if (!src) return;
     const n = phasedConfig.phases.length + 1;
@@ -2460,6 +3050,14 @@ function setPhaseField(i, key, val) {
 }
 function pickPhasePaper(i) {
     paperDrawerTarget = 'phase-' + i; // phased exam paper slot
+    phasedPaperDrawerTab = 'select';
+    paperDrawerOpen = true;
+    refreshFsModal();
+}
+
+function createPhasePaper(i) {
+    paperDrawerTarget = 'phase-' + i;
+    phasedPaperDrawerTab = 'create';
     paperDrawerOpen = true;
     refreshFsModal();
 }
@@ -2490,16 +3088,21 @@ function setExamField(key, val) {
 function setExamDailyTime(enabled) { examConfig.dailyTimeEnabled = enabled; refreshFsModal(); }
 function normalizeDailyScoreConfig() {
     dailyScoreConfig.maxDailyAttempts = Math.max(1, Number(dailyScoreConfig.maxDailyAttempts) || 1);
+    dailyScoreConfig.qualifiedScoreEnabled = dailyScoreConfig.qualifiedScoreEnabled !== false;
     dailyScoreConfig.qualifiedScore = Math.max(0, Number(dailyScoreConfig.qualifiedScore) || 0);
+    dailyScoreConfig.singleWrongTerminate = !!dailyScoreConfig.singleWrongTerminate;
     if (dailyScoreConfig.maxDailyAttempts <= 1) {
         dailyScoreConfig.dailyScoreRule = 'highest';
     }
 }
 function setDailyScoreField(key, val) {
     if (key === 'maxDailyAttempts') dailyScoreConfig.maxDailyAttempts = Math.max(1, Number(val) || 1);
+    else if (key === 'qualifiedScoreEnabled') dailyScoreConfig.qualifiedScoreEnabled = !!val;
     else if (key === 'qualifiedScore') dailyScoreConfig.qualifiedScore = Math.max(0, Number(val) || 0);
+    else if (key === 'singleWrongTerminate') dailyScoreConfig.singleWrongTerminate = !!val;
     else dailyScoreConfig[key] = val;
     normalizeDailyScoreConfig();
+    if (quizStep === 1) rerenderMain();
     refreshFsModal();
 }
 
@@ -2564,24 +3167,22 @@ function setDailyStreakMilestoneField(idx, key, val) {
 // ---- Step 5 draft mapping (for demo save/preview/publish) ----
 function buildQuizCreateDraft() {
     normalizeDailyStreakReward();
-    const dailySourceMode = dailyQMode === 'fixed' ? 'fixed' : 'random';
-    const activeDailySource = dailySourceMode === 'fixed'
-        ? {
-            mode: 'fixed',
-            fixedConfig: {
-                days: dailyFixedConfig.days.map(day => ({
-                    date: day.date,
-                    theme: day.theme,
-                    questions: cloneDailyFixedQuestions(day.questions)
-                }))
-            },
-            randomRules: []
+    syncDailyDateConfigsWithOpenRange();
+    const activeDailySource = {
+        mode: 'daily-by-date',
+        batchRules: dailyRandomRules.map(rule => ({ ...rule })),
+        fixedConfig: {
+            days: dailyFixedConfig.days.map(day => ({
+                date: day.date,
+                theme: day.theme,
+                isOpen: day.isOpen !== false,
+                hasFixedPaper: !!(day.hasFixedPaper || (day.questions || []).length),
+                hasBatchRule: !!day.hasBatchRule,
+                randomRules: cloneDailyPlanRules(day.randomRules || []),
+                questions: cloneDailyFixedQuestions(day.questions)
+            }))
         }
-        : {
-            mode: 'random',
-            fixedConfig: { days: [] },
-            randomRules: dailyRandomRules.map(rule => ({ ...rule }))
-        };
+    };
     return {
         groups: (groups || []).map(g => ({
             name: g.name,
@@ -2601,14 +3202,17 @@ function buildQuizCreateDraft() {
                 }
             }
         ])),
-        scoring: {
+            scoring: {
             totalScore: quizTotalScore,
             dailySource: activeDailySource,
             dailyTime: { ...dailyTimeConfig },
+            dailyScore: { ...dailyScoreConfig },
             levelRules: levels.map(level => ({
                 name: level.name,
                 totalScore: level.totalScore,
                 passScore: level.passScore,
+                passQuestions: getLevelPassQuestions(level),
+                maxAttempts: getLevelMaxAttempts(level),
                 rules: getLevelRules(level).map(rule => ({ ...rule })),
                 fixedQuestions: getLevelFixedQuestions(level).map(question => ({ ...question })),
                 validation: levelQuestionMode === 'fixed'
@@ -2625,7 +3229,8 @@ function buildQuizCreateDraft() {
             dailyStreak: {
                 enabled: !!dailyStreakReward.enabled,
                 milestones: (dailyStreakReward.milestones || []).map(m => ({ days: m.days, points: m.points }))
-            }
+            },
+            dailyPoints: JSON.parse(JSON.stringify(dailyPointsConfig))
         }
     };
 }
@@ -2709,14 +3314,21 @@ function selectPaperFromDrawer(idx) {
     if (!paper || paper.status === '停用') { alert('仅支持选择可用状态的试卷'); return; }
     if (paperDrawerTarget === -1) {
         // Legacy fixed paper slot
-        examConfig.selectedPaper = { name: paper.name, mode: paper.mode, randomStrategy: paper.randomStrategy, retakeStrategy: paper.retakeStrategy, qCount: paper.qCount, total: paper.total, subjective: paper.subjective, typeScores: paper.typeScores || [], composition: paper.composition, status: paper.status, updatedAt: paper.updatedAt };
+        examConfig.selectedPaper = clonePaperForConfig(paper);
     } else if (typeof paperDrawerTarget === 'string' && paperDrawerTarget.startsWith('phase-')) {
         // Unified phase paper slot
         const phaseIdx = parseInt(paperDrawerTarget.replace('phase-', ''), 10);
         const phase = phasedConfig.phases[phaseIdx];
         if (!phase) return;
-        phase.paper = { name: paper.name, mode: paper.mode, randomStrategy: paper.randomStrategy, retakeStrategy: paper.retakeStrategy, qCount: paper.qCount, total: paper.total, typeScores: paper.typeScores || [], composition: paper.composition, scope: paper.scope || '考试活动', status: paper.status, referenced: !!paper.referenced };
+        phase.paper = clonePaperForConfig(paper);
         phase.configured = true;
+    } else if (typeof paperDrawerTarget === 'string' && paperDrawerTarget.startsWith('daily-exam-')) {
+        const dayIdx = parseInt(paperDrawerTarget.replace('daily-exam-', ''), 10);
+        const day = dailyExamConfig.papers?.[dayIdx];
+        if (!day) return;
+        day.paper = clonePaperForConfig(paper);
+        day.configured = true;
+        dailyExamCurrentIdx = dayIdx;
     } else {
         // userChoicePapers slot
         const p = (examConfig.userChoicePapers || [])[paperDrawerTarget];
@@ -2750,18 +3362,52 @@ function renderPaperDrawer() {
         </div>`;
     }).join('');
 
+    const phaseIdx = typeof paperDrawerTarget === 'string' && paperDrawerTarget.startsWith('phase-')
+        ? parseInt(paperDrawerTarget.replace('phase-', ''), 10)
+        : -1;
+    const phase = phaseIdx >= 0 ? phasedConfig.phases[phaseIdx] : null;
+    const dailyExamIdx = typeof paperDrawerTarget === 'string' && paperDrawerTarget.startsWith('daily-exam-')
+        ? parseInt(paperDrawerTarget.replace('daily-exam-', ''), 10)
+        : -1;
+    const dailyExamDay = dailyExamIdx >= 0 ? dailyExamConfig.papers?.[dailyExamIdx] : null;
+    const activeTab = phasedPaperDrawerTab === 'create' ? 'create' : 'select';
+    const createMountId = 'phasePaperEditorMount';
+    const createEditor = activeTab === 'create'
+        ? `<div id="${createMountId}" class="pd-paper-editor-mount"></div>`
+        : '';
+    if (activeTab === 'create') {
+        queueMicrotask(() => {
+            const host = document.getElementById(createMountId);
+            if (host) {
+                openPaperEditor(null, {
+                    mountId: createMountId,
+                    embedded: true,
+                    afterSave: (paper) => {
+                        if (!paper) return;
+                        if (phase) {
+                            phase.paper = clonePaperForConfig(paper);
+                            phase.configured = true;
+                        }
+                        if (dailyExamDay) {
+                            dailyExamDay.paper = clonePaperForConfig(paper);
+                            dailyExamDay.configured = true;
+                            dailyExamCurrentIdx = dailyExamIdx;
+                        }
+                        closePaperDrawer();
+                    }
+                });
+            }
+        });
+    }
+
     return `
     <div class="pd-overlay show" onclick="closePaperDrawer()">
         <div class="pd-drawer" onclick="event.stopPropagation()">
-            <div class="pd-head">
-                <div>
-                    <div class="pd-title">选择试卷</div>
-                    <div class="pd-subtitle">从试卷库中选择一套启用状态的试卷。停用试卷不会出现在待选列表中。</div>
-                </div>
-                <button class="pd-close" onclick="closePaperDrawer()">✕</button>
-            </div>
+            <button class="pd-close pd-close-floating" onclick="closePaperDrawer()">✕</button>
             <div class="pd-body">
-                ${rows || '<div class="pd-empty">暂无可选试卷。请先在「试卷管理」中创建并启用试卷。</div>'}
+                ${activeTab === 'create'
+                    ? createEditor || '<div class="pd-empty">正在载入试卷编辑器...</div>'
+                    : (rows || '<div class="pd-empty">暂无可选试卷。请先在「试卷管理」中创建并启用试卷。</div>')}
             </div>
         </div>
     </div>`;
@@ -2772,78 +3418,33 @@ function renderPaperDrawer() {
 // ===============================
 function renderDailyModeConfig() {
     normalizeDailyScoreConfig();
-    const allowMultiDailyAttempts = Number(dailyScoreConfig.maxDailyAttempts) > 1;
-    dailyQMode = dailyQMode === 'fixed' ? 'fixed' : 'random';
+    dailyQMode = 'random';
     return `
     ${renderQuizTotalScorePanel({
         title: '每日总分',
-        subtitle: '请先选择本次每日答题的每日总分，再配置题目来源和抽题规则',
+        subtitle: '请先选择本次每日答题的每日总分，再按开放日期配置每日题目',
         label: '每日总分',
-        hint: '发布后，每日总分不支持修改，请确认后再发布活动。'
+        hint: '发布后，每日总分不支持修改，请确认后再发布活动。',
+        extraRows: renderDailyQualifiedScoreRow()
     })}
     <!-- 1. 题目来源 -->
     <div class="cfg-panel" id="dailyQSource">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('dailyQSource')">
             <div class="cfg-panel-icon green">📄</div>
-            <div><div class="cfg-panel-title">题目来源</div><div class="cfg-panel-subtitle">支持每日随机抽题和每日固定题目</div></div>
+            <div class="daily-panel-title-wrap">
+                <div class="cfg-panel-title">每日答题配置</div>
+                <div class="cfg-panel-subtitle">系统将按开放日期自动生成日历；可先批量配置随机抽题规则，再为单日设置抽题规则、固定题目或开放状态。</div>
+            </div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
         </div>
         <div class="cfg-panel-body">
-            <div class="daily-source-tabs">
-                <div class="radio-pill ${dailyQMode === 'random' ? 'active' : ''}" onclick="selectDailyQMode('random')"><input type="radio" name="dailyQMode" ${dailyQMode === 'random' ? 'checked' : ''}>每日随机抽题</div>
-                <div class="radio-pill ${dailyQMode === 'fixed' ? 'active' : ''}" onclick="selectDailyQMode('fixed')"><input type="radio" name="dailyQMode" ${dailyQMode === 'fixed' ? 'checked' : ''}>每日固定题目</div>
+            <div class="daily-panel-body-action">
+                <button type="button" class="btn btn-primary btn-sm" onclick="openDailyBatchRuleModal()">批量配置抽题规则</button>
             </div>
-            ${dailyQMode === 'fixed' ? renderDailyFixedSourceContent() : renderDailyRandomSourceContent()}
+            ${renderDailyDayConfigContent()}
         </div>
     </div>
-
-    ${renderActivityPracticeConfigPanel('daily', '练习模式', '每日答题可同步提供题库刷题，练习成绩不影响每日答题累计总分和达标天数。', 'after-daily-source')}
-
-    ${dailyQMode === 'fixed' ? '' : renderDailyTimePanel()}
-
-    <!-- 3. 参与次数 -->
-    <div class="cfg-panel" id="dailyAttempts">
-        <div class="cfg-panel-head" onclick="toggleCfgPanel('dailyAttempts')">
-            <div class="cfg-panel-icon green">🔄</div>
-            <div><div class="cfg-panel-title">参与次数与成绩</div></div>
-            <span class="cfg-panel-badge essential">必填</span>
-            <span class="cfg-panel-arrow">▼</span>
-        </div>
-        <div class="cfg-panel-body">
-            <div class="dev-rule-note">
-                <strong>研发规则</strong>
-                <span>后台统计默认同时展示“累计总分”和“达标天数”；管理员仅需配置达标分数。</span>
-            </div>
-            <div class="cfg-row" data-dev-rule="daily.maxDailyAttempts 控制本区块条件渲染：<=1 时隐藏 dailyScoreRule 和 averageDaily；>1 时展示。">
-                <div class="cfg-row-label"><span class="req">*</span> 每人每天最多答题次数</div>
-                <div class="cfg-row-control">
-                    <div class="num-input"><input type="number" value="${dailyScoreConfig.maxDailyAttempts}" min="1" onchange="setDailyScoreField('maxDailyAttempts',this.value)"><span class="unit">次</span></div>
-                    <div class="cfg-row-hint">0 表示不限。</div>
-                </div>
-            </div>
-            ${allowMultiDailyAttempts ? `
-            <div class="cfg-row" data-dev-rule="仅当 maxDailyAttempts > 1 时展示；否则当天成绩直接取唯一一次答题成绩。">
-                <div class="cfg-row-label">每日成绩取值</div>
-                <div class="cfg-row-control">
-                    <div class="radio-pills">
-                        <div class="radio-pill ${dailyScoreConfig.dailyScoreRule==='highest'?'active':''}" onclick="setDailyScoreField('dailyScoreRule','highest')"><input type="radio" name="dailyScoreRule" ${dailyScoreConfig.dailyScoreRule==='highest'?'checked':''}>每日最高分</div>
-                        <div class="radio-pill ${dailyScoreConfig.dailyScoreRule==='last'?'active':''}" onclick="setDailyScoreField('dailyScoreRule','last')"><input type="radio" name="dailyScoreRule" ${dailyScoreConfig.dailyScoreRule==='last'?'checked':''}>最后一次成绩</div>
-                    </div>
-                    <div class="cfg-row-hint">同一天多次答题时，用该规则确定当天计入总成绩的分数。</div>
-                </div>
-            </div>
-            ` : ''}
-            <div class="cfg-row" data-dev-rule="后台默认同时计算累计总分和达标天数；当天计入成绩 >= qualifiedScore 记为 1 个达标天数。">
-                <div class="cfg-row-label"><span class="req">*</span> 达标分数</div>
-                <div class="cfg-row-control">
-                    <div class="num-input"><input type="number" value="${dailyScoreConfig.qualifiedScore}" min="0" onchange="setDailyScoreField('qualifiedScore',this.value)"><span class="unit">分</span></div>
-                    <div class="cfg-row-hint">当天计入成绩达到该分数，即记为 1 个达标天数。</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- 4. 默认规则 -->
     <div class="cfg-panel" id="dailyDefaultRules">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('dailyDefaultRules')">
@@ -2867,15 +3468,15 @@ function renderDailyModeConfig() {
     </div>`;
 }
 
-function renderDailyTimeFields({ compact = false } = {}) {
+function renderDailyTimeFields({ compact = false, context = 'modal' } = {}) {
     return `
         <div class="cfg-row ${compact ? 'daily-time-inline-row' : ''}">
-            <div class="cfg-row-label"><span class="req">*</span> 答题开放时间</div>
+            <div class="cfg-row-label"><span class="req">*</span> 答题开放日期</div>
             <div class="cfg-row-control">
                 <div class="date-range-control">
-                    <input type="date" class="form-control" value="${getDatePartFromDateTime(dailyTimeConfig.startTime)}" onchange="setDailyTimeField('startTime',this.value)">
+                    <input type="date" class="form-control" value="${getDateOnlyValue(dailyTimeConfig.startTime)}" onchange="setDailyTimeField('startTime',this.value,'${context}')">
                     <span style="color:var(--text-tertiary)">至</span>
-                    <input type="date" class="form-control" value="${getDatePartFromDateTime(dailyTimeConfig.endTime)}" onchange="setDailyTimeField('endTime',this.value)">
+                    <input type="date" class="form-control" value="${getDateOnlyValue(dailyTimeConfig.endTime)}" onchange="setDailyTimeField('endTime',this.value,'${context}')">
                 </div>
                 <div class="cfg-row-hint">固定题目模式会根据开放日期范围生成需要配置的每日题目日期。</div>
             </div>
@@ -2883,39 +3484,15 @@ function renderDailyTimeFields({ compact = false } = {}) {
         <div class="cfg-row ${compact ? 'daily-time-inline-row' : ''}">
             <div class="cfg-row-label"><span class="req">*</span> 答题时段</div>
             <div class="cfg-row-control">
-                <div style="display:flex;gap:8px;align-items:center">
-                    <input type="time" value="${dailyTimeConfig.dailyStart}" style="padding:6px 10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);font-size:13px" onchange="setDailyTimeField('dailyStart',this.value)">
+                <div class="date-range-control">
+                    <input type="time" class="form-control" value="${dailyTimeConfig.dailyStart || ''}" onchange="setDailyTimeField('dailyStart',this.value,'${context}')">
                     <span style="color:var(--text-tertiary)">至</span>
-                    <input type="time" value="${dailyTimeConfig.dailyEnd}" style="padding:6px 10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);font-size:13px" onchange="setDailyTimeField('dailyEnd',this.value)">
+                    <input type="time" class="form-control" value="${dailyTimeConfig.dailyEnd || ''}" onchange="setDailyTimeField('dailyEnd',this.value,'${context}')">
                 </div>
+                <div class="cfg-row-hint">用户每天仅可在该时段内进入答题。</div>
             </div>
         </div>
-        <div class="cfg-row ${compact ? 'daily-time-inline-row' : ''}">
-            <div class="cfg-row-label">每题限时</div>
-            <div class="cfg-row-control">
-                <div style="display:flex;gap:8px;align-items:center">
-                    <label class="switch" style="margin-right:8px"><input type="checkbox" ${dailyTimeConfig.timeLimitEnabled ? 'checked' : ''} onchange="setDailyTimeField('timeLimitEnabled',this.checked)"><span class="sw-slider"></span></label>
-                    <div class="num-input"><input type="number" value="${dailyTimeConfig.timeLimitSeconds}" min="5" onchange="setDailyTimeField('timeLimitSeconds',this.value)"><span class="unit">秒</span></div>
-                </div>
-                <div class="cfg-row-hint">超时后自动进入下一题或提交当前答案。</div>
-            </div>
-        </div>`;
-}
-
-function renderDailyTimePanel() {
-    return `
-    <!-- 2. 答题时间 -->
-    <div class="cfg-panel" id="dailyTime">
-        <div class="cfg-panel-head" onclick="toggleCfgPanel('dailyTime')">
-            <div class="cfg-panel-icon green">⏱</div>
-            <div><div class="cfg-panel-title">答题时间</div><div class="cfg-panel-subtitle">活动开放时间、答题时段、每题限时</div></div>
-            <span class="cfg-panel-badge essential">必填</span>
-            <span class="cfg-panel-arrow">▼</span>
-        </div>
-        <div class="cfg-panel-body">
-            ${renderDailyTimeFields()}
-        </div>
-    </div>`;
+        `;
 }
 
 function renderDailyRandomSourceContent() {
@@ -2924,6 +3501,13 @@ function renderDailyRandomSourceContent() {
             <div class="cfg-row">
                 <div class="cfg-row-label"><span class="req">*</span> 随机抽题规则</div>
                 <div class="cfg-row-control">
+                    <div class="daily-rules-topbar">
+                        <div></div>
+                        <div class="daily-batch-time-control">
+                            <span>批量设置每题时限</span>
+                            <div class="num-input"><input type="number" value="${getDailyRandomBatchTimeLimit()}" min="5" onchange="batchSetDailyRandomTimeLimit(this.value)"><span class="unit">秒</span></div>
+                        </div>
+                    </div>
                     <div id="dailyRandomDrawRules">
                         ${dailyRandomRules.map((rule, idx) => renderScoreDrawRuleRow(rule, idx, 'daily', dailyRandomRules.length)).join('')}
                     </div>
@@ -2931,6 +3515,7 @@ function renderDailyRandomSourceContent() {
                         <button type="button" class="btn btn-outline btn-sm" onclick="addDailyRandomRule()">+ 新增抽题规则</button>
                         <div style="font-size:12px;color:var(--text-tertiary)">已配置总分：<strong style="color:var(--primary)">${getRuleTotal(dailyRandomRules)}</strong> / ${quizTotalScore} 分</div>
                     </div>
+                    <div class="info-box yellow" style="margin-top:8px">⚠ 每日答题仅支持标准答案题：单选题、多选题、判断题、填空题、排序题，至少配置 1 条抽题规则。</div>
                 </div>
             </div>
     `;
@@ -2943,23 +3528,307 @@ function renderDailyFixedSourceContent() {
     `;
 }
 
+function renderDailyDayConfigContent() {
+    syncDailyDateConfigsWithOpenRange();
+    const days = getDailyConfigDays();
+    const current = days[dailyFixedCurrentIdx] || days[0];
+    const batchState = getScoreValidationState(dailyRandomRules);
+    const batchAppliedCount = days.filter(day => getDailyDateStatus(day).key === 'batch').length;
+    const calendarCells = getDailyCalendarCells(days);
+    const monthSummary = getDailyCalendarStatusSummary(days);
+    const batchMeta = { batchState, batchAppliedCount };
+    const openStart = getDateOnlyValue(dailyTimeConfig.startTime);
+    const openEnd = getDateOnlyValue(dailyTimeConfig.endTime);
+    return `
+        <div class="daily-open-date-summary">
+            <span>答题开放日期</span>
+            <strong>${openStart ? formatDateLabel(openStart) : '未设置'} 至 ${openEnd ? formatDateLabel(openEnd) : '未设置'}</strong>
+        </div>
+        <div class="daily-config-shell">
+            <div class="daily-config-calendar">
+                <div class="daily-config-calendar-head">
+                    <div>
+                        <div class="daily-plan-calendar-title">开放日期日历</div>
+                        <div class="daily-plan-calendar-subtitle">共 ${days.length} 天 · 来源于基本信息的开放日期范围</div>
+                    </div>
+                    <div class="daily-calendar-summary">
+                        <strong>${monthSummary.configured}</strong>
+                        <span>已配置</span>
+                    </div>
+                </div>
+                <div class="daily-calendar-month">
+                    <span>‹</span>
+                    <strong>${getDailyCalendarMonthTitle(days)}</strong>
+                    <span>›</span>
+                </div>
+                <div class="daily-calendar-weekdays">
+                    <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span>
+                </div>
+                <div class="daily-calendar-grid">
+                    ${calendarCells.map(cell => cell.type === 'day'
+                        ? renderDailyCalendarCard(cell.day, cell.idx)
+                        : `<span class="daily-calendar-placeholder">${parseDateOnly(cell.date)?.getDate() || ''}</span>`).join('')}
+                </div>
+                <div class="daily-calendar-counts">
+                    <span><strong>${monthSummary.batch}</strong> 随机抽题</span>
+                    <span><strong>${monthSummary.fixed}</strong> 固定题目</span>
+                    <span><strong>${monthSummary.empty}</strong> 未配置</span>
+                    <span><strong>${monthSummary.closed}</strong> 不开放</span>
+                </div>
+                <div class="daily-calendar-legend">
+                    <span><i class="legend-dot batch"></i>已应用随机抽题规则</span>
+                    <span><i class="legend-dot fixed"></i>已设置每日固定题目</span>
+                    <span><i class="legend-dot empty"></i>未配置（默认状态）</span>
+                    <span><i class="legend-dot closed"></i>当天不开放答题</span>
+                </div>
+            </div>
+            <div class="daily-config-detail">
+                ${current ? renderDailyConfigActionHeader(current, batchMeta) : ''}
+                ${current ? renderDailySingleDayPanel(current) : '<div class="daily-fixed-empty">请先在基本信息中配置开放日期范围。</div>'}
+            </div>
+        </div>`;
+}
+
+function renderDailyConfigActionHeader(day, { batchState, batchAppliedCount }) {
+    const status = getDailyDateStatus(day);
+    const modeText = status.key === 'fixed'
+        ? '每日固定题目'
+        : status.key === 'batch'
+            ? '随机抽题规则'
+            : status.key === 'closed'
+                ? '不开放'
+                : '未配置';
+    return `
+        <div class="daily-config-current">
+            <div class="daily-config-current-main">
+                <div class="daily-config-kicker">当前配置日期</div>
+                <div class="daily-config-current-date">${formatDateLabel(day.date)}</div>
+            </div>
+            <div class="daily-current-side">
+                <label class="daily-open-inline">
+                    <span>当天开放答题</span>
+                    <span class="switch"><input type="checkbox" ${day.isOpen === false ? '' : 'checked'} onchange="toggleDailyConfigDayOpen(this.checked)"><span class="sw-slider"></span></span>
+                </label>
+            </div>
+        </div>
+        `;
+}
+
+function getDailyConfigDays() {
+    return dailyFixedConfig.days || [];
+}
+
+function syncDailyDateConfigsWithOpenRange() {
+    const start = getDateOnlyValue(dailyTimeConfig.startTime);
+    const end = getDateOnlyValue(dailyTimeConfig.endTime);
+    const dates = getDateRangeList(start, end);
+    if (!dates.length) return;
+    const existing = new Map((dailyFixedConfig.days || []).map(day => [day.date, day]));
+    dailyFixedConfig.days = dates.map((date, idx) => {
+        const old = existing.get(date) || {};
+        const oldHasFixedPaper = old.hasFixedPaper === true || (old.questions || []).length > 0;
+        return {
+            date,
+            theme: old.theme || `第${idx + 1}天：每日答题`,
+            isOpen: old.isOpen !== false,
+            hasBatchRule: old.hasBatchRule === true || (dailyBatchRuleApplied && !oldHasFixedPaper && old.isOpen !== false),
+            hasFixedPaper: oldHasFixedPaper,
+            randomRules: Array.isArray(old.randomRules) && old.randomRules.length ? cloneDailyPlanRules(old.randomRules) : [],
+            questions: Array.isArray(old.questions) ? old.questions : []
+        };
+    });
+    dailyFixedCurrentIdx = Math.min(Math.max(0, dailyFixedCurrentIdx), dailyFixedConfig.days.length - 1);
+}
+
+function getDailyDateStatus(day) {
+    if (!day || day.isOpen === false) return { key: 'closed', label: '不开放' };
+    if (day.hasFixedPaper === true || (day.questions || []).length > 0) return { key: 'fixed', label: '固定题目' };
+    if (day.hasBatchRule === true && getDailyDayRandomRules(day).length) return { key: 'batch', label: '随机抽题' };
+    return { key: 'empty', label: '未配置' };
+}
+
+function getDailyCalendarStatusSummary(days) {
+    const summary = { batch: 0, fixed: 0, empty: 0, closed: 0, configured: 0 };
+    (days || []).forEach(day => {
+        const key = getDailyDateStatus(day).key;
+        summary[key] = (summary[key] || 0) + 1;
+    });
+    summary.configured = summary.batch + summary.fixed;
+    return summary;
+}
+
+function getDailyCalendarCells(days) {
+    const dates = days.map(day => day.date).filter(Boolean);
+    if (!dates.length) return [];
+    const first = parseDateOnly(dates[0]);
+    const last = parseDateOnly(dates[dates.length - 1]);
+    if (!first || !last) return days.map(day => ({ type: 'day', day }));
+    const gridStart = new Date(first);
+    const mondayOffset = (gridStart.getDay() + 6) % 7;
+    gridStart.setDate(gridStart.getDate() - mondayOffset);
+    const gridEnd = new Date(last);
+    const sundayOffset = (7 - gridEnd.getDay()) % 7;
+    gridEnd.setDate(gridEnd.getDate() + sundayOffset);
+    const dayMap = new Map(days.map(day => [day.date, day]));
+    const cells = [];
+    for (let d = new Date(gridStart); d <= gridEnd; d.setDate(d.getDate() + 1)) {
+        const dateText = formatDateOnly(d);
+        cells.push(dayMap.has(dateText)
+            ? { type: 'day', day: dayMap.get(dateText), idx: days.findIndex(day => day.date === dateText) }
+            : { type: 'placeholder', date: dateText });
+    }
+    return cells;
+}
+
+function getDailyCalendarMonthTitle(days) {
+    const firstDate = parseDateOnly(days[0]?.date);
+    if (!firstDate) return '开放日期';
+    return `${firstDate.getFullYear()} 年 ${firstDate.getMonth() + 1} 月`;
+}
+
+function renderDailyCalendarCard(day, idx) {
+    const status = getDailyDateStatus(day);
+    const date = parseDateOnly(day.date);
+    const title = `${status.label}；规则类型：${status.label}；题目数量：${getDailyDayQuestionCount(day)}；是否开放：${day.isOpen === false ? '否' : '是'}`;
+    return `
+        <button type="button" class="daily-calendar-card ${status.key} ${idx === dailyFixedCurrentIdx ? 'active' : ''}" onclick="selectDailyConfigDay(${idx})" title="${title}">
+            <span class="daily-calendar-date">${date ? date.getDate() : formatDailyShortDate(day.date)}</span>
+            <span class="daily-calendar-status">${status.label}</span>
+        </button>`;
+}
+
+function renderDailySingleDayPanel(day) {
+    const status = getDailyDateStatus(day);
+    const questions = day.questions || [];
+    const totalQuestions = getDailyFixedDayQuestionCount(day);
+    const totalScore = getDailyFixedDayScore(day);
+    const dayRandomRules = getDailyDayRandomRules(day);
+    const randomState = getScoreValidationState(dayRandomRules);
+    const currentValidation = day.isOpen === false
+        ? { state: 'closed', current: 0, target: Number(quizTotalScore) || 0 }
+        : getDailyFixedDayValidationState(day, dailyFixedCurrentIdx, getDailyTimeValidationState());
+    const currentNoticeClass = day.isOpen === false ? 'warn' : currentValidation.state === 'ok' ? 'ok' : currentValidation.state === 'over' ? 'error' : 'warn';
+    return `
+        <div class="daily-single-panel">
+            ${day.isOpen === false ? '' : `<div class="daily-mode-radio-group" role="radiogroup" aria-label="当天题目配置方式">
+                <label class="daily-mode-radio ${status.key === 'batch' ? 'active' : ''}">
+                    <input type="radio" name="dailyMode-${dailyFixedCurrentIdx}" ${status.key === 'batch' ? 'checked' : ''} onchange="setDailyConfigDayMode('batch')">
+                    <span>随机抽题</span>
+                </label>
+                <label class="daily-mode-radio ${status.key === 'fixed' ? 'active' : ''}">
+                    <input type="radio" name="dailyMode-${dailyFixedCurrentIdx}" ${status.key === 'fixed' ? 'checked' : ''} onchange="setDailyConfigDayMode('fixed')">
+                    <span>固定题目</span>
+                </label>
+            </div>`}
+            ${renderDailyModeActionBar(status, questions)}
+            ${day.isOpen === false ? `
+                <div class="info-box yellow" style="margin-top:12px">当天已设置为不开放，用户无法进入答题；该日期不参与随机抽题或固定题计算。</div>
+            ` : status.key === 'batch' ? `
+                <div class="score-rule-notice ${randomState.state === 'ok' ? 'ok' : randomState.state === 'over' ? 'error' : 'warn'}" style="margin-top:12px">
+                    <div class="score-rule-notice-head"><strong>已配置总分：${randomState.current} / ${randomState.target || '-'} 分</strong><span>${randomState.state === 'ok' ? '校验通过' : '待调整'}</span></div>
+                    <p>当天使用随机抽题规则，系统按下方规则从题库抽题。</p>
+                    <p>${randomState.state === 'ok' ? '当天随机抽题总分已与每日总分对齐。' : '请检查当天抽题数量和每题分值。'}</p>
+                </div>
+                <div class="daily-plan-rule-head">
+                    <strong>当天随机抽题规则</strong>
+                    <div class="daily-fixed-list-actions">
+                        <div class="daily-batch-time-control"><span>批量设置时限</span><div class="num-input"><input type="number" value="${getDailyDayRandomBatchTimeLimit(day)}" min="5" onchange="batchSetDailyDayRandomTimeLimit(this.value)"><span class="unit">秒</span></div></div>
+                    </div>
+                </div>
+                <div class="daily-plan-rules">
+                    ${dayRandomRules.map((rule, i) => dailyConfigDayRandomRuleHtml(rule, i, dayRandomRules.length)).join('')}
+                </div>
+            ` : questions.length ? `
+                <div class="score-rule-notice ${currentNoticeClass}" style="margin-top:12px">
+                    <div class="score-rule-notice-head"><strong>已配置总分：${totalScore} / ${quizTotalScore || '-'} 分</strong><span>${currentValidation.state === 'ok' ? '校验通过' : '待调整'}</span></div>
+                    <p>保存固定题后会覆盖当天随机抽题规则。</p>
+                    <p>${currentValidation.state === 'ok' ? '当前日期的固定题总分已与每日总分对齐。' : '请检查当天固定题数量和每题分值。'}</p>
+                </div>
+                <div class="daily-plan-rule-head">
+                    <strong>当天固定题目</strong>
+                    <div class="daily-fixed-list-actions">
+                        <div class="daily-batch-time-control"><span>批量设置时限</span><div class="num-input"><input type="number" value="${getDailyFixedBatchTimeLimit(day)}" min="5" onchange="batchSetDailyFixedTimeLimit(this.value)"><span class="unit">秒</span></div></div>
+                    </div>
+                </div>
+                <div class="daily-fixed-question-list">
+                    ${questions.map((question, i) => dailyFixedQuestionRow(question, i, questions.length)).join('')}
+                </div>
+            ` : `
+                <div class="daily-empty-state ${status.key}">
+                    <strong>${status.key === 'batch' ? '当天将执行随机抽题规则' : '当天尚未配置题目规则'}</strong>
+                    <span>${status.key === 'batch' ? '如需特殊处理，可为当天设置固定题或关闭开放。' : '可点击批量配置抽题规则，或为当天单独设置固定题。'}</span>
+                </div>
+            `}
+        </div>`;
+}
+
+function renderDailyModeActionBar(status, questions) {
+    if (status.key === 'closed') {
+        return '';
+    }
+    if (status.key === 'batch') {
+        return `
+            <div class="daily-mode-actions">
+                <button type="button" class="btn btn-primary btn-sm" onclick="addDailyConfigDayRandomRule()">添加抽题规则</button>
+            </div>`;
+    }
+    return `
+        <div class="daily-mode-actions">
+            <button type="button" class="btn btn-primary btn-sm" onclick="openDailyFixedQuestionPicker()">设置每日固定题目</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="clearDailyFixedQuestions()" ${questions.length ? '' : 'disabled'}>清除固定题</button>
+        </div>`;
+}
+
+function formatDailyShortDate(dateText) {
+    const parts = String(dateText || '').split('-');
+    return parts.length === 3 ? `${parts[1]}-${parts[2]}` : dateText;
+}
+
+function getDailyDayQuestionCount(day) {
+    if (day?.isOpen === false) return 0;
+    if ((day?.questions || []).length) return getDailyFixedDayQuestionCount(day);
+    if (day?.hasBatchRule) return getDailyDayRandomRules(day).reduce((sum, rule) => sum + (Number(rule.count) || 0), 0);
+    return 0;
+}
+
+function getDailyDayRandomRules(day = dailyFixedConfig.days?.[dailyFixedCurrentIdx]) {
+    if (!day) return [];
+    if (!Array.isArray(day.randomRules) || !day.randomRules.length) {
+        day.randomRules = cloneDailyPlanRules(dailyRandomRules.length ? dailyRandomRules : dailyBatchRuleTemplate);
+    }
+    return day.randomRules;
+}
+
+function getDailyDayRandomBatchTimeLimit(day = dailyFixedConfig.days?.[dailyFixedCurrentIdx]) {
+    const first = getDailyDayRandomRules(day).find(rule => rule.timeLimitSeconds)?.timeLimitSeconds;
+    return Math.max(5, Number(first || 30) || 30);
+}
+
+function dailyConfigDayRandomRuleHtml(rule, idx, total) {
+    const bankOptions = ['图书馆知识题库', '历史文化题库', '非遗知识题库'].map(v => `<option ${v === rule.bank ? 'selected' : ''}>${v}</option>`).join('');
+    const typeOptions = standardAnswerQuestionTypeOptions(rule.type || '全部标准答案题');
+    const subtotal = (Number(rule.count) || 0) * (Number(rule.score) || 0);
+    return `
+        <div class="daily-random-rule-row">
+            <div class="daily-random-rule-grid top">
+                <div class="field-bank"><label>题库</label><select onchange="setDailyConfigDayRandomRuleField(${idx},'bank',this.value)">${bankOptions}</select></div>
+                <div class="field-type"><label>题型</label><select onchange="setDailyConfigDayRandomRuleField(${idx},'type',this.value)">${typeOptions}</select></div>
+                <div class="field-count"><label>抽题数量</label><input type="number" value="${rule.count}" min="1" onchange="setDailyConfigDayRandomRuleField(${idx},'count',this.value)"></div>
+            </div>
+            <div class="daily-random-rule-grid bottom">
+                <div><label>每题时限</label><div class="num-input"><input type="number" value="${rule.timeLimitSeconds || 30}" min="5" onchange="setDailyConfigDayRandomRuleField(${idx},'timeLimitSeconds',this.value)"><span class="unit">秒</span></div></div>
+                <div><label>每题分数</label><input type="number" value="${rule.score}" min="0.5" step="0.5" onchange="setDailyConfigDayRandomRuleField(${idx},'score',this.value)"></div>
+                <div><label>小计</label><div class="daily-random-rule-subtotal">${subtotal} 分</div></div>
+                <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDailyConfigDayRandomRule(${idx})" title="删除本条规则" ${total <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button></div>
+            </div>
+        </div>`;
+}
+
 // ===============================
-// LEVEL MODE CONFIG (答题闯关)
+// LEVEL MODE CONFIG (趣味闯关)
 // ===============================
 function renderLevelModeConfig() {
     return `
-    ${renderLevelActivityTime()}
-    ${renderQuizTotalScorePanel({
-        panelId: 'levelTotalScorePanel',
-        title: '每个关卡分数',
-        subtitle: `为整个答题闯关活动统一设置每个关卡分数，所有关卡共用同一分值`,
-        label: '每个关卡分数',
-        value: Number(levels[0]?.totalScore) || 100,
-        onSelect: 'setCurrentLevelTotalScore',
-        hint: '该分值用于统一校验所有关卡抽题规则分值之和，活动发布后不支持修改。'
-    })}
-    ${renderLevelRulesConfig()}
-    ${renderActivityPracticeConfigPanel('level', '练习模式', '可为整个答题闯关活动开放题库刷题，帮助用户在正式闯关前复习；练习成绩不影响通关判断和关卡成绩。', 'after-level-time')}
     <div class="cfg-panel" id="levelQuestionModePanel">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('levelQuestionModePanel')">
             <div class="cfg-panel-icon blue">🎯</div>
@@ -2991,13 +3860,13 @@ function renderLevelModeConfig() {
                         <div class="lli-num">${i + 1}</div>
                         <div class="lli-info">
                             <div class="lli-name">${lv.name}</div>
-                            <div class="lli-meta">${getLevelQuestionCount(lv)}题 / ${lv.totalScore}分</div>
+                            <div class="lli-meta">${getLevelQuestionCount(lv)}题</div>
                         </div>
                         <span class="lli-status ${lv.configured ? 'configured' : 'unconfigured'}">${lv.configured ? '已配置' : '未配置'}</span>
                         ${i === levelCurrentIdx ? `
                         <div class="lli-actions">
                             <button class="lli-action-btn" onclick="event.stopPropagation();copyLevel()" title="复制当前关卡">⧉</button>
-                            <button class="lli-action-btn danger" onclick="event.stopPropagation();deleteLevel()" title="删除当前关卡" ${levels.length <= 1 ? 'disabled' : ''}>×</button>
+                        <button class="draw-rule-delete-btn" onclick="event.stopPropagation();deleteLevel()" title="删除当前关卡" aria-label="删除当前关卡" ${levels.length <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button>
                         </div>
                         ` : ''}
                     </div>
@@ -3015,43 +3884,31 @@ function renderLevelModeConfig() {
     </div>`;
 }
 
-function renderLevelActivityTime() {
+function renderLevelTimeFields({ context = 'modal' } = {}) {
     return `
-    <div class="cfg-panel level-activity-time" id="levelActivityTime">
-        <div class="cfg-panel-head" onclick="toggleCfgPanel('levelActivityTime')">
-            <div class="cfg-panel-icon blue">⏱</div>
-            <div>
-                <div class="cfg-panel-title">闯关开放时间</div>
-                <div class="cfg-panel-subtitle">设置整个答题闯关活动的开始、结束时间和每日答题时段</div>
-            </div>
-            <span class="cfg-panel-badge essential">必填</span>
-            <span class="cfg-panel-arrow">▼</span>
-        </div>
-        <div class="cfg-panel-body">
-            <div class="cfg-row">
-                <div class="cfg-row-label"><span class="req">*</span> 闯关开放时间</div>
-                <div class="cfg-row-control">
-                    <div class="date-range-control">
-                        <input type="date" class="form-control" value="${getDatePartFromDateTime(levelConfig.startTime)}" onchange="setLevelConfigField('startTime', this.value)">
-                        <span>至</span>
-                        <input type="date" class="form-control" value="${getDatePartFromDateTime(levelConfig.endTime)}" onchange="setLevelConfigField('endTime', this.value)">
-                    </div>
-                    <div class="cfg-row-hint">用户仅可在该时间范围内进入闯关；进入后按关卡顺序解锁，无需为每关单独配置开放日期。</div>
+        <div class="cfg-row">
+            <div class="cfg-row-label"><span class="req">*</span> 闯关开放日期</div>
+            <div class="cfg-row-control">
+                <div class="date-range-control">
+                    <input type="date" class="form-control" value="${getDateOnlyValue(levelConfig.startTime)}" onchange="setLevelConfigField('startTime', this.value, '${context}')">
+                    <span>至</span>
+                    <input type="date" class="form-control" value="${getDateOnlyValue(levelConfig.endTime)}" onchange="setLevelConfigField('endTime', this.value, '${context}')">
                 </div>
-            </div>
-            <div class="cfg-row" style="border-bottom:none">
-                <div class="cfg-row-label"><span class="req">*</span> 答题时段</div>
-                <div class="cfg-row-control">
-                    <div class="time-range">
-                        <input type="time" class="form-control" value="${levelConfig.dailyStart || '09:00'}" onchange="setLevelConfigField('dailyStart', this.value)">
-                        <span>至</span>
-                        <input type="time" class="form-control" value="${levelConfig.dailyEnd || '18:00'}" onchange="setLevelConfigField('dailyEnd', this.value)">
-                    </div>
-                    <div class="cfg-row-hint">在开放日期范围内，每天仅允许于该时段进入闯关答题。</div>
-                </div>
+                <div class="cfg-row-hint">用户仅可在该日期范围内进入闯关；进入后按关卡顺序解锁，无需为每关单独配置开放日期。</div>
             </div>
         </div>
-    </div>`;
+        <div class="cfg-row">
+            <div class="cfg-row-label"><span class="req">*</span> 答题时段</div>
+            <div class="cfg-row-control">
+                <div class="date-range-control">
+                    <input type="time" class="form-control" value="${levelConfig.dailyStart || ''}" onchange="setLevelConfigField('dailyStart', this.value, '${context}')">
+                    <span>至</span>
+                    <input type="time" class="form-control" value="${levelConfig.dailyEnd || ''}" onchange="setLevelConfigField('dailyEnd', this.value, '${context}')">
+                </div>
+                <div class="cfg-row-hint">用户每天仅可在该时段内进入闯关。</div>
+            </div>
+        </div>
+        `;
 }
 
 function renderLevelDetail() {
@@ -3068,6 +3925,20 @@ function renderLevelDetail() {
         <div class="cfg-panel-body">
             <div class="cfg-row"><div class="cfg-row-label"><span class="req">*</span> 关卡名称</div><div class="cfg-row-control"><input class="form-control" value="${lv.name}"></div></div>
             <div class="cfg-row"><div class="cfg-row-label">关卡说明</div><div class="cfg-row-control"><textarea class="form-control" rows="2" placeholder="展示给用户的关卡介绍（选填）"></textarea></div></div>
+            <div class="cfg-row">
+                <div class="cfg-row-label"><span class="req">*</span> 过关条件</div>
+                <div class="cfg-row-control">
+                    <div class="inline-control-text">用户答对 <input class="inline-number" type="number" min="0" max="${getLevelQuestionCount(lv)}" value="${getLevelPassQuestions(lv)}" onchange="setCurrentLevelField('passQuestions', this.value)"> 题过关</div>
+                    <div class="cfg-row-hint">按当前关卡的答对题目数量判断是否过关。</div>
+                </div>
+            </div>
+            <div class="cfg-row">
+                <div class="cfg-row-label">本关最多挑战次数</div>
+                <div class="cfg-row-control">
+                    <div class="num-input"><input type="number" value="${getLevelMaxAttempts(lv)}" min="0" onchange="setCurrentLevelField('maxAttempts', this.value)"><span class="unit">次</span></div>
+                    <div class="cfg-row-hint">0 表示不限；未通关时是否可继续挑战，由本关次数上限决定。</div>
+                </div>
+            </div>
         </div>
 	    </div>
 
@@ -3080,14 +3951,20 @@ function renderLevelDetail() {
         </div>
         <div class="cfg-panel-body">
             ${levelQuestionMode === 'fixed' ? renderLevelFixedQuestionConfig(lv, fixedQuestions) : `
-                ${renderScoreRuleNotice(rules, lv.totalScore)}
                 <div class="cfg-row">
                     <div class="cfg-row-control">
+                        <div class="daily-rules-topbar">
+                            <div></div>
+                            <div class="daily-batch-time-control">
+                                <span>批量设置时限</span>
+                                <div class="num-input"><input type="number" value="${getLevelRulesBatchTimeLimit(lv)}" min="5" onchange="batchSetLevelRulesTimeLimit(this.value)"><span class="unit">秒</span></div>
+                            </div>
+                        </div>
                         <div id="levelDrawRules">
                             ${rules.map((rule, idx) => renderScoreDrawRuleRow(rule, idx, 'level', rules.length)).join('')}
                         </div>
                         <button class="btn btn-outline btn-sm" onclick="addLevelDrawRule()" style="margin-top:8px">+ 新增抽题规则</button>
-                        <div class="info-box yellow" style="margin-top:8px">⚠ 每日答题和答题闯关仅支持标准答案题：单选题、多选题、判断题、填空题、排序题，至少配置 1 条抽题规则。</div>
+                        <div class="info-box yellow" style="margin-top:8px">⚠趣味闯关仅支持标准答案题：单选题、多选题、判断题、填空题、排序题，至少配置 1 条抽题规则。</div>
                     </div>
                 </div>
             `}
@@ -3114,43 +3991,26 @@ function renderLevelDetail() {
     </div>`;
 }
 
-function renderLevelRulesConfig() {
-    const lv = levels[levelCurrentIdx] || levels[0];
-    return `
-    <div class="cfg-panel" id="levelRules">
-        <div class="cfg-panel-head" onclick="toggleCfgPanel('levelRules')">
-            <div class="cfg-panel-icon orange">🏆</div>
-            <div><div class="cfg-panel-title">闯关规则</div><div class="cfg-panel-subtitle">整场答题闯关统一生效的规则配置</div></div>
-            <span class="cfg-panel-badge essential">必填</span>
-            <span class="cfg-panel-arrow">▼</span>
-        </div>
-        <div class="cfg-panel-body">
-            <div class="cfg-row"><div class="cfg-row-label"><span class="req">*</span> 达标分数</div><div class="cfg-row-control"><div class="num-input"><input type="number" value="${lv.passScore}" min="0" max="${lv.totalScore || 0}" onchange="setCurrentLevelField('passScore', this.value)"><span class="unit">分</span></div><div class="cfg-row-hint">不得大于当前每个关卡分数；系统默认按达标分数判断是否通关。</div></div></div>
-            <div class="cfg-row"><div class="cfg-row-label">每关最多挑战次数</div><div class="cfg-row-control"><div class="num-input"><input type="number" value="0" min="0"><span class="unit">次</span></div><div class="cfg-row-hint">0 表示不限；未通关时是否可继续挑战，由这里的次数上限决定。</div></div></div>
-        </div>
-    </div>`;
-}
-
 function renderLevelFixedQuestionConfig(level, questions) {
-    const validation = getLevelFixedValidationState(level);
-    const validationClass = validation.state === 'ok' ? 'ok' : validation.state === 'over' ? 'error' : 'warn';
     return `
         <div class="cfg-row">
             <div class="cfg-row-control">
-                <div class="score-rule-notice ${validationClass}" style="margin-bottom:12px">
-                    <div class="score-rule-notice-head">
-                        <strong>已配置总分：${validation.current} / ${validation.target || '-'} 分</strong>
-                        <span>${validation.state === 'ok' ? '校验通过' : '待调整'}</span>
-                    </div>
-                    <p>固定题库模式下，每个关卡的题目总分必须等于该关卡分数。</p>
-                    <p>${getLevelValidationMessage(validation)}</p>
-                </div>
                 <div class="daily-fixed-toolbar">
                     <button type="button" class="btn btn-outline btn-sm" onclick="openLevelFixedQuestionPicker()">+ 从题库选题</button>
                     <button type="button" class="btn btn-outline btn-sm" onclick="copyPreviousLevelFixedQuestions()">复制上一关题目</button>
                     <button type="button" class="btn btn-outline btn-sm" onclick="clearCurrentLevelFixedQuestions()">清空当前关卡</button>
                 </div>
                 <div class="info-box blue" style="margin:8px 0 12px">💡 每个关卡可配置不同固定题目；所有关卡统一使用固定题目模式，不支持与随机抽题混用。</div>
+                <div class="daily-plan-rule-head">
+                    <strong>当前关卡固定题目</strong>
+                    <div class="daily-fixed-list-actions">
+                        <div class="daily-batch-time-control">
+                            <span>批量设置时限</span>
+                            <div class="num-input"><input type="number" value="${getLevelFixedBatchTimeLimit(level)}" min="5" onchange="batchSetLevelFixedTimeLimit(this.value)"><span class="unit">秒</span></div>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openLevelFixedQuestionPicker()">+ 从题库选题</button>
+                    </div>
+                </div>
                 <div class="daily-fixed-question-list">
                     ${questions.length ? questions.map((question, idx) => levelFixedQuestionRow(question, idx, questions.length)).join('') : '<div style="padding:12px;color:var(--text-tertiary);font-size:13px">当前关卡还未配置固定题目。</div>'}
                 </div>
@@ -3170,11 +4030,11 @@ function levelFixedQuestionRow(question, idx, total) {
                 <div class="daily-fixed-question-content">${question.content || '未填写题目内容'}</div>
             </div>
             <div class="daily-fixed-question-side">
-                <div class="daily-fixed-question-score">
-                    <label>分值</label>
-                    <input type="number" value="${question.score}" min="0.5" step="0.5" onchange="setLevelFixedQuestionField(${idx},'score',this.value)">
+                <div class="daily-fixed-question-score daily-fixed-question-time">
+                    <label>每题时限</label>
+                    <input type="number" value="${question.timeLimitSeconds || getLevelFixedBatchTimeLimit()}" min="5" onchange="setLevelFixedQuestionField(${idx},'timeLimitSeconds',this.value)">
                 </div>
-                <button type="button" class="lli-action-btn danger" onclick="removeLevelFixedQuestion(${idx})" title="删除本题" ${total <= 1 ? 'disabled' : ''}>×</button>
+                <button type="button" class="draw-rule-delete-btn" onclick="removeLevelFixedQuestion(${idx})" title="删除本题" aria-label="删除本题" ${total <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button>
             </div>
         </div>`;
 }
@@ -3191,8 +4051,9 @@ function toggleCfgPanel(id) {
     if (panel) panel.classList.toggle('collapsed');
 }
 
-function setLevelConfigField(field, value) {
+function setLevelConfigField(field, value, context = 'modal') {
     levelConfig[field] = value;
+    if (context === 'main') quizGoStep(1);
 }
 
 function selectRadioPill(el, group) {
@@ -3204,16 +4065,20 @@ function selectRadioPill(el, group) {
 function renderScoreDrawRuleRow(rule, idx, mode, total) {
     const bankOptions = ['图书馆知识题库', '历史文化题库', '非遗知识题库']
         .map(bank => `<option ${rule.bank === bank ? 'selected' : ''}>${bank}</option>`).join('');
-    const subtotal = (Number(rule.count) || 0) * (Number(rule.score) || 0);
+    const showTimeLimit = mode === 'daily' || mode === 'level';
     return `
-    <div class="draw-rule draw-rule-with-subtotal">
+    <div class="draw-rule draw-rule-with-subtotal ${showTimeLimit ? 'draw-rule-with-time' : ''}">
         <div><label>题库</label><select onchange="setScoreDrawRuleField('${mode}',${idx},'bank',this.value)">${bankOptions}</select></div>
         <div><label>题型</label><select onchange="setScoreDrawRuleField('${mode}',${idx},'type',this.value)">${standardAnswerQuestionTypeOptions(rule.type || '全部标准答案题')}</select></div>
         <div><label>抽题数量</label><input type="number" value="${rule.count}" min="1" onchange="setScoreDrawRuleField('${mode}',${idx},'count',this.value)"></div>
-        <div><label>每题分值</label><input type="number" value="${rule.score}" min="0.5" step="0.5" onchange="setScoreDrawRuleField('${mode}',${idx},'score',this.value)"></div>
-        <div><label>小计</label><div style="padding:6px 0;font-weight:600;color:var(--primary)">${subtotal} 分</div></div>
-        <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeScoreDrawRule('${mode}',${idx})" title="删除本条规则" aria-label="删除本条规则" ${total <= 1 ? 'disabled' : ''}><span aria-hidden="true">🗑</span></button></div>
+        ${showTimeLimit ? `<div><label>每题时限</label><div class="num-input"><input type="number" value="${rule.timeLimitSeconds || getDefaultRuleTimeLimit(mode)}" min="5" onchange="setScoreDrawRuleField('${mode}',${idx},'timeLimitSeconds',this.value)"><span class="unit">秒</span></div></div>` : ''}
+        <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeScoreDrawRule('${mode}',${idx})" title="删除本条规则" aria-label="删除本条规则" ${total <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button></div>
     </div>`;
+}
+
+function getDefaultRuleTimeLimit(mode) {
+    if (mode === 'level') return getLevelRulesBatchTimeLimit();
+    return getDailyRandomBatchTimeLimit() || 30;
 }
 
 function getScoreRuleList(mode) {
@@ -3224,7 +4089,8 @@ function setScoreDrawRuleField(mode, idx, key, value) {
     const list = getScoreRuleList(mode);
     const rule = list[idx];
     if (!rule) return;
-    rule[key] = (key === 'count' || key === 'score') ? Math.max(key === 'count' ? 1 : 0.5, Number(value) || (key === 'count' ? 1 : 0.5)) : value;
+    if (key === 'timeLimitSeconds') rule[key] = value === '' ? '' : Math.max(5, Number(value) || 5);
+    else rule[key] = (key === 'count' || key === 'score') ? Math.max(key === 'count' ? 1 : 0.5, Number(value) || (key === 'count' ? 1 : 0.5)) : value;
     refreshFsModal();
 }
 
@@ -3236,7 +4102,29 @@ function removeScoreDrawRule(mode, idx) {
 }
 
 function addDailyRandomRule() {
-    dailyRandomRules.push({ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, score: 1 });
+    dailyRandomRules.push({ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, timeLimitSeconds: getDailyRandomBatchTimeLimit(), score: 1 });
+    refreshFsModal();
+}
+
+function getDailyRandomBatchTimeLimit() {
+    const first = dailyRandomRules[0]?.timeLimitSeconds;
+    return first ? Math.max(5, Number(first) || 5) : '';
+}
+
+function batchSetDailyRandomTimeLimit(value) {
+    const seconds = value === '' ? '' : Math.max(5, Number(value) || 5);
+    dailyRandomRules.forEach(rule => { rule.timeLimitSeconds = seconds; });
+    refreshFsModal();
+}
+
+function getLevelRulesBatchTimeLimit(level = getCurrentLevel()) {
+    const first = getLevelRules(level).find(rule => rule.timeLimitSeconds)?.timeLimitSeconds;
+    return Math.max(5, Number(first || 30) || 30);
+}
+
+function batchSetLevelRulesTimeLimit(value) {
+    const seconds = Math.max(5, Number(value) || 30);
+    getLevelRules().forEach(rule => { rule.timeLimitSeconds = seconds; });
     refreshFsModal();
 }
 
@@ -3246,18 +4134,14 @@ function selectDailyQMode(mode) {
     refreshFsModal();
 }
 
-function setDailyTimeField(key, value) {
-    if (dailyQMode === 'fixed' && (key === 'startTime' || key === 'endTime')) {
-        setDailyFixedTimeRangeField(key, value);
-        return;
-    }
+function setDailyTimeField(key, value, context = 'modal') {
     if (key === 'timeLimitEnabled') dailyTimeConfig[key] = !!value;
     else if (key === 'timeLimitSeconds') dailyTimeConfig[key] = Math.max(5, Number(value) || 30);
     else dailyTimeConfig[key] = value;
-    refreshFsModal();
+    refreshDailyTimeConfigView(context);
 }
 
-function setDailyFixedTimeRangeField(key, value) {
+function setDailyFixedTimeRangeField(key, value, context = 'modal') {
     const nextValue = getDatePartFromDateTime(value);
     const previous = getDatePartFromDateTime(dailyTimeConfig[key]);
     if (previous === nextValue) return;
@@ -3266,7 +4150,7 @@ function setDailyFixedTimeRangeField(key, value) {
     const applyChange = () => {
         dailyTimeConfig[key] = nextValue;
         dailyQMode = 'fixed';
-        refreshFsModal();
+        refreshDailyTimeConfigView(context);
     };
     if (!impact.hasImpact) {
         applyChange();
@@ -3276,9 +4160,9 @@ function setDailyFixedTimeRangeField(key, value) {
         applyChange();
         return;
     }
-    openModal('确认修改答题开放时间', `
+    openModal('确认修改答题开放日期', `
         <div class="info-box yellow">
-            <strong>修改答题开放时间会影响已配置的每日固定题目日期计划。</strong>
+            <strong>修改答题开放日期会影响已配置的每日固定题目日期计划。</strong>
             <p style="margin-top:8px">系统不会自动删除已配置题目，但保存前需要确保日期计划与新的开放日期范围一致。</p>
         </div>
         <div class="assign-batch-preview" style="margin-top:12px">
@@ -3289,12 +4173,34 @@ function setDailyFixedTimeRangeField(key, value) {
     `, () => {
         applyChange();
     }, { confirmText: '确认修改' });
-    refreshFsModal();
+    refreshDailyTimeConfigView(context);
+}
+
+function refreshDailyTimeConfigView(context = 'modal') {
+    if (context === 'main') quizGoStep(1);
+    else refreshFsModal();
 }
 
 function getDatePartFromDateTime(value) {
     if (!value) return '';
     return String(value).slice(0, 10);
+}
+
+function getDateTimeLocalValue(value, fallbackTime = '00:00') {
+    if (!value) return '';
+    const text = String(value).trim();
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text)) return text.slice(0, 16);
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(text)) return text.slice(0, 16).replace(' ', 'T');
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return `${text}T${fallbackTime || '00:00'}`;
+    return text.slice(0, 16);
+}
+
+function formatDateTimeLocalForStorage(value) {
+    return getDateTimeLocalValue(value).replace('T', ' ');
+}
+
+function getDateOnlyValue(value) {
+    return getDatePartFromDateTime(value);
 }
 
 function getDailyFixedTimeRangeImpact(nextTimeConfig) {
@@ -3343,7 +4249,7 @@ function generateDailyFixedDaysFromTimeRange() {
     const startDate = parseDateOnly(start);
     const endDate = parseDateOnly(end);
     if (timeState.state !== 'ok' || !startDate || !endDate || endDate < startDate) {
-        alert('请先配置正确的答题开放时间');
+        alert('请先配置正确的答题开放日期');
         return;
     }
     const days = [];
@@ -3368,6 +4274,7 @@ function getDefaultDailyFixedQuestion(overrides = {}) {
         content: '',
         type: '单选题',
         bank: '图书馆知识题库',
+        timeLimitSeconds: getDailyFixedBatchTimeLimit(),
         score: 10,
         ...overrides
     };
@@ -3375,15 +4282,14 @@ function getDefaultDailyFixedQuestion(overrides = {}) {
 
 function normalizeDailyFixedConfig() {
     if (!dailyFixedConfig.days.length) {
-        dailyFixedConfig.days.push({
-            date: '2026-06-09',
-            theme: '第一天：阅读常识',
-            questions: [getDefaultDailyFixedQuestion({ sourceId: 'pool-001', content: '《四库全书》是哪个皇帝下令编纂的？' })]
-        });
+        syncDailyDateConfigsWithOpenRange();
     }
     dailyFixedCurrentIdx = Math.min(Math.max(0, dailyFixedCurrentIdx), dailyFixedConfig.days.length - 1);
     dailyFixedConfig.days.forEach(day => {
         if (!Array.isArray(day.questions)) day.questions = [];
+        day.questions.forEach(question => {
+            if (!question.timeLimitSeconds) question.timeLimitSeconds = getDailyFixedBatchTimeLimit(day);
+        });
     });
 }
 
@@ -3454,9 +4360,9 @@ function renderDailyFixedSummary() {
     const lastDate = days[days.length - 1]?.date ? formatDateLabel(days[days.length - 1].date) : '—';
     const cls = result.state === 'ok' ? 'ok' : result.state === 'over' ? 'error' : 'warn';
     const labelMap = {
-        'missing-time': '请先配置答题开放时间',
+        'missing-time': '请先配置答题开放日期',
         'invalid-time-range': '答题开放结束时间不能早于开始时间',
-        'missing-daily-window': '请先配置每日答题时段',
+        'missing-daily-window': '请先配置答题时段',
         'invalid-daily-window': '每日答题结束时刻必须晚于开始时刻',
         'invalid-time-limit': '每题限时不能低于 5 秒',
         'missing-date': `缺少 ${formatDateLabel(result.missingDate)} 的固定题目计划`,
@@ -3474,7 +4380,7 @@ function renderDailyFixedSummary() {
         <div class="daily-fixed-summary ${cls}">
             <div class="daily-fixed-summary-main">
                 <div class="daily-fixed-summary-title">每日固定题目计划</div>
-                <div class="daily-fixed-summary-subtitle">先配置答题开放时间，系统据此生成需要逐天配置固定题目的日期。</div>
+                <div class="daily-fixed-summary-subtitle">先配置答题开放日期，系统据此生成需要逐天配置固定题目的日期。</div>
             </div>
             <div class="daily-fixed-summary-meta">
                 <div><span>日期范围</span><strong>${firstDate} - ${lastDate}</strong></div>
@@ -3500,9 +4406,9 @@ function renderDailyFixedBuilder() {
     const currentNoticeClass = currentValidation.state === 'ok' ? 'ok' : currentValidation.state === 'over' ? 'error' : 'warn';
     const currentNoticeText = currentValidation.state === 'ok' ? '校验通过' : '待调整';
     const currentNoticeMessage = {
-        'missing-time': '请先配置答题开放时间。',
+        'missing-time': '请先配置答题开放日期。',
         'invalid-time-range': '答题开放结束时间不能早于开始时间。',
-        'missing-daily-window': '请先配置每日答题时段。',
+        'missing-daily-window': '请先配置答题时段。',
         'invalid-daily-window': '每日答题结束时刻必须晚于开始时刻。',
         'invalid-time-limit': '每题限时不能低于 5 秒。',
         'duplicate-date': '当前日期为空或与其他日期重复，请调整日期计划。',
@@ -3515,15 +4421,6 @@ function renderDailyFixedBuilder() {
     };
     return `
         <div class="daily-plan-builder daily-fixed-builder" style="margin-top:4px">
-            <div class="daily-fixed-time-card">
-                <div class="daily-fixed-time-head">
-                    <div>
-                        <div class="daily-plan-calendar-title">答题时间</div>
-                        <div class="daily-plan-calendar-subtitle">先确认活动开放日期，再生成日期计划。</div>
-                    </div>
-                </div>
-                ${renderDailyTimeFields({ compact: true })}
-            </div>
             <div class="daily-plan-calendar">
                 <div class="daily-plan-calendar-head">
                     <div>
@@ -3561,7 +4458,7 @@ function renderDailyFixedBuilder() {
                         <div class="daily-plan-detail-title">当前设置：${formatDateLabel(current.date)}</div>
                         <div class="daily-plan-detail-subtitle">${totalQuestions} 题 / ${totalScore} 分</div>
                     </div>
-                    <button type="button" class="lli-action-btn danger" onclick="deleteDailyFixedDay()" title="删除当前日期" ${dailyFixedConfig.days.length <= 1 ? 'disabled' : ''}>×</button>
+                    <button type="button" class="draw-rule-delete-btn" onclick="deleteDailyFixedDay()" title="删除当前日期" aria-label="删除当前日期" ${dailyFixedConfig.days.length <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button>
                 </div>
                 <div class="daily-plan-basic daily-fixed-basic">
                     <div><label>日期</label><input type="date" value="${current.date}" onchange="setDailyFixedDayField('date',this.value)"></div>
@@ -3582,7 +4479,13 @@ function renderDailyFixedBuilder() {
                 </div>
                 <div class="daily-plan-rule-head">
                     <strong>当天固定题目</strong>
-                    <button type="button" class="btn btn-outline btn-sm" onclick="openDailyFixedQuestionPicker()">+ 从题库选题</button>
+                    <div class="daily-fixed-list-actions">
+                        <div class="daily-batch-time-control">
+                            <span>批量设置时限</span>
+                            <div class="num-input"><input type="number" value="${getDailyFixedBatchTimeLimit(current)}" min="5" onchange="batchSetDailyFixedTimeLimit(this.value)"><span class="unit">秒</span></div>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openDailyFixedQuestionPicker()">+ 从题库选题</button>
+                    </div>
                 </div>
                 <div class="daily-fixed-question-list">
                     ${current.questions.length
@@ -3604,26 +4507,31 @@ function dailyFixedQuestionRow(question, idx, total) {
                 <div class="daily-fixed-question-content">${question.content || '未填写题目内容'}</div>
             </div>
             <div class="daily-fixed-question-side">
-                <div class="daily-fixed-question-score">
-                    <label>分值</label>
-                    <input type="number" value="${question.score}" min="0.5" step="0.5" onchange="setDailyFixedQuestionField(${idx},'score',this.value)">
+                <div class="daily-fixed-question-score daily-fixed-question-time">
+                    <label>每题时限</label>
+                    <div class="num-input"><input type="number" value="${question.timeLimitSeconds || getDailyFixedBatchTimeLimit()}" min="5" onchange="setDailyFixedQuestionField(${idx},'timeLimitSeconds',this.value)"><span class="unit">秒</span></div>
                 </div>
-                <button type="button" class="lli-action-btn danger" onclick="removeDailyFixedQuestion(${idx})" title="删除本题" ${total <= 1 ? 'disabled' : ''}>×</button>
+                <div class="daily-fixed-question-score">
+                    <label>每题分数</label>
+                    <input type="number" value="${question.score || 10}" min="0.5" step="0.5" onchange="setDailyFixedQuestionField(${idx},'score',this.value)">
+                </div>
+                <button type="button" class="draw-rule-delete-btn" onclick="removeDailyFixedQuestion(${idx})" title="删除本题" aria-label="删除本题" ${total <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button>
             </div>
         </div>`;
 }
 
 function openDailyFixedQuestionPicker() {
+    syncDailyDateConfigsWithOpenRange();
     normalizeDailyFixedConfig();
     const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
-    const enabledQuestions = DAILY_FIXED_QUESTION_POOL.filter(q => q.status === '启用');
+    const enabledQuestions = DAILY_FIXED_QUESTION_POOL.filter(q => q.status === '启用' && isDailySupportedQuestionType(q.type));
     openModal('从题库选择题目', `
         <div class="filter-bar" style="margin-bottom:12px">
           <select id="dailyFixedBankFilter" onchange="updateDailyFixedQuestionPool()"><option>全部题库</option><option>图书馆知识题库</option><option>历史文化题库</option><option>非遗知识题库</option></select>
-          <select id="dailyFixedTypeFilter" onchange="updateDailyFixedQuestionPool()">${questionTypeOptions('全部题型', true)}</select>
+          <select id="dailyFixedTypeFilter" onchange="updateDailyFixedQuestionPool()">${dailyQuestionTypeOptions('全部题型', true)}</select>
           <input id="dailyFixedSearchInput" placeholder="搜索题目" oninput="updateDailyFixedQuestionPool()">
         </div>
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">仅展示启用状态的题目，停用题目不会出现在待选列表中。当前日期：<strong>${formatDateLabel(day.date)}</strong></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">仅展示启用且每日答题支持的题目，停用题目和简答题不会出现在待选列表中。当前日期：<strong>${formatDateLabel(day.date)}</strong></div>
         <div id="dailyFixedQuestionPickHint" style="font-size:12px;color:var(--primary);font-weight:600;margin-bottom:8px">已选择 0 道题</div>
         <div style="max-height:300px;overflow-y:auto" id="dailyFixedQuestionPool">
           ${enabledQuestions.map(q => `<label class="daily-fixed-pick-row">
@@ -3653,9 +4561,14 @@ function openDailyFixedQuestionPicker() {
                 content: q.content,
                 type: q.type,
                 bank: q.bank,
+                timeLimitSeconds: getDailyFixedBatchTimeLimit(day),
                 score: 10
             });
         });
+        day.isOpen = true;
+        day.hasFixedPaper = true;
+        day.hasBatchRule = false;
+        dailyQMode = 'random';
         refreshFsModal();
     }, { confirmText:'确认选择' });
 }
@@ -3665,7 +4578,7 @@ function updateDailyFixedQuestionPool() {
     const type = document.getElementById('dailyFixedTypeFilter')?.value || '全部题型';
     const search = document.getElementById('dailyFixedSearchInput')?.value || '';
     const rows = document.querySelectorAll('#dailyFixedQuestionPool .daily-fixed-pick-row');
-    const questions = DAILY_FIXED_QUESTION_POOL.filter(q => q.status === '启用');
+    const questions = DAILY_FIXED_QUESTION_POOL.filter(q => q.status === '启用' && isDailySupportedQuestionType(q.type));
     rows.forEach((row, idx) => {
         const q = questions[idx];
         if (!q) return;
@@ -3714,12 +4627,15 @@ function copyPreviousDailyFixedDay() {
 }
 
 function copyPreviousDailyFixedQuestions() {
+    syncDailyDateConfigsWithOpenRange();
     normalizeDailyFixedConfig();
     const current = dailyFixedConfig.days[dailyFixedCurrentIdx];
     const source = dailyFixedConfig.days[dailyFixedCurrentIdx - 1] || dailyFixedConfig.days[dailyFixedConfig.days.length - 1];
     if (!current || !source) return;
     current.questions = cloneDailyFixedQuestions(source.questions);
-    dailyQMode = 'fixed';
+    current.hasFixedPaper = current.questions.length > 0;
+    current.hasBatchRule = current.hasFixedPaper ? false : (dailyBatchRuleApplied && current.isOpen !== false);
+    dailyQMode = 'random';
     refreshFsModal();
 }
 
@@ -3740,15 +4656,17 @@ function selectDailyFixedDay(idx) {
 function setDailyFixedDayField(key, val) {
     normalizeDailyFixedConfig();
     dailyFixedConfig.days[dailyFixedCurrentIdx][key] = val;
-    dailyQMode = 'fixed';
+    dailyQMode = 'random';
     refreshFsModal();
 }
 
 function removeDailyFixedQuestion(idx) {
     const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
-    if (!day || day.questions.length <= 1) return;
+    if (!day) return;
     day.questions.splice(idx, 1);
-    dailyQMode = 'fixed';
+    day.hasFixedPaper = true;
+    day.hasBatchRule = false;
+    dailyQMode = 'random';
     refreshFsModal();
 }
 
@@ -3756,15 +4674,38 @@ function setDailyFixedQuestionField(idx, key, val) {
     const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
     const question = day?.questions?.[idx];
     if (!question) return;
-    question[key] = key === 'score' ? Math.max(0.5, Number(val) || 0.5) : val;
-    dailyQMode = 'fixed';
+    if (key === 'timeLimitSeconds') question[key] = Math.max(5, Number(val) || 30);
+    else question[key] = key === 'score' ? Math.max(0.5, Number(val) || 0.5) : val;
+    day.hasFixedPaper = true;
+    day.hasBatchRule = false;
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function getDailyFixedBatchTimeLimit(day = dailyFixedConfig.days?.[dailyFixedCurrentIdx]) {
+    const first = day?.questions?.find(question => question.timeLimitSeconds)?.timeLimitSeconds;
+    return Math.max(5, Number(first || dailyTimeConfig.timeLimitSeconds || 30) || 30);
+}
+
+function batchSetDailyFixedTimeLimit(value) {
+    syncDailyDateConfigsWithOpenRange();
+    normalizeDailyFixedConfig();
+    const seconds = Math.max(5, Number(value) || 30);
+    const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    if (!day) return;
+    day.questions.forEach(question => { question.timeLimitSeconds = seconds; });
+    dailyQMode = 'random';
     refreshFsModal();
 }
 
 function clearDailyFixedQuestions() {
+    syncDailyDateConfigsWithOpenRange();
     normalizeDailyFixedConfig();
-    dailyFixedConfig.days[dailyFixedCurrentIdx].questions = [];
-    dailyQMode = 'fixed';
+    const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    day.questions = [];
+    day.hasFixedPaper = true;
+    day.hasBatchRule = false;
+    dailyQMode = 'random';
     refreshFsModal();
 }
 
@@ -3772,7 +4713,7 @@ function openDailyFixedBatchModal() {
     const first = getDatePartFromDateTime(dailyTimeConfig.startTime) || dailyFixedConfig.days[0]?.date || '2026-06-09';
     const last = getDatePartFromDateTime(dailyTimeConfig.endTime) || dailyFixedConfig.days[dailyFixedConfig.days.length - 1]?.date || first;
     openModal('批量生成日期', `
-        <div class="info-box blue">💡 默认使用上方答题开放时间的日期范围，批量生成后仅创建日期，题目需逐天单独配置。</div>
+        <div class="info-box blue">💡 默认使用上方答题开放日期的日期范围，批量生成后仅创建日期，题目需逐天单独配置。</div>
         <div class="form-group"><label>开始日期</label><input type="date" class="form-control" id="dailyFixedBatchStart" value="${first}"></div>
         <div class="form-group"><label>结束日期</label><input type="date" class="form-control" id="dailyFixedBatchEnd" value="${last}"></div>
         <div class="form-group"><label>主题前缀</label><input type="text" class="form-control" id="dailyFixedBatchTheme" value="每日答题"></div>
@@ -3821,7 +4762,7 @@ function updateDrawRuleDeleteButtons(container) {
 }
 
 function getDefaultDailyPlanRule(overrides = {}) {
-    return { source: '我的题库', bank: '图书馆知识题库', type: '全部标准答案题', count: 10, score: 1, ...overrides };
+    return { source: '我的题库', bank: '图书馆知识题库', type: '全部标准答案题', count: 10, timeLimitSeconds: 30, score: 1, ...overrides };
 }
 
 function normalizeDailyPlanConfig() {
@@ -3873,7 +4814,7 @@ function renderDailyPlanBuilder() {
                         <div class="daily-plan-detail-title">当前设置：${formatDateLabel(current.date)}</div>
                         <div class="daily-plan-detail-subtitle">${totalQuestions} 题 / ${totalScore} 分</div>
                     </div>
-                    <button type="button" class="lli-action-btn danger" onclick="deleteDailyPlanDay()" title="删除当前日期" ${dailyPlanConfig.days.length <= 1 ? 'disabled' : ''}>×</button>
+                    <button type="button" class="draw-rule-delete-btn" onclick="deleteDailyPlanDay()" title="删除当前日期" aria-label="删除当前日期" ${dailyPlanConfig.days.length <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button>
                 </div>
                 <div class="daily-plan-basic">
                     <div><label>日期</label><input type="date" value="${current.date}" onchange="setDailyPlanDayField('date',this.value)"></div>
@@ -3900,10 +4841,8 @@ function dailyPlanRuleHtml(rule, idx, total) {
                 <div><label>题库</label><select onchange="setDailyPlanRuleField(${idx},'bank',this.value)">${bankOptions}</select></div>
                 <div><label>题型</label><select onchange="setDailyPlanRuleField(${idx},'type',this.value)">${typeOptions}</select></div>
                 <div><label>抽题数量</label><input type="number" value="${rule.count}" min="1" onchange="setDailyPlanRuleField(${idx},'count',this.value)"></div>
-                <div><label>每题分值</label><input type="number" value="${rule.score}" min="0.5" step="0.5" onchange="setDailyPlanRuleField(${idx},'score',this.value)"></div>
-                <button type="button" class="lli-action-btn danger" onclick="removeDailyPlanRule(${idx})" title="删除本条规则" ${total <= 1 ? 'disabled' : ''}>×</button>
+                <button type="button" class="draw-rule-delete-btn" onclick="removeDailyPlanRule(${idx})" title="删除本条规则" aria-label="删除本条规则" ${total <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button>
             </div>
-            <div class="daily-plan-rule-score">小计：<strong>${(Number(rule.count) || 0) * (Number(rule.score) || 0)}</strong> 分</div>
         </div>`;
 }
 
@@ -3970,6 +4909,369 @@ function buildNextDailyPlanTheme(prevTheme, index, nextDate) {
 }
 
 function selectDailyPlanDay(idx) { dailyPlanCurrentIdx = idx; dailyQMode = 'random'; refreshFsModal(); }
+function selectDailyConfigDay(idx) {
+    syncDailyDateConfigsWithOpenRange();
+    dailyFixedCurrentIdx = Math.min(Math.max(0, idx), dailyFixedConfig.days.length - 1);
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function toggleDailyConfigDayOpen(isOpen) {
+    syncDailyDateConfigsWithOpenRange();
+    const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    if (!day) return;
+    day.isOpen = !!isOpen;
+    if (!day.isOpen) day.hasBatchRule = false;
+    else if (!day.hasFixedPaper) {
+        day.hasBatchRule = true;
+        getDailyDayRandomRules(day);
+    }
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function setDailyConfigDayMode(mode) {
+    syncDailyDateConfigsWithOpenRange();
+    const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    if (!day) return;
+    if (mode === 'closed') {
+        day.isOpen = false;
+        day.hasBatchRule = false;
+        dailyQMode = 'random';
+        refreshFsModal();
+        return;
+    }
+    day.isOpen = true;
+    if (mode === 'batch') {
+        day.hasFixedPaper = false;
+        day.questions = [];
+        day.hasBatchRule = true;
+        getDailyDayRandomRules(day);
+    }
+    if (mode === 'fixed') {
+        day.hasBatchRule = false;
+        day.hasFixedPaper = true;
+        if (!Array.isArray(day.questions)) day.questions = [];
+    }
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function getCurrentDailyFixedSourceDay() {
+    syncDailyDateConfigsWithOpenRange();
+    const source = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    if (!source || source.isOpen === false || !(source.questions || []).length) {
+        alert('当前日期暂无固定题可复制');
+        return null;
+    }
+    return source;
+}
+
+function applyFixedQuestionsToDay(targetDay, sourceQuestions) {
+    targetDay.isOpen = true;
+    targetDay.questions = cloneDailyFixedQuestions(sourceQuestions);
+    targetDay.hasFixedPaper = true;
+    targetDay.hasBatchRule = false;
+}
+
+function applyBatchModeToDay(targetDay) {
+    targetDay.isOpen = true;
+    targetDay.questions = [];
+    targetDay.hasFixedPaper = false;
+    targetDay.hasBatchRule = true;
+    targetDay.randomRules = cloneDailyPlanRules(dailyFixedConfig.days[dailyFixedCurrentIdx]?.randomRules || dailyRandomRules);
+}
+
+function getCurrentDailyConfigSource() {
+    syncDailyDateConfigsWithOpenRange();
+    const source = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    const status = getDailyDateStatus(source);
+    if (!source || !['batch', 'fixed'].includes(status.key)) {
+        alert('当前日期暂无可复制的题目配置');
+        return null;
+    }
+    return { source, status };
+}
+
+function applyCurrentConfigToTargetDay(targetDay, source, status) {
+    if (status.key === 'batch') applyBatchModeToDay(targetDay);
+    if (status.key === 'fixed') applyFixedQuestionsToDay(targetDay, source.questions);
+}
+
+function copyCurrentFixedQuestionsToUnconfigured() {
+    const source = getCurrentDailyFixedSourceDay();
+    if (!source) return;
+    let count = 0;
+    dailyFixedConfig.days.forEach(day => {
+        if (day === source || day.isOpen === false) return;
+        if (getDailyDateStatus(day).key !== 'empty') return;
+        applyFixedQuestionsToDay(day, source.questions);
+        count += 1;
+    });
+    dailyQMode = 'random';
+    refreshFsModal();
+    setTimeout(() => alert(count ? `已复制到 ${count} 个未配置日期` : '当前没有可复制的未配置日期'), 0);
+}
+
+function copyCurrentDayConfigToUnconfigured() {
+    const result = getCurrentDailyConfigSource();
+    if (!result) return;
+    const { source, status } = result;
+    let count = 0;
+    dailyFixedConfig.days.forEach(day => {
+        if (day === source || day.isOpen === false) return;
+        if (getDailyDateStatus(day).key !== 'empty') return;
+        applyCurrentConfigToTargetDay(day, source, status);
+        count += 1;
+    });
+    dailyQMode = 'random';
+    refreshFsModal();
+    setTimeout(() => alert(count ? `已复制到 ${count} 个未配置日期` : '当前没有可复制的未配置日期'), 0);
+}
+
+function confirmCopyCurrentDayConfigToAll() {
+    const result = getCurrentDailyConfigSource();
+    if (!result) return;
+    const { source, status } = result;
+    const targets = dailyFixedConfig.days.filter(day => day !== source && day.isOpen !== false);
+    const fixedCount = targets.filter(day => getDailyDateStatus(day).key === 'fixed').length;
+    const batchCount = targets.filter(day => getDailyDateStatus(day).key === 'batch').length;
+    const emptyCount = targets.filter(day => getDailyDateStatus(day).key === 'empty').length;
+    const closedCount = dailyFixedConfig.days.filter(day => day.isOpen === false).length;
+    openModal('确认复制到全部日期', `
+        <div class="info-box yellow">
+            将把当前日期的「${status.label}」配置复制到所有开放日期；不开放日期会保持不变。
+        </div>
+        <div class="assign-batch-preview" style="margin-top:12px">
+            <div class="assign-batch-preview-row"><span>将覆盖固定题日期</span><strong>${fixedCount} 天</strong></div>
+            <div class="assign-batch-preview-row"><span>将覆盖批量规则日期</span><strong>${batchCount} 天</strong></div>
+            <div class="assign-batch-preview-row"><span>将填充未配置日期</span><strong>${emptyCount} 天</strong></div>
+            <div class="assign-batch-preview-row"><span>保持不开放</span><strong>${closedCount} 天</strong></div>
+        </div>
+    `, () => {
+        targets.forEach(day => applyCurrentConfigToTargetDay(day, source, status));
+        dailyQMode = 'random';
+        refreshFsModal();
+    }, { confirmText: '确认复制' });
+}
+
+function confirmCopyCurrentFixedQuestionsToAll() {
+    const source = getCurrentDailyFixedSourceDay();
+    if (!source) return;
+    const targets = dailyFixedConfig.days.filter(day => day !== source && day.isOpen !== false);
+    const fixedCount = targets.filter(day => getDailyDateStatus(day).key === 'fixed').length;
+    const batchCount = targets.filter(day => getDailyDateStatus(day).key === 'batch').length;
+    const emptyCount = targets.filter(day => getDailyDateStatus(day).key === 'empty').length;
+    const closedCount = dailyFixedConfig.days.filter(day => day.isOpen === false).length;
+    openModal('确认复制到全部日期', `
+        <div class="info-box yellow">
+            该操作会把当前日期的固定题复制到所有开放日期，并覆盖已有批量规则或其他固定题。不开放日期会保持不变。
+        </div>
+        <div class="assign-batch-preview" style="margin-top:12px">
+            <div class="assign-batch-preview-row"><span>将覆盖固定题日期</span><strong>${fixedCount} 天</strong></div>
+            <div class="assign-batch-preview-row"><span>将覆盖批量规则日期</span><strong>${batchCount} 天</strong></div>
+            <div class="assign-batch-preview-row"><span>将填充未配置日期</span><strong>${emptyCount} 天</strong></div>
+            <div class="assign-batch-preview-row"><span>保持不开放</span><strong>${closedCount} 天</strong></div>
+        </div>
+    `, () => {
+        targets.forEach(day => applyFixedQuestionsToDay(day, source.questions));
+        dailyQMode = 'random';
+        refreshFsModal();
+    }, { confirmText: '确认复制' });
+}
+
+function applyDailyBatchRulesToUnlockedDays(options = {}) {
+    const includeFixed = options.includeFixed === true;
+    syncDailyDateConfigsWithOpenRange();
+    dailyBatchRuleApplied = true;
+    dailyFixedConfig.days.forEach(day => {
+        const hasFixed = day.hasFixedPaper === true || (day.questions || []).length > 0;
+        if (day.isOpen === false || (hasFixed && !includeFixed)) return;
+        if (hasFixed && includeFixed) {
+            day.hasFixedPaper = false;
+            day.questions = [];
+        }
+        day.hasBatchRule = true;
+        day.randomRules = cloneDailyPlanRules(dailyRandomRules);
+    });
+}
+
+function hasExistingDailyBatchRuleConfig() {
+    syncDailyDateConfigsWithOpenRange();
+    return dailyBatchRuleApplied === true
+        || (dailyFixedConfig.days || []).some(day => day.hasBatchRule === true || (Array.isArray(day.randomRules) && day.randomRules.length > 0));
+}
+
+function applyDailyBatchDraftRules(options = {}) {
+    dailyRandomRules = cloneDailyPlanRules(dailyBatchDraftRules);
+    applyDailyBatchRulesToUnlockedDays(options);
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function setDailyConfigDayRandomRuleField(idx, key, val) {
+    syncDailyDateConfigsWithOpenRange();
+    const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    const rule = getDailyDayRandomRules(day)[idx];
+    if (!rule) return;
+    rule[key] = (key === 'count' || key === 'score')
+        ? Math.max(key === 'count' ? 1 : 0.5, Number(val) || (key === 'count' ? 1 : 0.5))
+        : val;
+    day.isOpen = true;
+    day.hasBatchRule = true;
+    day.hasFixedPaper = false;
+    day.questions = [];
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function addDailyConfigDayRandomRule() {
+    syncDailyDateConfigsWithOpenRange();
+    const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    getDailyDayRandomRules(day).push({ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, timeLimitSeconds: getDailyDayRandomBatchTimeLimit(day), score: 1 });
+    day.isOpen = true;
+    day.hasBatchRule = true;
+    day.hasFixedPaper = false;
+    day.questions = [];
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function removeDailyConfigDayRandomRule(idx) {
+    const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    const rules = getDailyDayRandomRules(day);
+    if (rules.length <= 1) return;
+    rules.splice(idx, 1);
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function batchSetDailyDayRandomTimeLimit(value) {
+    const day = dailyFixedConfig.days[dailyFixedCurrentIdx];
+    const seconds = Math.max(5, Number(value) || 30);
+    getDailyDayRandomRules(day).forEach(rule => { rule.timeLimitSeconds = seconds; });
+    dailyQMode = 'random';
+    refreshFsModal();
+}
+
+function openDailyBatchRuleModal() {
+    const hasExistingConfig = hasExistingDailyBatchRuleConfig();
+    dailyBatchDraftRules = cloneDailyPlanRules(dailyRandomRules.length ? dailyRandomRules : dailyBatchRuleTemplate);
+    openModal('批量配置抽题规则', renderDailyBatchRuleModalBody(), () => {
+        if (!dailyBatchDraftRules.length) return false;
+        if (hasExistingConfig) {
+            confirmApplyNewDailyBatchRuleConfig();
+            return false;
+        }
+        applyDailyBatchDraftRules();
+    }, { confirmText: '确认应用', modalClass: 'modal-lg' });
+}
+
+function confirmApplyNewDailyBatchRuleConfig() {
+    const fixedCount = (dailyFixedConfig.days || []).filter(day => day.isOpen !== false && (day.hasFixedPaper || (day.questions || []).length)).length;
+    const closedCount = (dailyFixedConfig.days || []).filter(day => day.isOpen === false).length;
+    const overwriteCount = (dailyFixedConfig.days || []).filter(day => day.isOpen !== false && !(day.hasFixedPaper || (day.questions || []).length)).length;
+    closeModal();
+    setTimeout(() => {
+        openModal('确认生效新规则', `
+            <div class="info-box yellow">
+                当前已存在随机抽题规则。确认后将使用本次配置的新规则覆盖已有批量配置。
+            </div>
+            <div class="assign-batch-preview" style="margin-top:12px">
+                <div class="assign-batch-preview-row"><span>将生效并覆盖老规则</span><strong>${overwriteCount} 天</strong></div>
+                <div class="assign-batch-preview-row"><span>默认保持固定题目</span><strong>${fixedCount} 天</strong></div>
+                <div class="assign-batch-preview-row"><span>保持不开放</span><strong>${closedCount} 天</strong></div>
+            </div>
+            <label class="daily-confirm-option">
+                <span>
+                    <strong>同时覆盖每日固定题目日期</strong>
+                    <em>默认关闭。开启后，已设置固定题目的日期也会改为使用本次随机抽题规则。</em>
+                </span>
+                <span class="switch"><input id="dailyBatchOverwriteFixed" type="checkbox"><span class="sw-slider"></span></span>
+            </label>
+        `, () => {
+            const includeFixed = document.getElementById('dailyBatchOverwriteFixed')?.checked === true;
+            applyDailyBatchDraftRules({ includeFixed });
+        }, { confirmText: '确认生效' });
+    }, 0);
+}
+
+function renderDailyBatchRuleModalBody() {
+    const protectedCount = (dailyFixedConfig.days || []).filter(day => day.isOpen === false || day.hasFixedPaper || (day.questions || []).length).length;
+    return `
+        <div class="daily-batch-plain-tip">
+            当前操作将覆盖所有未设置固定题、且开放的日期；已设置固定题或不开放日期将保持不变。
+            ${protectedCount ? `<br>当前有 ${protectedCount} 天不会被批量规则覆盖。` : ''}
+        </div>
+        ${renderScoreRuleNotice(dailyBatchDraftRules)}
+        <div class="daily-rules-topbar">
+            <div class="daily-batch-rule-heading">抽题规则</div>
+            <div class="daily-batch-time-control">
+                <span>批量设置每题时限</span>
+                <div class="num-input"><input type="number" value="${getDailyBatchDraftTimeLimit()}" min="5" onchange="batchSetDailyBatchDraftTimeLimit(this.value)"><span class="unit">秒</span></div>
+            </div>
+        </div>
+        <div id="dailyBatchRulesDraft">
+            ${dailyBatchDraftRules.map((rule, idx) => renderDailyBatchRuleDraftRow(rule, idx, dailyBatchDraftRules.length)).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-color-light)">
+            <button type="button" class="btn btn-outline btn-sm" onclick="addDailyBatchDraftRule()">+ 新增抽题规则</button>
+            <div style="font-size:12px;color:var(--text-tertiary)">已配置总分：<strong style="color:var(--primary)">${getRuleTotal(dailyBatchDraftRules)}</strong> / ${quizTotalScore} 分</div>
+        </div>
+        <div class="info-box yellow" style="margin-top:8px">每日答题仅支持标准答案题：单选题、多选题、判断题、填空题、排序题，至少配置 1 条抽题规则。</div>`;
+}
+
+function renderDailyBatchRuleDraftRow(rule, idx, total) {
+    const bankOptions = ['图书馆知识题库', '历史文化题库', '非遗知识题库']
+        .map(bank => `<option ${rule.bank === bank ? 'selected' : ''}>${bank}</option>`).join('');
+    const subtotal = (Number(rule.count) || 0) * (Number(rule.score) || 0);
+    return `
+    <div class="draw-rule draw-rule-with-subtotal draw-rule-with-time">
+        <div><label>题库</label><select onchange="setDailyBatchDraftRuleField(${idx},'bank',this.value)">${bankOptions}</select></div>
+        <div><label>题型</label><select onchange="setDailyBatchDraftRuleField(${idx},'type',this.value)">${standardAnswerQuestionTypeOptions(rule.type || '全部标准答案题')}</select></div>
+        <div><label>抽题数量</label><input type="number" value="${rule.count}" min="1" onchange="setDailyBatchDraftRuleField(${idx},'count',this.value)"></div>
+        <div><label>每题时限</label><div class="num-input"><input type="number" value="${rule.timeLimitSeconds || 30}" min="5" onchange="setDailyBatchDraftRuleField(${idx},'timeLimitSeconds',this.value)"><span class="unit">秒</span></div></div>
+        <div><label>每题分值</label><input type="number" value="${rule.score}" min="0.5" step="0.5" onchange="setDailyBatchDraftRuleField(${idx},'score',this.value)"></div>
+        <div><label>小计</label><div style="padding:6px 0;font-weight:600;color:var(--primary)">${subtotal} 分</div></div>
+        <div><label>操作</label><button type="button" class="draw-rule-delete-btn" onclick="removeDailyBatchDraftRule(${idx})" title="删除本条规则" aria-label="删除本条规则" ${total <= 1 ? 'disabled' : ''}><span class="trash-icon" aria-hidden="true"></span></button></div>
+    </div>`;
+}
+
+function refreshDailyBatchRuleModal() {
+    const body = document.getElementById('modalBody');
+    if (body) body.innerHTML = renderDailyBatchRuleModalBody();
+}
+
+function setDailyBatchDraftRuleField(idx, key, value) {
+    const rule = dailyBatchDraftRules[idx];
+    if (!rule) return;
+    if (key === 'timeLimitSeconds') rule[key] = value === '' ? '' : Math.max(5, Number(value) || 5);
+    else rule[key] = (key === 'count' || key === 'score') ? Math.max(key === 'count' ? 1 : 0.5, Number(value) || (key === 'count' ? 1 : 0.5)) : value;
+    refreshDailyBatchRuleModal();
+}
+
+function addDailyBatchDraftRule() {
+    dailyBatchDraftRules.push({ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, timeLimitSeconds: getDailyBatchDraftTimeLimit(), score: 1 });
+    refreshDailyBatchRuleModal();
+}
+
+function removeDailyBatchDraftRule(idx) {
+    if (dailyBatchDraftRules.length <= 1) return;
+    dailyBatchDraftRules.splice(idx, 1);
+    refreshDailyBatchRuleModal();
+}
+
+function getDailyBatchDraftTimeLimit() {
+    const first = dailyBatchDraftRules[0]?.timeLimitSeconds;
+    return first ? Math.max(5, Number(first) || 5) : 30;
+}
+
+function batchSetDailyBatchDraftTimeLimit(value) {
+    const seconds = value === '' ? '' : Math.max(5, Number(value) || 5);
+    dailyBatchDraftRules.forEach(rule => { rule.timeLimitSeconds = seconds; });
+    refreshDailyBatchRuleModal();
+}
+
 function addDailyPlanRow() {
     normalizeDailyPlanConfig();
     const last = dailyPlanConfig.days[dailyPlanConfig.days.length - 1];
@@ -4023,7 +5325,7 @@ function addLevelDrawRule() {
     const level = getCurrentLevel();
     if (!level) return;
     if (!Array.isArray(level.rules)) level.rules = [];
-    level.rules.push({ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, score: 1 });
+    level.rules.push({ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, timeLimitSeconds: getLevelRulesBatchTimeLimit(level), score: 1 });
     refreshFsModal();
 }
 
@@ -4038,7 +5340,7 @@ function selectLevelQuestionMode(mode) {
     } else {
         levels.forEach(level => {
             if (!Array.isArray(level.rules) || !level.rules.length) {
-                level.rules = [{ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, score: 1 }];
+                level.rules = [{ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, timeLimitSeconds: 30, score: 1 }];
             }
         });
     }
@@ -4051,6 +5353,8 @@ function setCurrentLevelField(key, val) {
     const level = getCurrentLevel();
     if (!level) return;
     if (key === 'passScore') level[key] = Math.min(Number(level.totalScore) || 0, Math.max(0, Number(val) || 0));
+    else if (key === 'passQuestions') level[key] = Math.min(getLevelQuestionCount(level), Math.max(0, Number(val) || 0));
+    else if (key === 'maxAttempts') level[key] = Math.max(0, Number(val) || 0);
     else level[key] = val;
     refreshFsModal();
 }
@@ -4062,6 +5366,7 @@ function getDefaultLevelFixedQuestion(overrides = {}) {
         content: '',
         type: '单选题',
         bank: '图书馆知识题库',
+        timeLimitSeconds: getLevelFixedBatchTimeLimit(),
         score: 10,
         ...overrides
     };
@@ -4075,12 +5380,27 @@ function cloneLevelFixedQuestions(questions) {
     return (questions || [getDefaultLevelFixedQuestion()]).map(question => ({ ...question }));
 }
 
+function getLevelFixedBatchTimeLimit(level = getCurrentLevel()) {
+    const first = getLevelFixedQuestions(level).find(question => question.timeLimitSeconds)?.timeLimitSeconds;
+    return Math.max(5, Number(first || 30) || 30);
+}
+
+function batchSetLevelFixedTimeLimit(value) {
+    const seconds = Math.max(5, Number(value) || 30);
+    getLevelFixedQuestions().forEach(question => { question.timeLimitSeconds = seconds; });
+    levelQuestionMode = 'fixed';
+    refreshFsModal();
+}
+
 function normalizeCurrentLevelFixedQuestions() {
     const level = getCurrentLevel();
     if (!level) return;
     if (!Array.isArray(level.fixedQuestions) || !level.fixedQuestions.length) {
         level.fixedQuestions = [getDefaultLevelFixedQuestion()];
     }
+    level.fixedQuestions.forEach(question => {
+        if (question.timeLimitSeconds == null) question.timeLimitSeconds = getLevelFixedBatchTimeLimit(level);
+    });
 }
 
 function clearCurrentLevelFixedQuestions() {
@@ -4115,7 +5435,8 @@ function setLevelFixedQuestionField(idx, key, val) {
     const level = getCurrentLevel();
     const question = level?.fixedQuestions?.[idx];
     if (!question) return;
-    question[key] = key === 'score' ? Math.max(0.5, Number(val) || 0.5) : val;
+    if (key === 'timeLimitSeconds') question[key] = Math.max(5, Number(val) || 30);
+    else question[key] = key === 'score' ? Math.max(0.5, Number(val) || 0.5) : val;
     levelQuestionMode = 'fixed';
     refreshFsModal();
 }
@@ -4160,6 +5481,7 @@ function openLevelFixedQuestionPicker() {
                 content: q.content,
                 type: q.type,
                 bank: q.bank,
+                timeLimitSeconds: getLevelFixedBatchTimeLimit(level),
                 score: 10
             });
         });
@@ -4201,8 +5523,10 @@ function addLevel() {
         questions: 0,
         totalScore: Number(levels[0]?.totalScore) || 100,
         passScore: Math.min(60, Number(levels[0]?.totalScore) || 100),
+        passQuestions: Math.min(6, getLevelQuestionCount({ rules: [{ count: 10 }], fixedQuestions })),
+        maxAttempts: 0,
         configured: false,
-        rules: [{ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, score: 1 }],
+        rules: [{ bank: '图书馆知识题库', type: '全部标准答案题', count: 10, timeLimitSeconds: 30, score: 1 }],
         fixedQuestions
     });
     levelCurrentIdx = levels.length - 1;
@@ -4218,6 +5542,8 @@ function copyLevel() {
         configured: true,
         totalScore: Number(levels[0]?.totalScore) || Number(src.totalScore) || 100,
         passScore: Math.min(Number(src.passScore) || 0, Number(levels[0]?.totalScore) || Number(src.totalScore) || 100),
+        passQuestions: getLevelPassQuestions(src),
+        maxAttempts: getLevelMaxAttempts(src),
         rules: getLevelRules(src).map(rule => ({ ...rule })),
         fixedQuestions: levelQuestionMode === 'fixed' ? cloneLevelFixedQuestions(src.fixedQuestions) : []
     });

@@ -9,6 +9,16 @@ const questionBanks = [
 ];
 
 const questionTypes = SYSTEM_QUESTION_TYPE_LABELS;
+const QUESTION_BANK_CHOICES = ['默认题库', '题库名称一', '题库名称二', '题库名称三'];
+
+function getQuestionFormBankValue(q) {
+    const currentBank = questionBanks.find(b => b.id === currentBankId);
+    return q?.bankName || q?.bank || currentBank?.name || QUESTION_BANK_CHOICES[0];
+}
+
+function renderQuestionBankOptions(selected) {
+    return QUESTION_BANK_CHOICES.map(name => `<option ${selected === name ? 'selected' : ''}>${name}</option>`).join('');
+}
 
 function generateQuestions(bankId, count) {
     const questions = [];
@@ -269,6 +279,7 @@ function exportBank(bankId) {
 function openCreateQuestionModal() {
     openModal('添加题目', renderQuestionForm(), () => {
         if (!validateQuestionForm()) return false;
+        const values = getQuestionFormValues();
         alert('题目添加成功！（演示提示）');
         openQuestionManage(currentBankId);
     }, { confirmText: '添加题目', modalClass: 'modal-xl question-form-modal' });
@@ -282,6 +293,7 @@ function openEditQuestionModal(qId) {
     if (!q) return;
     openModal('编辑题目', renderQuestionForm(q), () => {
         if (!validateQuestionForm()) return false;
+        const values = getQuestionFormValues();
         alert('题目修改成功！（演示提示）');
         openQuestionManage(currentBankId);
     }, { confirmText: '保存', modalClass: 'modal-xl question-form-modal' });
@@ -292,6 +304,7 @@ function renderQuestionForm(q) {
     const isEdit = !!q;
     const type = isEdit ? (q.type === '问答题' ? '简答题' : q.type) : '单选题';
     const answer = isEdit ? q.answer : 'A';
+    const bankValue = getQuestionFormBankValue(q);
     return `
     <div class="qb-question-editor qb-standard-editor" data-answer="${answer}">
         <section class="qb-standard-top">
@@ -299,11 +312,14 @@ function renderQuestionForm(q) {
                     <div>
                         <strong>基础信息</strong>
                         <span>选择题型后，下方仅展示该题型对应的配置项</span>
-                </div>
+                    </div>
             </div>
-            <div class="form-row">
+            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                 <div class="form-group"><label><span class="req">*</span> 题型</label>
                     <select class="form-control" id="qType" onchange="setQuestionType(this.value)">${questionTypeOptions(type)}</select>
+                </div>
+                <div class="form-group"><label>题库</label>
+                    <select class="form-control" id="qBank">${renderQuestionBankOptions(bankValue)}</select>
                 </div>
             </div>
             <div class="form-group qb-field-full">
@@ -638,10 +654,12 @@ function parseSortItemsText(text = '') {
 function validateQuestionForm() {
     syncQuestionAnswerState();
     const type = document.getElementById('qType')?.value || '';
+    const bank = document.getElementById('qBank')?.value || '';
     const content = document.getElementById('qContent')?.value.trim();
     const answer = document.getElementById('qAnswer')?.value.trim();
     const state = document.querySelector('.qb-question-editor')?.typeState?.[type];
     if (!type) { alert('请选择题型'); return false; }
+    if (!bank) { alert('请选择题库'); return false; }
     if (!content) { alert('请填写题目内容'); return false; }
     if (['单选题', '多选题'].includes(type)) {
         const options = parseChoiceOptionsText(state?.optionsText || '');
@@ -683,6 +701,17 @@ function validateQuestionForm() {
     }
     if (!answer) { alert('请设置正确答案'); return false; }
     return true;
+}
+
+function getQuestionFormValues() {
+    syncQuestionAnswerState();
+    const type = document.getElementById('qType')?.value || '单选题';
+    const bank = document.getElementById('qBank')?.value || QUESTION_BANK_CHOICES[0];
+    const content = document.getElementById('qContent')?.value.trim() || '';
+    const answer = document.getElementById('qAnswer')?.value.trim() || '';
+    const analysis = document.getElementById('qAnalysis')?.value.trim() || '';
+    const state = document.querySelector('.qb-question-editor')?.typeState?.[type] || {};
+    return { type, bank, content, answer, analysis, state };
 }
 
 // ===== 预览题目 =====

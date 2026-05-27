@@ -23,6 +23,7 @@ const SYSTEM_QUESTION_TYPE_LABELS = SYSTEM_QUESTION_TYPES.map(t => t.value);
 const SYSTEM_QUESTION_TYPE_FILTERS = ['全部题型', ...SYSTEM_QUESTION_TYPE_LABELS];
 const STANDARD_ANSWER_QUESTION_TYPE_LABELS = ['单选题', '多选题', '判断题', '填空题', '排序题'];
 const STANDARD_ANSWER_QUESTION_TYPE_FILTERS = ['全部标准答案题', ...STANDARD_ANSWER_QUESTION_TYPE_LABELS];
+const DAILY_QUESTION_TYPE_FILTERS = ['全部题型', ...STANDARD_ANSWER_QUESTION_TYPE_LABELS];
 const EXAM_QUESTION_TYPE_FILTERS = ['全部题型', ...SYSTEM_QUESTION_TYPE_LABELS];
 
 function questionTypeOptions(selected, includeAll = false) {
@@ -40,6 +41,16 @@ function standardAnswerQuestionTypeOptions(selected = '全部标准答案题', i
     const normalized = selected === '全部题型' || selected === '简答题' || selected === '问答题' ? '全部标准答案题' : selected;
     const types = includeAll ? STANDARD_ANSWER_QUESTION_TYPE_FILTERS : STANDARD_ANSWER_QUESTION_TYPE_LABELS;
     return types.map(t => `<option ${normalized === t ? 'selected' : ''}>${t}</option>`).join('');
+}
+
+function dailyQuestionTypeOptions(selected = '全部题型', includeAll = true) {
+    const normalized = selected === '全部标准答案题' || selected === '简答题' || selected === '问答题' ? '全部题型' : selected;
+    const types = includeAll ? DAILY_QUESTION_TYPE_FILTERS : STANDARD_ANSWER_QUESTION_TYPE_LABELS;
+    return types.map(t => `<option ${normalized === t ? 'selected' : ''}>${t}</option>`).join('');
+}
+
+function isDailySupportedQuestionType(type) {
+    return STANDARD_ANSWER_QUESTION_TYPE_LABELS.includes(type);
 }
 
 function examQuestionTypeOptions(selected = '全部题型', includeAll = true) {
@@ -185,7 +196,6 @@ const ACTIVITY_SIDEBAR_MODULES_BY_TYPE = {
     quiz: [
         { label: '活动列表', page: 'quiz-activity-list' },
         { label: '题库管理', page: 'question-bank' },
-        { label: '试卷管理', page: 'paper-mgmt' },
         { label: '数据概况', page: 'activity-data' }
     ],
     offline: [
@@ -224,8 +234,7 @@ const SIDEBAR_ACTIVITY_MANAGE = [
         label: '阅卷管理',
         children: [
             { page: 'paper-review', label: '阅卷配置' },
-            { page: 'paper-review-teachers', label: '阅卷老师' },
-            { page: 'paper-review-detail', label: '阅卷进度' }
+            { page: 'paper-review-teachers', label: '阅卷老师' }
         ]
     },
     { page: 'practice-list', label: '练习记录' },

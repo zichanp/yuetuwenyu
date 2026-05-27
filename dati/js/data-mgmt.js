@@ -269,15 +269,15 @@ function renderLevelRecordFilter() {
         <input class="form-control" placeholder="请输入选送单位">
         ${isAll ? `
             <select class="form-control"><option>全部当前关卡</option><option>第 1 关</option><option>第 2 关</option><option>第 3 关</option></select>
-            <select class="form-control"><option>全部进度状态</option><option>未开始闯关</option><option>闯关中</option><option>已全部通关</option></select>
+            <select class="form-control"><option>是否全部通关</option><option>是</option><option>否</option></select>
             <span class="score-range-control">
                 <input class="form-control" type="number" min="0" placeholder="最少通关数">
                 <span>-</span>
                 <input class="form-control" type="number" min="0" placeholder="最多通关数">
             </span>
         ` : `
-            <select class="form-control"><option>全部通关状态</option><option>已通关</option><option>未通关</option><option>待挑战</option></select>
-            <select class="form-control"><option>全部解锁状态</option><option>已解锁下一关</option><option>停留本关</option><option>未开放</option></select>
+            <select class="form-control"><option>本关过关状态</option><option>已过关</option><option>未过关</option></select>
+            <select class="form-control"><option>是否全部通关</option><option>是</option><option>否</option></select>
             <span class="score-range-control">
                 <input class="form-control" type="number" min="0" placeholder="最低分">
                 <span>-</span>
@@ -293,7 +293,7 @@ function getAnswerModeConfig() {
     const configs = {
         exam: {
             key: 'exam',
-            title: '考试模式',
+            title: '在线考试',
             desc: '按考试 / 试卷查看用户成绩、阅卷状态与交卷明细。',
             objectTitle: '考试 / 试卷',
             tableTitle: '成绩列表',
@@ -313,13 +313,13 @@ function getAnswerModeConfig() {
         },
         level: {
             key: 'level',
-            title: '答题闯关',
-            desc: '按关卡查看用户当前进度、通关状态、挑战次数和解锁情况。',
+            title: '趣味闯关',
+            desc: '按关卡查看用户当前进度、本关过关状态、挑战次数和解锁情况。',
             objectTitle: '关卡',
             tableTitle: '闯关成绩列表',
             userLabel: '用户',
             scoreField: 'levelScore',
-            extraFilter: `<select class="form-control"><option>全部通关状态</option><option>已通关</option><option>未通关</option><option>待挑战</option></select>`
+            extraFilter: `<select class="form-control"><option>本关过关状态</option><option>已过关</option><option>未过关</option></select>`
         }
     };
     return configs[answerStatsMode] || configs.exam;
@@ -327,9 +327,9 @@ function getAnswerModeConfig() {
 
 function renderAnswerStatsModeSwitch() {
     const modes = [
-        { key: 'exam', label: '考试模式', count: EXAM_RECORD_ROWS.length },
+        { key: 'exam', label: '在线考试', count: EXAM_RECORD_ROWS.length },
         { key: 'daily', label: '每日答题', count: DAILY_RECORD_ROWS.length },
-        { key: 'level', label: '答题闯关', count: LEVEL_RECORD_ROWS.length }
+        { key: 'level', label: '趣味闯关', count: LEVEL_RECORD_ROWS.length }
     ];
     return `
     <section class="card answer-mode-panel">
@@ -542,7 +542,7 @@ function renderLevelRecordTable(rows) {
     return `
     <table class="exam-record-table answer-record-table level">
         <thead>
-            <tr><th>排名</th><th>用户姓名</th><th>手机号</th><th>所属组别</th><th>选送单位</th><th>参与关卡数</th><th>已通关数</th><th>本关得分</th><th>累计得分</th><th>挑战次数</th><th>用时</th><th>通关状态</th><th>操作</th></tr>
+            <tr><th>排名</th><th>用户姓名</th><th>手机号</th><th>所属组别</th><th>选送单位</th><th>已通关数</th><th>本关得分</th><th>累计得分</th><th>挑战次数</th><th>用时</th><th>本关过关状态</th><th>是否全部通关</th><th>操作</th></tr>
         </thead>
         <tbody>
             ${rows.map(row => `
@@ -552,13 +552,13 @@ function renderLevelRecordTable(rows) {
                     <td>${row.phone}</td>
                     <td>${row.group}</td>
                     <td>${row.org}</td>
-                    <td><span class="action-link" onclick="openLevelChallengeDetail('${escHtml(row.name)}', '${escHtml(row.phone)}', 'participated')">${getUserLevelParticipationCount(row)}关</span></td>
-                    <td><span class="action-link" onclick="openLevelChallengeDetail('${escHtml(row.name)}', '${escHtml(row.phone)}', 'passed')">${row.passedLevels}关</span></td>
+                    <td><span class="action-link" onclick="openLevelChallengeDetail('${escHtml(row.name)}', '${escHtml(row.phone)}', 'passed')">${formatPassedLevelCount(row)}</span></td>
                     <td>${scoreValue(row.levelScore, true)}</td>
                     <td>${scoreValue(row.totalScore, true)}</td>
                     <td>${row.attempts}</td>
                     <td>${row.duration}</td>
                     <td>${levelPassBadge(row.passStatus)}</td>
+                    <td>${levelAllPassedText(row)}</td>
                     <td class="exam-record-actions"><span class="action-link" onclick="openLevelChallengeDetail('${escHtml(row.name)}', '${escHtml(row.phone)}', 'all')">查看详情</span></td>
                 </tr>
             `).join('')}
@@ -641,6 +641,18 @@ function getLevelRecordRowsForUser(row) {
     return rows;
 }
 
+function formatPassedLevelCount(row) {
+    return `${Number(row?.passedLevels) || 0}/${getLevelTotalCount()}`;
+}
+
+function getLevelTotalCount() {
+    return 9;
+}
+
+function levelAllPassedText(row) {
+    return (Number(row?.passedLevels) || 0) >= getLevelTotalCount() ? '是' : '否';
+}
+
 function getUserLevelParticipationCount(row) {
     const currentLevelNo = parseLevelNo(row?.currentLevel);
     const passedLevels = Number(row?.passedLevels) || 0;
@@ -687,7 +699,7 @@ function openLevelChallengeDetail(name, phone, focus = 'all') {
     const row = LEVEL_RECORD_ROWS.find(item => item.name === name && item.phone === phone) || LEVEL_RECORD_ROWS[0];
     if (!row) return;
     const progressRows = getLevelRecordRowsForUser(row);
-    openModal(`${row.name} - 答题闯关详情`, `
+    openModal(`${row.name} - 趣味闯关详情`, `
         <div class="daily-detail-modal level-detail-modal">
             ${renderLevelDetailSummary(row, progressRows, focus)}
             ${renderLevelProgressTable(row, progressRows, focus)}
@@ -722,7 +734,7 @@ function renderLevelProgressTable(row, progressRows, focus) {
             <div class="daily-attempt-table-wrap">
                 <table class="daily-attempt-table level-progress-table">
                     <thead>
-                        <tr><th>关卡</th><th>答题次数</th><th>本关得分</th><th>通关状态</th><th>最近提交时间</th><th>操作</th></tr>
+                        <tr><th>关卡</th><th>答题次数</th><th>本关得分</th><th>过关状态</th><th>最近提交时间</th><th>操作</th></tr>
                     </thead>
                     <tbody>
                         ${filteredRows.map(level => `
@@ -907,7 +919,7 @@ function renderAnswerPaperBanner(row) {
         <div class="answer-paper-banner-meta">
             <span>${paper.sectionCount} 个大题</span>
             <span>${paper.questionCount} 道题</span>
-            <span>按考试模式答题配置展示</span>
+            <span>按在线考试答题配置展示</span>
         </div>
     </section>`;
 }
@@ -1087,7 +1099,7 @@ function getAnswerPaperBlueprint(row) {
     return {
         title: row.paper || '考试答卷',
         subtitle: `${row.examName || '考试'} · ${row.name || '考生'} · ${row.group || '未知组别'}`,
-        mode: '考试模式',
+        mode: '在线考试',
         total: typeof row.full === 'number' ? row.full : 100,
         sectionCount: sections.length,
         questionCount: sections.reduce((sum, section) => sum + section.questions.length, 0),
@@ -1750,7 +1762,8 @@ function dailyAnsweredStatusBadge(row) {
 
 function levelPassBadge(status) {
     const map = { '已通关': 'badge-green', '未通关': 'badge-red', '待挑战': 'badge-gray' };
-    return `<span class="badge ${map[status] || 'badge-gray'}">${status}</span>`;
+    const labelMap = { '已通关': '已过关', '未通关': '未过关' };
+    return `<span class="badge ${map[status] || 'badge-gray'}">${labelMap[status] || status}</span>`;
 }
 
 function dailyDayLabel(dayId) {

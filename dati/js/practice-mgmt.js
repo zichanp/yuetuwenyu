@@ -21,8 +21,8 @@ const PRACTICE_ITEMS = [
     id: 'prac-2',
     name: '图书馆知识题库刷题',
     scope: '活动级',
-    relationType: '答题闯关',
-    relation: '答题闯关活动',
+    relationType: '趣味闯关',
+    relation: '趣味闯关活动',
     mode: '题库刷题',
     source: '图书馆知识题库、历史文化题库',
     time: '2026-06-01 00:00 - 2026-06-30 23:59',
@@ -69,8 +69,8 @@ const PRACTICE_ITEMS = [
 
 const PRACTICE_RECORDS = [
   { id: 'rec-1', user: '王小明', phone: '138****1234', org: '生产部', practiceId: 'prac-1', practiceName: '第一场考试 · 模拟练习', relation: '第一场考试', mode: '模拟考试', seq: 3, total: 25, correct: 22, wrong: 3, accuracy: '88%', score: 92, duration: '18分42秒', submittedAt: '2026-06-12 15:30' },
-  { id: 'rec-2', user: '李小红', phone: '139****5678', org: '技术部', practiceId: 'prac-2', practiceName: '图书馆知识题库刷题', relation: '答题闯关活动', mode: '题库刷题', seq: 2, total: 40, correct: 34, wrong: 6, accuracy: '85%', score: '-', duration: '24分18秒', submittedAt: '2026-06-12 10:20' },
-  { id: 'rec-3', user: '张小刚', phone: '137****9012', org: '销售部', practiceId: 'prac-2', practiceName: '图书馆知识题库刷题', relation: '答题闯关活动', mode: '题库刷题', seq: 1, total: 40, correct: 27, wrong: 13, accuracy: '68%', score: '-', duration: '31分06秒', submittedAt: '2026-06-11 19:05' },
+  { id: 'rec-2', user: '李小红', phone: '139****5678', org: '技术部', practiceId: 'prac-2', practiceName: '图书馆知识题库刷题', relation: '趣味闯关活动', mode: '题库刷题', seq: 2, total: 40, correct: 34, wrong: 6, accuracy: '85%', score: '-', duration: '24分18秒', submittedAt: '2026-06-12 10:20' },
+  { id: 'rec-3', user: '张小刚', phone: '137****9012', org: '销售部', practiceId: 'prac-2', practiceName: '图书馆知识题库刷题', relation: '趣味闯关活动', mode: '题库刷题', seq: 1, total: 40, correct: 27, wrong: 13, accuracy: '68%', score: '-', duration: '31分06秒', submittedAt: '2026-06-11 19:05' },
   { id: 'rec-4', user: '赵一一', phone: '136****7788', org: '综合办公室', practiceId: 'prac-4', practiceName: '第二场考试 · 模拟练习', relation: '第二场考试', mode: '模拟考试', seq: 1, total: 30, correct: 26, wrong: 4, accuracy: '87%', score: 86, duration: '20分12秒', submittedAt: '2026-05-08 16:44' }
 ];
 

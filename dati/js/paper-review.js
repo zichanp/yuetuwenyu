@@ -74,35 +74,35 @@ const REVIEW_ATTEMPT_INSTANCES = [
 ];
 
 const REVIEW_ATTEMPT_QUESTION_TEMPLATES = [
-  { id: 'paper-q1', no: 1, type: '简答题', difficulty: '基础', source: '安全意识', score: 10, title: '请简述安全生产的“三不伤害”原则是什么？', standard: '不伤害自己、不伤害他人、不被他人伤害。', rule: '三项原则各 3 分，表述完整 1 分。', answers: {
+  { id: 'paper-q1', no: 1, type: '简答题', source: '安全意识', score: 10, title: '请简述安全生产的“三不伤害”原则是什么？', standard: '不伤害自己、不伤害他人、不被他人伤害。', rule: '三项原则各 3 分，表述完整 1 分。', answers: {
     'attempt-001': '保护自己、保护他人、互相保护。',
     'attempt-002': '不伤害自己、不伤害他人、不被他人伤害。',
     'attempt-003': '不伤害自己、不伤害别人、不被别人伤害。',
     'attempt-004': '不伤害自己、不伤害他人，注意安全。',
     'attempt-005': '自己不受伤，也不要让别人受伤。'
   } },
-  { id: 'paper-q2', no: 2, type: '简答题', difficulty: '中等', source: '消防逃生', score: 15, title: '请描述发生火灾时的正确逃生步骤。', standard: '保持冷静，判断火势方向；湿毛巾捂住口鼻；低姿沿安全通道撤离；不乘坐电梯；到达安全地点后报警。', rule: '防烟、路线、电梯、报警等关键要点完整给满分。', answers: {
+  { id: 'paper-q2', no: 2, type: '简答题', source: '消防逃生', score: 15, title: '请描述发生火灾时的正确逃生步骤。', standard: '保持冷静，判断火势方向；湿毛巾捂住口鼻；低姿沿安全通道撤离；不乘坐电梯；到达安全地点后报警。', rule: '防烟、路线、电梯、报警等关键要点完整给满分。', answers: {
     'attempt-001': '用湿毛巾捂住口鼻，从安全出口跑出去。',
     'attempt-002': '保持冷静，用湿毛巾捂住口鼻，弯腰前进，走安全通道，不坐电梯，到安全地点报警。',
     'attempt-003': '先报警，再从楼梯有序撤离，不能坐电梯。',
     'attempt-004': '听从指挥，走楼梯撤离，不要坐电梯。',
     'attempt-005': '捂住口鼻，弯腰从最近出口离开。'
   } },
-  { id: 'paper-q3', no: 3, type: '简答题', difficulty: '中等', source: '隐患排查', score: 10, title: '发现生产现场存在安全隐患时，员工应如何处理？', standard: '立即停止相关危险操作，提醒周边人员，向负责人或安全管理人员报告，并配合整改闭环。', rule: '报告、控制风险、配合整改三类要点均需覆盖。', answers: {
+  { id: 'paper-q3', no: 3, type: '简答题', source: '隐患排查', score: 10, title: '发现生产现场存在安全隐患时，员工应如何处理？', standard: '立即停止相关危险操作，提醒周边人员，向负责人或安全管理人员报告，并配合整改闭环。', rule: '报告、控制风险、配合整改三类要点均需覆盖。', answers: {
     'attempt-001': '告诉主管，让专业人员处理。',
     'attempt-002': '先提醒附近同事远离，再上报班组长和安全员，记录并跟进整改。',
     'attempt-003': '马上上报，等待处理。',
     'attempt-004': '停止作业并报告安全员，现场设置提醒。',
     'attempt-005': '拍照发群里，让大家注意。'
   } },
-  { id: 'paper-q4', no: 4, type: '简答题', difficulty: '较难', source: '事故复盘', score: 20, title: '阅读事故案例后，简要分析该事故暴露出的管理问题，并提出两条改进建议。', standard: '可从培训不足、检查不到位、责任链条不清、应急预案执行弱等方面分析，并提出制度化检查、专项培训、责任追踪等建议。', rule: '问题分析 10 分，改进建议 8 分，表达结构 2 分。', answers: {
+  { id: 'paper-q4', no: 4, type: '简答题', source: '事故复盘', score: 20, title: '阅读事故案例后，简要分析该事故暴露出的管理问题，并提出两条改进建议。', standard: '可从培训不足、检查不到位、责任链条不清、应急预案执行弱等方面分析，并提出制度化检查、专项培训、责任追踪等建议。', rule: '问题分析 10 分，改进建议 8 分，表达结构 2 分。', answers: {
     'attempt-001': '主要是员工安全意识不够，建议加强培训和检查。',
     'attempt-002': '暴露出日常巡检没有闭环、岗位培训不足、现场责任人不明确。建议建立隐患台账并限期复查，同时按岗位开展案例化培训。',
     'attempt-003': '管理不到位，应加强管理，完善制度。',
     'attempt-004': '检查没有落实，员工不会处理。建议每日检查，定期演练。',
     'attempt-005': '领导要重视，员工要认真，发现问题及时处理。'
   } },
-  { id: 'paper-q5', no: 5, type: '简答题', difficulty: '基础', source: '岗位责任', score: 10, title: '请结合本岗位，简述如何落实安全生产责任。', standard: '围绕岗位操作规范、风险识别、设备点检、同伴提醒和异常上报展开即可。', rule: '结合岗位 4 分，责任动作 4 分，表达完整 2 分。', answers: {
+  { id: 'paper-q5', no: 5, type: '简答题', source: '岗位责任', score: 10, title: '请结合本岗位，简述如何落实安全生产责任。', standard: '围绕岗位操作规范、风险识别、设备点检、同伴提醒和异常上报展开即可。', rule: '结合岗位 4 分，责任动作 4 分，表达完整 2 分。', answers: {
     'attempt-001': '遵守制度，发现问题及时汇报。',
     'attempt-002': '每天开工前检查设备和防护用品，按流程操作，发现异常先停机再上报，并提醒同事遵守安全要求。',
     'attempt-003': '认真工作，按照安全要求完成任务。',
@@ -111,11 +111,12 @@ const REVIEW_ATTEMPT_QUESTION_TEMPLATES = [
   } }
 ];
 
+const ATTEMPT_PAPER_SECTION_ORDINALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+
 const REVIEW_TEACHERS = [
-  { id: 'teacher-001', account: 'zhanglaoshi', password: '123456', name: '张老师', unit: '上海市图书馆', assigned: 120, reviewed: 86, pending: 34, status: '启用' },
-  { id: 'teacher-002', account: 'lilaoshi', password: '123456', name: '李老师', unit: '华东政法大学图书馆', assigned: 96, reviewed: 72, pending: 24, status: '启用' },
-  { id: 'teacher-003', account: 'wanglaoshi', password: '123456', name: '王老师', unit: '复旦大学图书馆', assigned: 64, reviewed: 64, pending: 0, status: '启用' },
-  { id: 'teacher-004', account: 'zhaolaoshi', password: '123456', name: '赵老师', unit: '长宁区图书馆', assigned: 30, reviewed: 8, pending: 22, status: '停用' }
+  { id: 'teacher-001', name: '张三', account: 'zhangsan', password: '******', addedAt: '2025-10-22 14:33:34' },
+  { id: 'teacher-002', name: '李四', account: 'lisi', password: '******', addedAt: '2025-10-23 09:18:10' },
+  { id: 'teacher-003', name: '王五', account: 'wangwu', password: '******', addedAt: '2025-10-24 10:05:46' }
 ];
 
 const REVIEW_USER_DIRECTORY = [
@@ -270,8 +271,11 @@ let attemptReviewAutoSaveTimer = null;
 let studentReviewActiveAttemptId = 'attempt-002';
 let reviewTeacherFormState = {
   id: '',
+  name: '',
   account: '',
-  password: ''
+  password: '',
+  addedAt: '',
+  showPassword: false
 };
 
 registerPage('paper-review-all', () => renderAllReviewPaperListPage());
@@ -363,6 +367,26 @@ function renderReviewOpenSwitch(exam) {
     </div>`;
 }
 
+function getReviewEntryUrl(examOrId) {
+  const exam = typeof examOrId === 'string'
+    ? REVIEW_EXAMS.find(item => item.id === examOrId)
+    : examOrId;
+  const id = exam?.id || '123456';
+  return exam?.reviewEntryUrl || `https://www.yuetu.com/review/${id}`;
+}
+
+function renderReviewEntryCell(exam) {
+  const url = getReviewEntryUrl(exam);
+  return `
+    <div class="review-entry-cell">
+      <a href="javascript:void(0)" title="${reviewEscapeAttr(url)}" onclick="openReviewEntryPage('${exam.id}')">${url}</a>
+      <div class="review-entry-row-actions">
+        <button class="review-entry-icon" data-tooltip="访问阅卷页面" aria-label="访问阅卷页面" onclick="openReviewEntryPage('${exam.id}')">↗</button>
+        <button class="review-entry-icon" data-tooltip="复制链接" aria-label="复制链接" onclick="copyReviewEntryLink('${exam.id}')">⧉</button>
+      </div>
+    </div>`;
+}
+
 function paperTypeText(type) {
   return type === 'random' ? '随机抽题' : '固定题目';
 }
@@ -400,7 +424,6 @@ function renderAllReviewPaperListPage() {
       <span class="review-divider"></span>
       <strong>阅卷管理</strong>
     </div>`}
-    ${renderReviewEntryBar()}
     ${renderReviewFilterCard({ scope: 'all' })}
     <div class="card review-table-card">
       <div class="review-list-title">全部答题活动试卷</div>
@@ -414,6 +437,7 @@ function renderAllReviewPaperListPage() {
             <th>待阅数量</th>
             <th>已阅数量</th>
             <th>阅卷进度</th>
+            <th>阅卷入口</th>
             <th>阅卷状态</th>
             <th>操作</th>
           </tr>
@@ -428,6 +452,7 @@ function renderAllReviewPaperListPage() {
               <td>${item.pending}</td>
               <td>${item.reviewed}</td>
               <td>${reviewProgress(item.pending, item.reviewed, item.status === '已完成' ? 'var(--success)' : 'var(--primary)')}</td>
+              <td>${renderReviewEntryCell(REVIEW_EXAMS.find(exam => exam.id === item.examId) || { id: item.examId })}</td>
               <td>${paperReviewStatusBadge(item.status)}</td>
               <td>
                 <span class="action-link" onclick="openQuestionAssign('${item.examId}')">分配阅卷人</span>
@@ -445,11 +470,9 @@ function renderActivityReviewPaperListPage() {
   const filteredExams = getReviewConfigFilteredExams();
   return `
   <div class="review-config-page">
-    ${renderReviewEntryBar()}
     <div class="card review-table-card review-config-table-card">
       <div class="review-config-table-head">
         <div class="review-list-title">试卷列表</div>
-        ${renderReviewConfigStatusTabs()}
       </div>
       <table class="review-table review-config-table">
         <thead>
@@ -459,8 +482,9 @@ function renderActivityReviewPaperListPage() {
             <th>考试时间</th>
             <th>主观题数量</th>
             <th>答卷总份数</th>
-            <th>分配方式</th>
-            <th>阅卷开启状态</th>
+            <th>阅卷入口</th>
+            <th>完成进度</th>
+            <th>阅卷状态</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -472,9 +496,12 @@ function renderActivityReviewPaperListPage() {
               <td class="review-exam-time-cell">${formatExamTimeRange(exam)}</td>
               <td>${exam.subjective}</td>
               <td>${exam.pending + exam.reviewed}</td>
-              <td class="review-assign-method-cell" title="${reviewAssignMethodText(exam.assignMethod)}">${reviewAssignMethodText(exam.assignMethod)}</td>
-              <td>${renderReviewOpenSwitch(exam)}</td>
+              <td>${renderReviewEntryCell(exam)}</td>
+              <td>${renderWideProgress(getProgressReviewedTotal(exam), getProgressTaskTotal(exam), exam.status === '已完成' ? 'var(--success)' : 'var(--primary)')}</td>
+              <td>${paperReviewStatusBadge(exam.status)}</td>
               <td>
+                ${renderReviewPublishScoreButton(exam)}
+                <span class="action-link" onclick="openReviewProgressDetail('${exam.id}')">进度详情</span>
                 <span class="action-link" onclick="openQuestionAssignWithTeacherReminder('${exam.id}')">${exam.assignStatus === '未分配' ? '配置分配' : '调整分配'}</span>
               </td>
             </tr>`).join('')}
@@ -529,30 +556,27 @@ function getReviewConfigFilteredExams() {
 }
 
 function renderReviewConfigStatusTabs() {
-  const counts = REVIEW_EXAMS.reduce((acc, exam) => {
-    acc.all += 1;
-    acc[isReviewOpened(exam) ? 'opened' : 'notOpened'] += 1;
-    return acc;
-  }, { all: 0, opened: 0, notOpened: 0 });
-  const tabs = [
-    { key: 'all', label: '全部' },
-    { key: 'not-opened', label: '未开启阅卷', count: counts.notOpened },
-    { key: 'opened', label: '已开启阅卷', count: counts.opened }
-  ];
-  return `
-    <div class="review-config-tabs" role="tablist" aria-label="阅卷开启状态">
-      ${tabs.map(tab => `
-        <button class="${reviewConfigStatusFilter === tab.key ? 'active' : ''}" role="tab" aria-selected="${reviewConfigStatusFilter === tab.key}" onclick="setReviewConfigStatusFilter('${tab.key}')">
-          <span>${tab.label}</span>
-          ${typeof tab.count === 'number' ? `<em>${tab.count}</em>` : ''}
-        </button>
-      `).join('')}
-    </div>`;
+  return '';
 }
 
 function setReviewConfigStatusFilter(filter) {
   reviewConfigStatusFilter = filter;
   navigateTo('paper-review', { source: currentPageSource });
+}
+
+function renderReviewPublishScoreButton(exam) {
+  const enabled = exam?.status === '已完成';
+  return `<button class="btn btn-sm review-publish-score-btn ${enabled ? 'btn-primary' : 'is-disabled'}" ${enabled ? `onclick="openReviewPublishScoreConfirm('${exam.id}')"` : 'disabled'}>发布成绩</button>`;
+}
+
+function openReviewPublishScoreConfirm(examId) {
+  const exam = REVIEW_EXAMS.find(item => item.id === examId);
+  if (!exam || exam.status !== '已完成') return;
+  openModal('确认发布成绩？', `
+    <p>发布后，用户端将立即可见本次成绩。请确认主观题评分无误后再继续。
+
+</p>
+  `, () => navigateTo('paper-review-all'), { confirmText: '确认发布', cancelText: '暂不发布', danger: true });
 }
 
 function renderReviewEntryBar() {
@@ -588,12 +612,12 @@ function renderReviewFilterCard({ scope }) {
   </div>`;
 }
 
-function openReviewEntryPage() {
+function openReviewEntryPage(examId = '') {
   navigateTo('paper-review-my-tasks', { source: { pageId: currentPage, params: currentPageParams || {}, tabKey: activeTabKey } });
 }
 
-function copyReviewEntryLink() {
-  const url = QUESTION_ASSIGN_PAPER.reviewEntryUrl || 'https://www.yuetu.com/123456';
+function copyReviewEntryLink(examId = '') {
+  const url = getReviewEntryUrl(examId || QUESTION_ASSIGN_PAPER);
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(url).then(() => {
       openModal('复制成功', `<p>阅卷入口链接已复制：${url}</p>`, null, { hideCancel: true, confirmText: '知道了' });
@@ -668,7 +692,7 @@ function renderReviewStudentListPage() {
   <div class="card review-table-card">
     <table class="review-table">
       <thead>
-        <tr><th>考生姓名</th><th>所属单位</th><th>待阅数量</th><th>已阅数量</th><th>批阅进度</th><th>操作</th></tr>
+        <tr><th>考生姓名</th><th>所属单位</th><th>待阅题数</th><th>已阅题数</th><th>批阅进度</th><th>操作</th></tr>
       </thead>
       <tbody>
         ${students.map(stu => `
@@ -904,13 +928,13 @@ function renderReviewDetailPage() {
   if (reviewProgressDetailExamId) return renderSinglePaperProgressDetailPage();
   return `
   <div class="review-shell">
-  ${renderReviewStructureNav('阅卷进度')}
+  ${renderReviewStructureNav('阅卷管理')}
   <section class="review-progress-views">
     <div class="review-list-title">试卷列表</div>
     <div class="reviewer-progress-table-wrap">
       <table class="reviewer-progress-table">
         <thead>
-          <tr><th>考试名称</th><th>试卷类型</th><th>考试时间</th><th>主观题数量</th><th>答卷总份数</th><th>分配方式</th><th>完成进度</th><th>阅卷状态</th><th>操作</th></tr>
+          <tr><th>考试名称</th><th>试卷类型</th><th>考试时间</th><th>主观题数量</th><th>答卷总份数</th><th>完成进度</th><th>阅卷状态</th><th>操作</th></tr>
         </thead>
         <tbody>
           ${REVIEW_EXAMS.map(exam => `
@@ -920,11 +944,12 @@ function renderReviewDetailPage() {
               <td class="review-exam-time-cell">${formatExamTimeRange(exam)}</td>
               <td>${exam.subjective}</td>
               <td>${exam.pending + exam.reviewed}</td>
-              <td class="review-assign-method-cell">${reviewAssignMethodText(exam.assignMethod)}</td>
               <td>${renderWideProgress(getProgressReviewedTotal(exam), getProgressTaskTotal(exam), exam.status === '已完成' ? 'var(--success)' : 'var(--primary)')}</td>
               <td>${paperReviewStatusBadge(exam.status)}</td>
               <td>
+                ${renderReviewPublishScoreButton(exam)}
                 <span class="action-link" onclick="openReviewProgressDetail('${exam.id}')">进度详情</span>
+                <span class="action-link" onclick="openQuestionAssignWithTeacherReminder('${exam.id}')">${exam.assignStatus === '未分配' ? '配置分配' : '调整分配'}</span>
               </td>
             </tr>
           `).join('')}
@@ -947,7 +972,7 @@ function openReviewProgressList() {
   reviewAssignDetailExamId = null;
   reviewProgressDetailExamId = null;
   reviewDetailView = 'paper';
-  navigateTo('paper-review-detail');
+  navigateTo(getReviewListPage());
 }
 
 function renderReviewAssignDetailPage() {
@@ -1145,7 +1170,7 @@ function renderSinglePaperProgressDetailPage() {
   const isQuestionView = canViewByQuestion && reviewProgressDetailView === 'question';
   return `
   <div class="review-shell">
-  ${renderReviewStructureNav('阅卷进度')}
+  ${renderReviewStructureNav('阅卷管理')}
   ${renderReviewHeaderCard({ title: '进度详情', backText: '返回上一级', backAction: 'openReviewProgressList()' })}
   <section class="review-progress-views single-paper-progress">
     <div class="progress-detail-context">
@@ -1282,37 +1307,55 @@ function renderReviewTeacherManagePage(options = {}) {
     <div class="review-crumb-card platform-review-back">
       ${renderSourceBack('paper-review-teachers-all')}
       <span class="review-divider"></span>
-      <strong>阅卷老师管理</strong>
+      <strong>阅卷老师配置</strong>
     </div>`}
     <div class="review-page-hero card">
-      <div>
-        <h2>阅卷老师管理</h2>
-        <p>维护当前活动可用的阅卷老师账号。改版后仅保留账号和密码配置，方便快速新增和调整。</p>
+      <div class="review-page-hero-copy">
+        <h2>阅卷老师配置</h2>
+        <p>统一维护阅卷老师账号、密码与添加时间，支持快速检索和复制信息。</p>
       </div>
       <div class="review-page-actions">
-        <button class="btn btn-primary" onclick="openAddReviewTeacher()">+ 添加阅卷老师</button>
+        <button class="btn btn-primary review-teacher-add-btn" onclick="openAddReviewTeacher()">添加阅卷老师</button>
       </div>
     </div>
     <div class="review-teacher-filter card">
-      <label>老师账号</label><input class="form-control" placeholder="请输入老师账号">
-      <button class="btn btn-primary" onclick="filterReviewTasks()">查询</button>
+      <label>阅卷老师姓名</label><input class="form-control" placeholder="请输入阅卷老师姓名">
+      <label>阅卷老师账号</label><input class="form-control" placeholder="请输入阅卷老师账号">
+      <button class="btn btn-primary review-teacher-search-btn" onclick="filterReviewTasks()">查询</button>
       <button class="btn btn-outline" onclick="resetReviewFilters()">重置</button>
     </div>
 
     <div class="card review-table-card review-teacher-table-card">
-      <div class="review-list-title">阅卷老师列表</div>
+      <div class="review-teacher-list-head">
+        <div>
+          <div class="review-list-title">阅卷老师列表</div>
+          <p class="review-teacher-list-desc">共 ${REVIEW_TEACHERS.length} 位老师，当前展示的是可参与阅卷配置的账号信息。</p>
+        </div>
+        <button class="btn btn-outline review-teacher-copy-btn" onclick="copyReviewTeacherTable()">复制表格信息</button>
+      </div>
       <table class="review-table review-teacher-table review-teacher-simple-table">
         <thead>
           <tr>
-            <th>老师账号</th>
+            <th></th>
+            <th>阅卷老师姓名</th>
+            <th>阅卷老师账号</th>
             <th>密码</th>
+            <th>添加时间</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
           ${REVIEW_TEACHERS.map(t => `
             <tr>
-              <td><strong>${t.account}</strong></td>
-              <td>${maskTeacherPassword(t.password)}</td>
+              <td></td>
+              <td><span class="review-inline-text">${t.name}</span><button class="icon-btn review-inline-edit" onclick="editReviewTeacher('${t.id}')">✎</button></td>
+              <td><span class="review-inline-text">${t.account}</span><button class="icon-btn review-inline-edit" onclick="editReviewTeacher('${t.id}')">✎</button></td>
+              <td><span class="review-inline-text review-password-text">${t.showPassword ? t.password : maskTeacherPassword(t.password)}</span><button class="icon-btn review-inline-edit" onclick="toggleReviewTeacherPassword('${t.id}')">👁</button><button class="icon-btn review-inline-edit" onclick="editReviewTeacher('${t.id}')">✎</button></td>
+              <td>${t.addedAt || '-'}</td>
+              <td>
+                <span class="action-link" onclick="copyReviewTeacherRow('${t.id}')">复制信息</span>
+                <span class="action-link danger-link" onclick="removeReviewTeacher('${t.id}')">删除</span>
+              </td>
             </tr>`).join('')}
         </tbody>
       </table>
@@ -1325,9 +1368,8 @@ function renderQuestionAssignPage() {
   const p = QUESTION_ASSIGN_PAPER;
   const effectivePaperType = reviewAssignPaperType === 'random' || p.paperType === 'random' ? 'random' : 'fixed';
   reviewAssignPaperType = effectivePaperType;
-  if (effectivePaperType === 'random' && reviewAssignDimension === 'question') {
-    reviewAssignDimension = 'paper';
-  }
+  reviewAssignDimension = 'paper';
+  reviewAssignPaperMode = 'quota';
   normalizeQuestionOwnerAssignments();
   const list = QUESTION_ASSIGN_LIST;
   const assignedCount = QUESTION_ASSIGN_LIST.filter(q => q.teacherIds.length).length;
@@ -1435,7 +1477,6 @@ function renderMyReviewTasksPage(options = {}) {
               <td>${paperReviewStatusBadge(task.status === '待阅卷' ? '待阅' : task.status)}</td>
               <td>
                 <div class="my-review-actions">
-                  ${task.paperType === '随机抽题' ? '' : `<span class="action-link" onclick="openQuestionReviewFromPaperTask('${task.id}')">按题目批阅</span>`}
                   <span class="action-link" onclick="openStudentReviewFromPaperTask('${task.id}')">按考生批阅</span>
                 </div>
               </td>
@@ -1520,27 +1561,9 @@ function getSelectedAssignQuestions(list = QUESTION_ASSIGN_LIST) {
 }
 
 function renderReviewAssignRulePage(list, activeQuestion) {
-  if (reviewAssignPaperType === 'random' || QUESTION_ASSIGN_PAPER.paperType === 'random') {
-    reviewAssignPaperType = 'random';
-    reviewAssignDimension = 'paper';
-    return renderPaperDimensionWorkbench();
-  }
-  return `
-      <section class="assign-rule-switch card">
-        <div class="assign-rule-switch-head">
-          <div>
-            <strong>选择阅卷分配方式</strong>
-            <p>固定题目支持按题目或按答卷分配。</p>
-          </div>
-        </div>
-        <div class="assign-dimension-grid">
-          ${renderAssignDimensionCard('question', '按题目分配', '按题目组织阅卷任务，每道需人工阅卷的题目指定一名负责老师。', false)}
-          ${renderAssignDimensionCard('paper', '按答卷分配', '按考生答卷组织阅卷任务，同一份答卷中的人工阅卷题由同一老师处理。', false)}
-        </div>
-      </section>
-    ${reviewAssignDimension === 'question'
-      ? renderQuestionDimensionWorkbench(list, activeQuestion)
-      : renderPaperDimensionWorkbench()}`;
+  reviewAssignDimension = 'paper';
+  reviewAssignPaperMode = 'quota';
+  return renderPaperDimensionWorkbench();
 }
 
 function renderAssignDimensionCard(value, title, desc, disabled) {
@@ -1567,7 +1590,7 @@ function renderQuestionDimensionWorkbench(list, activeQuestion) {
         <div class="assign-section-title">
           <div>
             <strong>主观题清单</strong>
-            <p>考试模式下仅简答题进入人工阅卷配置。</p>
+            <p>在线考试下仅简答题进入人工阅卷配置。</p>
           </div>
           <span>${visibleText}</span>
         </div>
@@ -1586,22 +1609,17 @@ function renderQuestionDimensionWorkbench(list, activeQuestion) {
 
 function renderPaperDimensionWorkbench() {
   const activeTeachers = getDefaultPaperQuotaTeachers();
-  const toolbarText = reviewAssignPaperMode === 'all'
-    ? `${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷，${activeTeachers.length} 位老师各评阅 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份`
-    : `${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷，待分配答卷 ${QUESTION_ASSIGN_PAPER.assignedTaskCount} 份`;
+  reviewAssignPaperMode = 'quota';
+  const toolbarText = `${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷，${activeTeachers.length} 位老师参与分配`;
   return `
     <section class="assign-toolbar card">
-      <div class="assign-toolbar-notice"><strong>按答卷分配：</strong>老师按考生整份答卷批阅，适合随机抽题或需要一名老师完整处理同一份答卷的场景。</div>
+      <div class="assign-toolbar-notice"><strong>按数量分配答卷：</strong>为每位老师设置需要批阅的答卷数量，系统按配置分配考生答卷。</div>
       <div class="assign-toolbar-actions">
         <span>${toolbarText}</span>
       </div>
     </section>
     <section class="assign-paper-workbench card">
-      <div class="assign-paper-mode-grid">
-        ${renderPaperAssignModeCard('quota', '按数量分配答卷', '为每位老师设置需要批阅的答卷数量，系统按配置分配考生答卷。')}
-        ${renderPaperAssignModeCard('all', '每位老师评阅全部答卷', '每位阅卷老师都需要评阅当前试卷下的全部考生答卷。')}
-      </div>
-      ${reviewAssignPaperMode === 'all' ? renderPaperAssignAllTeachers() : renderPaperAssignQuota()}
+      ${renderPaperAssignQuota()}
     </section>`;
 }
 
@@ -1733,7 +1751,7 @@ function renderPaperAssignQuota() {
     <div class="assign-paper-mode-panel">
       <div class="assign-quota-head">
         <div>
-          <strong>配置每位老师答卷数量</strong>
+          <strong>按数量分配答卷</strong>
           <span>已配置 ${totalQuota} / ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份${remaining === 0 ? '，数量匹配' : `，剩余 ${remaining} 份`}</span>
           <em>当前已批阅 ${reviewedTotal} 份；重新分配只调整未批阅答卷，不会抵消老师已完成的批阅份数。</em>
         </div>
@@ -1765,11 +1783,7 @@ function renderPaperAssignQuota() {
 }
 
 function getReviewAssignFooterText(readyCount, unassignedCount, totalAnswers) {
-  if (reviewAssignDimension === 'paper') {
-    const modeText = reviewAssignPaperMode === 'all' ? '每位老师评阅全部答卷' : '按老师配置答卷数量';
-    return `按答卷分配 · ${modeText}，共 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷`;
-  }
-  return `按题目分配 · 共 ${QUESTION_ASSIGN_LIST.length} 道主观题，${readyCount} 道可提交，${unassignedCount} 道尚未配置，合计 ${totalAnswers} 份答案`;
+  return `按数量分配答卷 · 共 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷`;
 }
 
 function setReviewAssignDimension(value) {
@@ -2431,7 +2445,6 @@ function openQuestionAssignWithTeacherReminder(examId) {
   openModal('请先确认阅卷老师', `
     <div class="review-teacher-ready-modal">
       <p>分配阅卷老师前，请先在 <strong>阅卷管理 - 阅卷老师</strong> 中维护好本活动的阅卷老师。</p>
-      <p>确认老师已添加并处于启用状态后，再进行配置分配或调整分配，系统才能在分配页面中提供完整的可选老师。</p>
       <button class="btn btn-outline btn-sm" onclick="closeModal();navigateTo('paper-review-teachers')">前往阅卷老师</button>
       <label class="assign-check review-single-check">
         <input type="checkbox" id="skipReviewTeacherReadyReminder">
@@ -2522,56 +2535,25 @@ function openSingleQuestionProgress(id) {
 }
 
 function saveQuestionAssign() {
-  if (reviewAssignDimension === 'paper') {
-    if (reviewAssignPaperMode === 'quota' && !isPaperQuotaValid()) {
-      openModal('无法保存', `<p>按数量分配时，每位老师配置数量之和必须等于 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷。</p>`, null, { hideCancel: true, confirmText: '知道了' });
-      return;
-    }
-    reviewAssignSaved = true;
-    openModal('保存成功', `<p>已保存按答卷分配规则：<strong>${reviewAssignPaperMode === 'all' ? '每位老师评阅全部答卷' : '按数量分配答卷'}</strong>。</p><p>点击“确认分配并开启”后将生成阅卷任务。</p>`, () => navigateTo('paper-review-assign-question'), { hideCancel: true, confirmText: '知道了' });
+  reviewAssignDimension = 'paper';
+  reviewAssignPaperMode = 'quota';
+  if (!isPaperQuotaValid()) {
+    openModal('无法保存', `<p>按数量分配时，每位老师配置数量之和必须等于 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷。</p>`, null, { hideCancel: true, confirmText: '知道了' });
     return;
   }
-  const targets = getSelectedAssignQuestions().length
-    ? getSelectedAssignQuestions()
-    : [getAssignQuestion(questionAssignSelectedId)].filter(Boolean);
-  const savable = targets.filter(q => q.assignStatus !== '已完成' && q.teacherIds.length);
-  if (!savable.length) {
-    openModal('无法保存', '<p>请先选择至少一道可配置题目，并为题目设置阅卷老师。</p>', null, { hideCancel: true, confirmText: '知道了' });
-    return;
-  }
-  savable.forEach(q => {
-    if (q.assignStatus !== '阅卷中') q.assignStatus = '已分配';
-  });
-  openModal('保存成功', `<p>已保存 <strong>${savable.length}</strong> 道题的分配规则，当前分配范围为：<strong>${getAssignScopeLabel()}</strong>。</p><p>点击“确认分配并开启”后将生成阅卷任务。</p>`, () => navigateTo('paper-review-assign-question'), { hideCancel: true, confirmText: '知道了' });
+  reviewAssignSaved = true;
+  openModal('保存成功', '<p>已保存按数量分配答卷规则。</p><p>点击“确认分配并开启”后将生成阅卷任务。</p>', () => navigateTo('paper-review-assign-question'), { hideCancel: true, confirmText: '知道了' });
 }
 
 function confirmQuestionAssign() {
-  if (reviewAssignDimension === 'paper') {
-    if (reviewAssignPaperMode === 'quota' && !isPaperQuotaValid()) {
-      openModal('无法确认分配并开启', `<p>按数量分配时，每位老师配置数量之和必须等于 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷。</p>`, null, { hideCancel: true, confirmText: '知道了' });
-      return;
-    }
-    reviewAssignSaved = false;
-    openModal('确认分配并开启成功', `<p>阅卷任务已生成：<strong>${reviewAssignPaperMode === 'all' ? '每位老师都需评阅当前试卷下全部答卷' : '系统已按老师配置数量分配答卷'}</strong>。阅卷老师可开始批改。</p>`, () => navigateTo('paper-review'), { confirmText: '返回试卷列表' });
+  reviewAssignDimension = 'paper';
+  reviewAssignPaperMode = 'quota';
+  if (!isPaperQuotaValid()) {
+    openModal('无法确认分配并开启', `<p>按数量分配时，每位老师配置数量之和必须等于 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷。</p>`, null, { hideCancel: true, confirmText: '知道了' });
     return;
   }
-  const unassigned = QUESTION_ASSIGN_LIST.filter(q => q.assignStatus !== '已完成' && !q.teacherIds.length);
-  if (unassigned.length) {
-    openModal('无法确认分配并开启', `<p>仍有 <strong>${unassigned.length}</strong> 道主观题未设置阅卷老师，请完成设置后再确认分配并开启。</p>`, null, { hideCancel: true, confirmText: '知道了' });
-    return;
-  }
-  const submit = () => {
-    QUESTION_ASSIGN_LIST.forEach(q => {
-      if (q.teacherIds.length && q.assignStatus !== '阅卷中' && q.assignStatus !== '已完成') q.assignStatus = '已分配';
-    });
-    questionAssignSelectedIds = [];
-    openModal('确认分配并开启成功', `<p>阅卷任务已生成，分配范围为：<strong>${getAssignScopeLabel()}</strong>。阅卷老师可开始批改。</p>`, () => navigateTo('paper-review'), { confirmText: '返回试卷列表' });
-  };
-  if (questionAssignScope === 'all') {
-    openModal('二次确认', '<p>你选择了“全部重新分配”。该操作可能改变已有阅卷任务归属，确认继续吗？</p>', submit, { confirmText: '确认重新分配' });
-    return;
-  }
-  submit();
+  reviewAssignSaved = false;
+  openModal('确认分配并开启成功', '<p>阅卷任务已生成：<strong>系统已按老师配置数量分配答卷</strong>。阅卷老师可开始批改。</p>', () => navigateTo('paper-review'), { confirmText: '返回试卷列表' });
 }
 
 function isPaperQuotaValid() {
@@ -2644,26 +2626,33 @@ function resetReviewFilters() {
 function openAddReviewTeacher() {
   reviewTeacherFormState = {
     id: '',
+    name: '',
     account: '',
-    password: ''
+    password: '',
+    addedAt: '',
+    showPassword: false
   };
   renderAddReviewTeacherModal();
 }
 
 function renderAddReviewTeacherModal() {
   const isEdit = !!reviewTeacherFormState.id;
-  const canSubmit = !!reviewTeacherFormState.account.trim() && !!reviewTeacherFormState.password.trim();
+  const canSubmit = !!reviewTeacherFormState.name.trim() && !!reviewTeacherFormState.account.trim() && !!reviewTeacherFormState.password.trim();
   openModal('添加阅卷老师', `
     <div class="review-teacher-modal review-teacher-add-modal review-teacher-simple-modal">
-      <p class="review-teacher-modal-subtitle">${isEdit ? '修改阅卷老师账号信息。' : '新增阅卷老师只需要填写账号和密码即可。'}</p>
+      <p class="review-teacher-modal-subtitle">${isEdit ? '修改阅卷老师信息。' : '新增阅卷老师请填写名称、账号和密码。'}</p>
       <div class="review-setting-grid review-teacher-simple-grid">
         <div class="form-group">
-          <label>老师账号</label>
-          <input id="reviewTeacherAccount" class="form-control" placeholder="请输入老师账号" value="${reviewEscapeAttr(reviewTeacherFormState.account)}" oninput="updateReviewTeacherForm('account', this.value)">
+          <label>阅卷老师姓名</label>
+          <input id="reviewTeacherName" class="form-control" placeholder="请输入阅卷老师姓名" value="${reviewEscapeAttr(reviewTeacherFormState.name)}" oninput="updateReviewTeacherForm('name', this.value)">
         </div>
         <div class="form-group">
-          <label>老师密码</label>
-          <input id="reviewTeacherPassword" type="password" class="form-control" placeholder="请输入老师密码" value="${reviewEscapeAttr(reviewTeacherFormState.password)}" oninput="updateReviewTeacherForm('password', this.value)">
+          <label>阅卷老师账号</label>
+          <input id="reviewTeacherAccount" class="form-control" placeholder="请输入阅卷老师账号" value="${reviewEscapeAttr(reviewTeacherFormState.account)}" oninput="updateReviewTeacherForm('account', this.value)">
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input id="reviewTeacherPassword" type="password" class="form-control" placeholder="请输入密码" value="${reviewEscapeAttr(reviewTeacherFormState.password)}" oninput="updateReviewTeacherForm('password', this.value)">
         </div>
       </div>
     </div>
@@ -2673,27 +2662,26 @@ function renderAddReviewTeacherModal() {
 }
 
 function submitAddReviewTeacher() {
+  const name = reviewTeacherFormState.name.trim();
   const account = reviewTeacherFormState.account.trim();
   const password = reviewTeacherFormState.password.trim();
-  if (!account || !password) {
+  if (!name || !account || !password) {
     renderAddReviewTeacherModal();
     return false;
   }
   const existed = REVIEW_TEACHERS.find(item => item.id === reviewTeacherFormState.id || item.account === account);
   if (reviewTeacherFormState.id && existed) {
+    existed.name = name;
     existed.account = account;
     existed.password = password;
+    existed.addedAt = existed.addedAt || formatNowForReviewTeacher();
   } else {
     REVIEW_TEACHERS.unshift({
       id: `teacher-${String(REVIEW_TEACHERS.length + 1).padStart(3, '0')}`,
+      name,
       account,
       password,
-      name: '',
-      unit: '',
-      assigned: 0,
-      reviewed: 0,
-      pending: 0,
-      status: '启用'
+      addedAt: formatNowForReviewTeacher()
     });
   }
   closeModal();
@@ -2713,6 +2701,12 @@ function maskTeacherPassword(password) {
   const value = String(password || '');
   if (!value) return '-';
   return '••••••';
+}
+
+function formatNowForReviewTeacher() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 function getReviewTeacherStatusTone(user) {
@@ -2749,16 +2743,43 @@ function editReviewTeacher(id) {
   if (!teacher) return;
   reviewTeacherFormState = {
     id: teacher.id,
+    name: teacher.name || '',
     account: teacher.account,
     password: teacher.password
   };
   renderAddReviewTeacherModal();
 }
 
+function removeReviewTeacher(id) {
+  const index = REVIEW_TEACHERS.findIndex(t => t.id === id);
+  if (index < 0) return;
+  REVIEW_TEACHERS.splice(index, 1);
+  navigateTo(currentPage, { params: currentPageParams, source: currentPageSource, refresh: true, fromTabSwitch: true, reuseTabKey: activeTabKey });
+}
+
+function toggleReviewTeacherPassword(id) {
+  const teacher = REVIEW_TEACHERS.find(t => t.id === id);
+  if (!teacher) return;
+  teacher.showPassword = !teacher.showPassword;
+  navigateTo(currentPage, { params: currentPageParams, source: currentPageSource, refresh: true, fromTabSwitch: true, reuseTabKey: activeTabKey });
+}
+
+function copyReviewTeacherRow(id) {
+  const teacher = REVIEW_TEACHERS.find(t => t.id === id);
+  if (!teacher || !navigator.clipboard?.writeText) return;
+  navigator.clipboard.writeText(`阅卷老师姓名：${teacher.name}\n阅卷老师账号：${teacher.account}\n密码：${teacher.password}\n添加时间：${teacher.addedAt || ''}`);
+}
+
+function copyReviewTeacherTable() {
+  if (!navigator.clipboard?.writeText) return;
+  const text = REVIEW_TEACHERS.map(t => `${t.name}\t${t.account}\t${t.password}\t${t.addedAt || ''}`).join('\n');
+  navigator.clipboard.writeText(text);
+}
+
 function updateReviewTeacherForm(field, value) {
   reviewTeacherFormState[field] = String(value || '');
   const confirmBtn = document.getElementById('modalConfirm');
-  if (confirmBtn) confirmBtn.disabled = !(reviewTeacherFormState.account.trim() && reviewTeacherFormState.password.trim());
+  if (confirmBtn) confirmBtn.disabled = !(reviewTeacherFormState.name.trim() && reviewTeacherFormState.account.trim() && reviewTeacherFormState.password.trim());
 }
 
 function openQuestionReview(examId) {
@@ -2999,9 +3020,8 @@ function renderAttemptReviewWorkbench() {
   return `
   <div class="attempt-review-page">
     <section class="attempt-review-header card">
-      <button class="review-header-back" onclick="goBackFromPage('${currentPage}')">‹ 返回上一级</button>
-      <span class="review-header-divider"></span>
       <div class="attempt-review-title">
+        <button class="review-header-back attempt-review-back" onclick="goBackFromPage('${currentPage}')">‹ 返回上一级</button>
         <strong>${task?.paper || '安全生产知识主观题试卷'}</strong>
         <span>${task?.exam || REVIEW_MARKING.examName}｜仅批阅简答题｜当前 ${attemptIndex + 1} / ${allAttempts.length}</span>
       </div>
@@ -3014,26 +3034,6 @@ function renderAttemptReviewWorkbench() {
     </section>
 
     <section class="attempt-review-workspace">
-      <aside class="attempt-stream-panel card">
-        <div class="attempt-panel-head">
-          <strong>答卷流</strong>
-          <span>自动推送下一份</span>
-        </div>
-        <div class="attempt-stream-progress">
-          <span>当前答卷进度</span>
-          <strong>${stats.reviewed} / ${stats.total} 题</strong>
-          <div class="attempt-ring" style="--pct:${pct}%">${pct}%</div>
-          <p>当前得分 ${stats.totalScore}，剩余 ${stats.pending} 题</p>
-        </div>
-        <div class="attempt-stream-list">
-          ${allAttempts.map((row, index) => renderAttemptStreamItem(row, index, attempt.id)).join('')}
-        </div>
-        <div class="attempt-stream-actions">
-          <button class="btn btn-outline" onclick="switchAttemptByOffset(-1)">上一份</button>
-          <button class="btn btn-primary" onclick="switchAttemptByOffset(1)">下一份</button>
-        </div>
-      </aside>
-
       <main class="attempt-question-panel card">
         <div class="attempt-mode-bar">
           <div>
@@ -3064,8 +3064,7 @@ function renderAttemptQuestionMode(attempt, question, item) {
           <div>
             <strong>题目 ${question.no}</strong>
             <span class="badge badge-blue">${question.type}</span>
-            <span>难度：${question.difficulty}</span>
-            <span>来源：${question.source}</span>
+            <span>满分 ${question.score} 分</span>
           </div>
           <div class="attempt-question-jump">
             ${REVIEW_ATTEMPT_QUESTION_TEMPLATES.map((q, index) => {
@@ -3100,11 +3099,6 @@ function renderAttemptQuestionMode(attempt, question, item) {
             </div>
             <span>/ ${question.score}</span>
           </div>
-          <div class="attempt-score-presets">
-            <button onclick="applyAttemptQuickScore('full')">✓ 正确</button>
-            <button onclick="applyAttemptQuickScore('zero')">✕ 错误</button>
-            <button onclick="applyAttemptQuickScore('half')">⚠ 部分正确</button>
-          </div>
           <textarea id="attemptCommentInput" class="form-control" placeholder="添加评语（可选）" oninput="updateAttemptComment(this.value)">${reviewEscapeAttr(item.comment || '')}</textarea>
         </div>
       `;
@@ -3114,8 +3108,45 @@ function renderAttemptPaperMode(attempt) {
   const items = ensureAttemptReviewItems(attempt);
   return `
     <div class="attempt-paper-scroll">
-      ${REVIEW_ATTEMPT_QUESTION_TEMPLATES.map((question, index) => renderAttemptPaperQuestionCard(attempt, question, items[index], index)).join('')}
+      ${getAttemptPaperSections().map((section, sectionIndex) => renderAttemptPaperSection(attempt, items, section, sectionIndex)).join('')}
     </div>`;
+}
+
+function getAttemptPaperSections() {
+  const total = REVIEW_ATTEMPT_QUESTION_TEMPLATES.length;
+  const sections = [];
+  let cursor = 0;
+  while (cursor < total) {
+    const remaining = total - cursor;
+    const size = remaining > 2 ? 2 : remaining;
+    sections.push({
+      title: `大题${ATTEMPT_PAPER_SECTION_ORDINALS[sections.length] || sections.length + 1}`,
+      start: cursor,
+      end: cursor + size
+    });
+    cursor += size;
+  }
+  return sections;
+}
+
+function renderAttemptPaperSection(attempt, items, section, sectionIndex) {
+  const questions = REVIEW_ATTEMPT_QUESTION_TEMPLATES.slice(section.start, section.end);
+  const sectionItems = items.slice(section.start, section.end);
+  const totalScore = questions.reduce((sum, question) => sum + (Number(question.score) || 0), 0);
+  const reviewedCount = sectionItems.filter(item => item.status === '已评分').length;
+  return `
+    <section class="attempt-paper-section" id="attemptPaperSection-${sectionIndex}">
+      <div class="attempt-paper-section-head">
+        <div>
+          <strong>${section.title}</strong>
+          <span>${questions.length} 题 · ${totalScore} 分</span>
+        </div>
+        <em>${reviewedCount}/${questions.length} 已评分</em>
+      </div>
+      <div class="attempt-paper-section-body">
+        ${questions.map((question, index) => renderAttemptPaperQuestionCard(attempt, question, sectionItems[index], section.start + index)).join('')}
+      </div>
+    </section>`;
 }
 
 function renderAttemptPaperQuestionCard(attempt, question, item, index) {
@@ -3126,7 +3157,6 @@ function renderAttemptPaperQuestionCard(attempt, question, item, index) {
           <strong>第 ${question.no} 题</strong>
           <span class="badge badge-blue">${question.type}</span>
           <span>满分 ${question.score} 分</span>
-          <span>难度：${question.difficulty}</span>
         </div>
         <span class="${item.status === '已评分' ? 'badge badge-green' : 'badge badge-gray'}">${item.status}</span>
       </div>
@@ -3156,11 +3186,6 @@ function renderAttemptPaperQuestionCard(attempt, question, item, index) {
           </div>
           <span>/ ${question.score}</span>
         </div>
-        <div class="attempt-score-presets">
-          <button onclick="applyAttemptPaperQuestionScore(${index}, 'full')">满分</button>
-          <button onclick="applyAttemptPaperQuestionScore(${index}, 'zero')">零分</button>
-          <button onclick="applyAttemptPaperQuestionScore(${index}, 'half')">部分分</button>
-        </div>
         <textarea id="attemptPaperComment-${index}" class="form-control" placeholder="添加本题评语（可选）" oninput="updateAttemptPaperComment(${index}, this.value)">${reviewEscapeAttr(item.comment || '')}</textarea>
       </div>
     </article>`;
@@ -3177,8 +3202,7 @@ function renderStudentReviewMarkingPage() {
   <div class="student-review-page">
     <section class="review-crumb-card student-review-header">
       <div>
-        ${renderSourceBack(currentPage)}
-        <span class="review-divider"></span>
+        <button class="review-header-back" onclick="goBackFromPage('${currentPage}')">‹ 返回上一级</button>
         <strong>${attempt.student} - 批阅主观题</strong>
       </div>
       <div class="student-review-meta">
@@ -3609,15 +3633,6 @@ function initAttemptReviewHotkeys() {
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
       moveAttemptQuestion(1);
-    } else if (event.key === '1') {
-      event.preventDefault();
-      applyAttemptQuickScore('full');
-    } else if (event.key === '2') {
-      event.preventDefault();
-      applyAttemptQuickScore('zero');
-    } else if (event.key === '3') {
-      event.preventDefault();
-      applyAttemptQuickScore('half');
     }
   };
 }

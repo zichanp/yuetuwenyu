@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>答题活动配置 - 知识问答系统</title>
+<title>答题活动配置 - 知识问答管理后台</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -171,34 +171,34 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <!-- PAGE HEADER -->
 <div class="page-head">
     <h1>答题活动配置</h1>
-    <p>配置活动的答题时间、参与规则、题目来源和分值规则。选择活动模式后，系统将自动展示对应配置项。</p>
+    <p>用于配置活动开放时间、参与限制、题目来源与计分规则。切换活动模式后，系统将展示对应配置项。</p>
     <div style="display:flex;gap:8px;margin-top:12px">
-        <span class="badge badge-blue">考试模式</span>
-        <span class="badge badge-green">每日答题闯关模式</span>
+        <span class="badge badge-blue">在线考试</span>
+        <span class="badge badge-green">每日趣味闯关模式</span>
         <span class="badge badge-yellow">闯关模式</span>
-        <span style="font-size:11px;color:var(--text-muted);margin-left:4px">闯关模式：顺序解锁、实时校验、即时解析</span>
+        <span style="font-size:11px;color:var(--text-muted);margin-left:4px">闯关模式支持顺序解锁、实时校验与即时解析</span>
     </div>
 </div>
 
 <!-- ===== MODE SELECTOR ===== -->
 <div class="mode-selector" style="grid-template-columns:1fr 1fr 1fr">
-    <div class="mode-card selected" id="modeExam" onclick="selectMode('exam')">
+    <div class="mode-card selected" id="modeExam" onclick="selectMode('exam')" title="切换至在线考试配置">
         <div class="mode-tag">考试</div>
         <div class="mode-icon">📝</div>
-        <div class="mode-title">考试模式</div>
-        <div class="mode-desc">面向考试模式、测评、竞赛场景。支持固定题目与随机抽题，配置考试时长与防作弊设置。</div>
+        <div class="mode-title">在线考试</div>
+        <div class="mode-desc">适用于考试、测评、竞赛等正式答题场景。支持固定题目、随机抽题、考试时长与防作弊配置。</div>
     </div>
-    <div class="mode-card" id="modeChallenge" onclick="selectMode('challenge')">
+    <div class="mode-card" id="modeChallenge" onclick="selectMode('challenge')" title="切换至每日趣味闯关配置">
         <div class="mode-tag">每日</div>
         <div class="mode-icon">🎯</div>
-        <div class="mode-title">每日答题闯关模式</div>
-        <div class="mode-desc">面向连续参与、每日学习、积分排行场景。支持每日关卡抽题与排行榜激励。</div>
+        <div class="mode-title">每日趣味闯关模式</div>
+        <div class="mode-desc">适用于连续参与、每日学习与积分排行场景。支持每日关卡抽题与排行榜激励。</div>
     </div>
-    <div class="mode-card" id="modeLevel" onclick="selectMode('level')">
+    <div class="mode-card" id="modeLevel" onclick="selectMode('level')" title="切换至闯关模式配置">
         <div class="mode-tag">闯关</div>
         <div class="mode-icon">⚔️</div>
         <div class="mode-title">闯关模式</div>
-        <div class="mode-desc">面向顺序闯关、刷题练习、实时校验场景。过关才解锁下一关，答完即显解析。</div>
+        <div class="mode-desc">适用于顺序闯关、刷题练习与实时校验场景。通关后解锁下一关，答题后展示解析。</div>
     </div>
 </div>
 
@@ -220,10 +220,10 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <input type="datetime-local" class="form-control" value="2026-06-09T09:00">
                 <input type="datetime-local" class="form-control" value="2026-06-09T18:00">
             </div>
-            <p class="hint">配置用户可以进入考试、点击「开始答题」的时间范围</p>
+            <p class="hint">设置用户可进入考试并点击「开始答题」的时间范围。</p>
         </div>
         <div class="form-group">
-            <label>可设置答题时段</label>
+            <label>每日可答题时段</label>
             <div class="inline-field">
                 <span>每日开放</span>
                 <input type="time" value="09:00" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
@@ -231,7 +231,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <input type="time" value="18:00" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
                 <span>可答题</span>
             </div>
-            <p class="hint">支持配置具体开放时段，例如 09:00-18:00。留空表示全天开放。</p>
+            <p class="hint">支持设置具体开放时段，例如 09:00-18:00；留空表示全天开放。</p>
         </div>
         <div class="form-group">
             <label><span class="req">*</span> 考试时长</label>
@@ -239,7 +239,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <input type="number" value="120" min="1" placeholder="120">
                 <span>分钟</span>
             </div>
-            <p class="hint">用户点击「开始答题」后，单次考试最长可作答时间。到达后系统自动交卷。</p>
+            <p class="hint">用户点击「开始答题」后，单次考试最长可作答时长。到时后系统自动交卷。</p>
         </div>
     </div>
 </div>
@@ -260,12 +260,12 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
             </div>
         </div>
         <div class="form-group">
-            <label>每人最多答题次数（整个活动期间）</label>
+            <label>活动期间每人最多答题次数</label>
             <div class="inline-field">
                 <input type="number" placeholder="留空不限制" min="1">
                 <span>次</span>
             </div>
-            <p class="hint">限制用户在整个活动期间最多可答题次数。留空表示不限制。</p>
+            <p class="hint">限制单个用户在活动期间的累计答题次数；留空表示不限制。</p>
         </div>
     </div>
 </div>
@@ -281,14 +281,14 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
             <div class="sw-row">
                 <div class="sw-text">
                     <div class="sw-label">允许中断答题</div>
-                    <div class="sw-hint">控制用户答题过程中退出后是否允许继续答题。关闭后，退出将自动交卷。</div>
+                    <div class="sw-hint">开启后，用户退出答题后可继续作答；关闭后，退出将自动交卷。</div>
                 </div>
                 <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
             </div>
             <div class="sw-row">
                 <div class="sw-text">
-                    <div class="sw-label">中断后默认计时将继续</div>
-                    <div class="sw-hint">中断后倒计时继续，避免用户通过退出暂停计时。关闭后中断期间暂停计时。</div>
+                    <div class="sw-label">中断后继续计时</div>
+                    <div class="sw-hint">开启后，中断期间倒计时继续；关闭后，中断期间暂停计时。</div>
                 </div>
                 <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
             </div>
@@ -331,27 +331,27 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon blue">📄</div>
-        <div><div class="sec-title">题目与试卷配置</div><div class="sec-subtitle">考试模式：从试卷库中选择试卷作为考试内容</div></div>
+        <div><div class="sec-title">题目与试卷配置</div><div class="sec-subtitle">在线考试：从试卷库中选择试卷作为答题内容</div></div>
     </div>
     <div class="section-body">
-        <div class="info-box blue">💡 考试模式使用<strong>试卷</strong>作为题目来源。请先在「试卷管理」中创建试卷（支持固定题目和随机抽题），然后在此选择试卷。<strong>抽题规则</strong>在创建随机抽题时配置，不属于活动配置。</div>
+        <div class="info-box blue">💡 在线考试以<strong>试卷</strong>作为题目来源。请先在「试卷管理」创建试卷（支持固定题目和随机抽题），再在此选择。<strong>抽题规则</strong>在随机抽题试卷中配置，不在活动配置中维护。</div>
         <div class="form-group">
             <label><span class="req">*</span> 选择试卷</label>
-            <div class="paper-card selected" onclick="selectPaper(this)">
+            <div class="paper-card selected" onclick="selectPaper(this)" title="选择该试卷作为答题内容">
                 <div class="paper-info">
                     <div class="paper-name">图书馆知识竞赛试卷 <span class="badge badge-green" style="margin-left:6px">固定题目</span></div>
                     <div class="paper-meta">题目数量：50 | 总分：100 | 及格分：60 | 创建时间：2026-05-01</div>
                 </div>
                 <div class="paper-radio"></div>
             </div>
-            <div class="paper-card" onclick="selectPaper(this)">
+            <div class="paper-card" onclick="selectPaper(this)" title="选择该试卷作为答题内容">
                 <div class="paper-info">
                     <div class="paper-name">历史文化知识测试 <span class="badge badge-yellow" style="margin-left:6px">随机抽题</span></div>
                     <div class="paper-meta">题目数量：30 | 总分：100 | 及格分：60 | 创建时间：2026-05-03</div>
                 </div>
                 <div class="paper-radio"></div>
             </div>
-            <div class="paper-card" onclick="selectPaper(this)">
+            <div class="paper-card" onclick="selectPaper(this)" title="选择该试卷作为答题内容">
                 <div class="paper-info">
                     <div class="paper-name">阅读素养测评 <span class="badge badge-green" style="margin-left:6px">固定题目</span></div>
                     <div class="paper-meta">题目数量：40 | 总分：100 | 及格分：60 | 创建时间：2026-05-05</div>
@@ -359,8 +359,8 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <div class="paper-radio"></div>
             </div>
             <div style="display:flex;gap:8px;margin-top:8px">
-                <button class="btn btn-outline" style="font-size:12px" onclick="alert('跳转至试卷管理页面，可创建固定题目或随机抽题（含抽题规则配置）')">+ 创建新试卷</button>
-                <button class="btn btn-ghost" style="font-size:12px">前往试卷管理</button>
+                <button class="btn btn-outline" style="font-size:12px" title="前往试卷管理创建新试卷" onclick="alert('将前往「试卷管理」创建试卷，可选择固定题目或随机抽题，并配置抽题规则。')">+ 创建新试卷</button>
+                <button class="btn btn-ghost" style="font-size:12px" title="前往试卷管理查看或编辑试卷">前往试卷管理</button>
             </div>
         </div>
         <!-- 试卷详情预览 -->
@@ -386,7 +386,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                     <div style="font-size:13px;color:var(--text-primary)">100 分 / 60 分</div>
                 </div>
             </div>
-            <p class="hint" style="margin-top:4px">如需修改试卷内容或抽题规则，请前往「试卷管理」编辑试卷。</p>
+            <p class="hint" style="margin-top:4px">如需调整试卷内容、分值或抽题规则，请前往「试卷管理」编辑。</p>
         </div>
     </div>
 </div>
@@ -443,7 +443,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
             <div class="sw-row">
                 <div class="sw-text">
                     <div class="sw-label">满分是否默认 100 分</div>
-                    <div class="sw-hint">开启后系统将自动换算为 100 分制；关闭则保留原始总分。⚠️ 此项待确认。</div>
+                    <div class="sw-hint">开启后，系统将成绩换算为 100 分制；关闭后，保留试卷原始总分。该规则需业务确认。</div>
                 </div>
                 <label class="switch"><input type="checkbox"><span class="sw-slider"></span></label>
             </div>
@@ -494,19 +494,19 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon blue">⏱</div>
-        <div><div class="sec-title">答题时间</div><div class="sec-subtitle">配置闯关开放时间、答题时段和每题限时</div></div>
+        <div><div class="sec-title">答题时间</div><div class="sec-subtitle">配置闯关开放日期、答题时段和每题限时</div></div>
     </div>
     <div class="section-body">
         <div class="form-group">
-            <label><span class="req">*</span> 答题开放时间</label>
+            <label><span class="req">*</span> 答题开放日期</label>
             <div class="form-row">
                 <input type="datetime-local" class="form-control" value="2026-06-01T09:00">
                 <input type="datetime-local" class="form-control" value="2026-06-30T18:00">
             </div>
-            <p class="hint">配置用户可以「开始答题」的时间范围</p>
+            <p class="hint">设置用户可点击「开始答题」的时间范围。</p>
         </div>
         <div class="form-group">
-            <label>可设置答题时段</label>
+            <label>每日可答题时段</label>
             <div class="inline-field">
                 <span>每日开放</span>
                 <input type="time" value="09:00" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
@@ -514,12 +514,12 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <input type="time" value="18:00" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
                 <span>可答题</span>
             </div>
-            <p class="hint">支持配置具体开放时段，例如 09:00-18:00。留空表示全天开放。</p>
+            <p class="hint">支持设置具体开放时段，例如 09:00-18:00；留空表示全天开放。</p>
         </div>
         <div class="form-group">
             <label><span class="req">*</span> 每题限时</label>
             <div class="inline-field"><input type="number" value="60" min="1" placeholder="60"> <span>秒</span></div>
-            <p class="hint">限制用户每道题的作答时间。超时后自动跳转下一题。</p>
+            <p class="hint">限制用户每道题的作答时长，超时后系统自动进入下一题。</p>
         </div>
     </div>
 </div>
@@ -540,12 +540,12 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
             </div>
         </div>
         <div class="form-group">
-            <label>每人最多答题次数（整个活动期间）</label>
+            <label>活动期间每人最多答题次数</label>
             <div class="inline-field">
                 <input type="number" placeholder="留空不限制" min="1">
                 <span>次</span>
             </div>
-            <p class="hint">限制用户在整个活动期间最多可答题次数。留空表示不限制。</p>
+            <p class="hint">限制单个用户在活动期间的累计答题次数；留空表示不限制。</p>
         </div>
     </div>
 </div>
@@ -561,14 +561,14 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
             <div class="sw-row">
                 <div class="sw-text">
                     <div class="sw-label">允许中断答题</div>
-                    <div class="sw-hint">控制用户答题过程中退出后是否允许继续答题。关闭后，退出将自动交卷。</div>
+                    <div class="sw-hint">开启后，用户退出答题后可继续作答；关闭后，退出将自动交卷。</div>
                 </div>
                 <label class="switch"><input type="checkbox"><span class="sw-slider"></span></label>
             </div>
             <div class="sw-row">
                 <div class="sw-text">
-                    <div class="sw-label">中断后默认计时将继续</div>
-                    <div class="sw-hint">中断后倒计时继续，避免用户通过退出暂停计时。关闭后中断期间暂停计时。</div>
+                    <div class="sw-label">中断后继续计时</div>
+                    <div class="sw-hint">开启后，中断期间倒计时继续；关闭后，中断期间暂停计时。</div>
                 </div>
                 <label class="switch"><input type="checkbox"><span class="sw-slider"></span></label>
             </div>
@@ -628,27 +628,27 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
         <div><div class="sec-title">组卷方式</div><div class="sec-subtitle">闯关模式支持三种组卷方式，选择后展示对应配置项</div></div>
     </div>
     <div class="section-body">
-        <div class="info-box green">🎯 选择组卷方式后，系统将展示对应的配置项。「公共题库」不是独立组卷方式，而是随机组卷时可选的题库来源。</div>
+        <div class="info-box green">🎯 选择组卷方式后，系统将展示对应配置项。「公共题库」属于题库来源，不作为独立组卷方式。</div>
 
         <!-- ===== 组卷方式三选一 ===== -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
-            <div class="mode-card" id="chFixed" onclick="switchChMethod('fixed')">
+            <div class="mode-card" id="chFixed" onclick="switchChMethod('fixed')" title="切换为固定题目组卷">
                 <div class="mode-tag">手动组卷</div>
                 <div class="mode-icon">📝</div>
                 <div class="mode-title">固定题目</div>
-                <div class="mode-desc">手动选择固定题目，所有用户每天答同一套题。适合标准测评。</div>
+                <div class="mode-desc">手动选择固定题目，所有用户每天使用同一套题。适合标准化测评场景。</div>
             </div>
-            <div class="mode-card selected" id="chRandom" onclick="switchChMethod('random')">
+            <div class="mode-card selected" id="chRandom" onclick="switchChMethod('random')" title="切换为随机组卷">
                 <div class="mode-tag">随机抽题</div>
                 <div class="mode-icon">🎲</div>
                 <div class="mode-title">随机组卷</div>
-                <div class="mode-desc">从指定题库范围中随机抽题，每个用户可能题目不同。适合考试、竞赛、测评。</div>
+                <div class="mode-desc">系统按抽题规则从指定题库范围随机抽题，不同用户可能获得不同题目。适合竞赛、测评等场景。</div>
             </div>
-            <div class="mode-card" id="chDaily" onclick="switchChMethod('daily')">
+            <div class="mode-card" id="chDaily" onclick="switchChMethod('daily')" title="切换为每日题库计划组卷">
                 <div class="mode-tag">每日计划</div>
                 <div class="mode-icon">📅</div>
                 <div class="mode-title">每日题库计划组卷</div>
-                <div class="mode-desc">适合每日答题闯关，每天可配置不同题库、不同主题、不同抽题规则。</div>
+                <div class="mode-desc">适用于每日趣味闯关，可按天配置题库、主题与抽题规则。</div>
             </div>
         </div>
 
@@ -656,17 +656,17 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
         <div id="chFixedPane" class="ch-pane" style="display:none">
             <div class="config-block">
                 <div class="config-block-title">📝 固定题目配置</div>
-                <div class="info-box blue" style="margin-bottom:12px">💡 固定题目模式下，所有用户每天看到的题目完全相同。请选择一张已创建的固定题目。</div>
+                <div class="info-box blue" style="margin-bottom:12px">💡 固定题目模式下，所有用户每天使用相同题目。请选择一张已创建的固定题目试卷。</div>
                 <div class="form-group">
                     <label><span class="req">*</span> 选择试卷</label>
-                    <div class="paper-card selected" onclick="selectChPaper(this)">
+                    <div class="paper-card selected" onclick="selectChPaper(this)" title="选择该固定题目试卷">
                         <div class="paper-info">
                             <div class="paper-name">图书馆基础知识固定题组 <span class="badge badge-green" style="margin-left:6px">固定题目</span></div>
                             <div class="paper-meta">题目数量：10 | 总分：100 | 及格分：60</div>
                         </div>
                         <div class="paper-radio"></div>
                     </div>
-                    <div class="paper-card" onclick="selectChPaper(this)">
+                    <div class="paper-card" onclick="selectChPaper(this)" title="选择该固定题目试卷">
                         <div class="paper-info">
                             <div class="paper-name">阅读素养固定题组 <span class="badge badge-green" style="margin-left:6px">固定题目</span></div>
                             <div class="paper-meta">题目数量：15 | 总分：150 | 及格分：90</div>
@@ -678,7 +678,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
             <div class="sw-row" style="padding-top:8px">
                 <div class="sw-text">
                     <div class="sw-label">每日使用相同题目</div>
-                    <div class="sw-hint">固定题目模式下，默认每天使用同一套题目。关闭后可配置每日轮换不同试卷。</div>
+                    <div class="sw-hint">开启后，每天使用同一套题目；关闭后，可按天配置不同试卷。</div>
                 </div>
                 <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
             </div>
@@ -689,7 +689,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
             <!-- 题库来源 -->
             <div class="config-block">
                 <div class="config-block-title">📂 题库来源</div>
-                <p class="hint" style="margin-bottom:10px">请选择本次随机组卷可使用的题库范围。系统将根据抽题规则，从所选题库中随机抽取题目生成试卷。</p>
+                <p class="hint" style="margin-bottom:10px">选择本次随机组卷可使用的题库范围。系统将按抽题规则从所选题库中生成试卷。</p>
                 <div class="radio-group" style="margin-bottom:8px">
                     <div class="radio-item"><input type="radio" name="chBankSource" value="mine" onclick="switchBankSource(this,'random')"><label>我的题库</label></div>
                     <div class="radio-item"><input type="radio" name="chBankSource" value="org" onclick="switchBankSource(this,'random')"><label>机构题库</label></div>
@@ -709,7 +709,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                     <div class="checkbox-item"><input type="checkbox"> 公共非遗知识题库</div>
                     <div class="checkbox-item"><input type="checkbox"> 公共传统文化题库</div>
                 </div>
-                <p class="hint">勾选后，系统将从已勾选题库中按规则抽取题目。</p>
+                <p class="hint">勾选后，系统将从已选题库中按规则抽取题目。</p>
             </div>
 
             <!-- 抽题规则 -->
@@ -732,7 +732,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                                 <td style="padding:8px 6px"><input type="number" value="8" min="1" style="width:60px;margin:0 auto;display:block;padding:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></td>
                                 <td style="padding:8px 6px"><input type="number" value="10" min="1" style="width:60px;margin:0 auto;display:block;padding:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></td>
                                 <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">80分</td>
-                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--danger);cursor:pointer;font-size:12px">删除</span></td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--danger);cursor:pointer;font-size:12px" title="删除本条抽题规则">删除</span></td>
                             </tr>
                             <tr>
                                 <td style="padding:8px 6px"><select style="width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>判断题</option><option>单选题</option><option>多选题</option></select></td>
@@ -740,12 +740,12 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                                 <td style="padding:8px 6px"><input type="number" value="2" min="1" style="width:60px;margin:0 auto;display:block;padding:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></td>
                                 <td style="padding:8px 6px"><input type="number" value="10" min="1" style="width:60px;margin:0 auto;display:block;padding:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></td>
                                 <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">20分</td>
-                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--danger);cursor:pointer;font-size:12px">删除</span></td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--danger);cursor:pointer;font-size:12px" title="删除本条抽题规则">删除</span></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <button class="btn btn-outline" style="margin-top:10px;font-size:12px">+ 添加规则</button>
+                <button class="btn btn-outline" style="margin-top:10px;font-size:12px" title="新增一条抽题规则">+ 添加规则</button>
             </div>
 
             <!-- 配比概览 -->
@@ -764,7 +764,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <div class="sw-row" style="padding-top:0">
                     <div class="sw-text">
                         <div class="sw-label">每日重新抽题</div>
-                        <div class="sw-hint">同一用户每天多次答题时是否重新抽题。关闭后用户每天看到的题目相同。</div>
+                        <div class="sw-hint">开启后，同一用户每天多次答题将重新抽题；关闭后，当天题目保持一致。</div>
                     </div>
                     <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
                 </div>
@@ -780,12 +780,12 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 
         <!-- ===== 每日题库计划组卷配置 ===== -->
         <div id="chDailyPane" class="ch-pane" style="display:none">
-            <div class="info-box green" style="margin-bottom:12px">📅 每日题库计划组卷适合每日答题闯关，每天可以配置不同题库、不同主题、不同抽题规则。公共题库只是某一天可选的题库来源。</div>
+            <div class="info-box green" style="margin-bottom:12px">📅 每日题库计划组卷适用于每日趣味闯关，可按天配置题库、主题与抽题规则。公共题库仅作为单日题库来源选项。</div>
 
             <!-- 每日题库来源（全局默认） -->
             <div class="config-block">
                 <div class="config-block-title">📂 默认题库来源</div>
-                <p class="hint" style="margin-bottom:10px">设置每日关卡默认的题库来源。单日关卡可在下方独立覆盖。</p>
+                <p class="hint" style="margin-bottom:10px">设置每日关卡默认题库来源；单日关卡可在下方单独调整。</p>
                 <div class="radio-group">
                     <div class="radio-item"><input type="radio" name="chDailyBankSource" value="mine"><label>我的题库</label></div>
                     <div class="radio-item"><input type="radio" name="chDailyBankSource" value="org"><label>机构题库</label></div>
@@ -832,7 +832,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                                 <td style="padding:8px 6px;text-align:center"><span class="badge badge-yellow">随机抽题</span></td>
                                 <td style="padding:8px 6px;font-size:12px;color:var(--text-secondary)">单选 8 + 判断 2</td>
                                 <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">100</td>
-                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600">编辑</span></td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600" title="编辑第 1 天关卡配置">编辑</span></td>
                             </tr>
                             <tr style="border-bottom:1px solid var(--border-light)">
                                 <td style="padding:10px 8px;font-weight:700;color:var(--primary)">第 2 天</td>
@@ -854,7 +854,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                                 <td style="padding:8px 6px;text-align:center"><span class="badge badge-yellow">随机抽题</span></td>
                                 <td style="padding:8px 6px;font-size:12px;color:var(--text-secondary)">单选 5 + 多选 3 + 判断 2</td>
                                 <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">100</td>
-                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600">编辑</span></td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600" title="编辑第 2 天关卡配置">编辑</span></td>
                             </tr>
                             <tr style="border-bottom:1px solid var(--border-light)">
                                 <td style="padding:10px 8px;font-weight:700;color:var(--primary)">第 3 天</td>
@@ -876,15 +876,15 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                                 <td style="padding:8px 6px;text-align:center"><span class="badge badge-green">固定题目</span></td>
                                 <td style="padding:8px 6px;font-size:12px;color:var(--text-secondary)">固定 10 题</td>
                                 <td style="padding:8px 6px;text-align:center;font-weight:700;color:var(--primary)">100</td>
-                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600">编辑</span></td>
+                                <td style="padding:8px 6px;text-align:center"><span style="color:var(--primary);cursor:pointer;font-size:12px;font-weight:600" title="编辑第 3 天关卡配置">编辑</span></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <button class="btn btn-outline" style="margin-top:12px;font-size:12px">+ 添加关卡</button>
+                <button class="btn btn-outline" style="margin-top:12px;font-size:12px" title="新增每日关卡计划">+ 添加关卡</button>
             </div>
 
-            <div class="info-box blue" style="margin-top:12px">💡 每日关卡可独立配置：题库来源、使用题库、组卷方式、抽题规则和总分。点击「编辑」进入当日详情配置。</div>
+            <div class="info-box blue" style="margin-top:12px">💡 每日关卡可独立配置题库来源、使用题库、组卷方式、抽题规则和总分。点击「编辑」进入当日配置详情。</div>
         </div>
     </div>
 </div>
@@ -941,7 +941,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
             <div class="sw-row">
                 <div class="sw-text">
                     <div class="sw-label">满分是否默认 100 分</div>
-                    <div class="sw-hint">开启后系统将自动换算为 100 分制；关闭则保留原始总分。⚠️ 此项待确认。</div>
+                    <div class="sw-hint">开启后，系统将成绩换算为 100 分制；关闭后，保留试卷原始总分。该规则需业务确认。</div>
                 </div>
                 <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
             </div>
@@ -977,7 +977,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon blue">⏱</div>
-        <div><div class="sec-title">答题时间</div><div class="sec-subtitle">闯关模式仅配置开放时间范围，不设置关卡答题时间</div></div>
+        <div><div class="sec-title">答题时间</div><div class="sec-subtitle">闯关模式仅配置活动开放时间，不设置关卡限时</div></div>
     </div>
     <div class="section-body">
         <div class="form-group">
@@ -987,7 +987,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <input type="datetime-local" class="form-control" value="2026-06-30T18:00">
             </div>
         </div>
-        <div class="info-box green">⚔️ 闯关模式不设置关卡答题时间限制。用户可从容答题，实时校验闯关结果。</div>
+        <div class="info-box green">⚔️ 闯关模式不设置关卡答题限时。用户作答过程中，系统将实时校验闯关结果。</div>
     </div>
 </div>
 
@@ -995,7 +995,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon green">🔄</div>
-        <div><div class="sec-title">闯关次数</div><div class="sec-subtitle">设置用户闯关次数，允许刷题重闯</div></div>
+        <div><div class="sec-title">闯关次数</div><div class="sec-subtitle">设置用户每关可挑战次数及重闯规则</div></div>
     </div>
     <div class="section-body">
         <div class="form-group">
@@ -1005,7 +1005,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <div class="radio-item"><input type="radio" name="levelAttempts"><label>每关可闯</label><input type="number" style="width:56px;margin:0 4px;padding:4px 6px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;text-align:center" value="3" min="1"><label>次</label></div>
                 <div class="radio-item"><input type="radio" name="levelAttempts"><label>每关不限次（允许刷题）</label></div>
             </div>
-            <p class="hint">设置每关允许闯关的次数。选择「不限次」可允许用户反复刷题练习。</p>
+            <p class="hint">设置每关允许挑战的次数。选择「不限次」后，用户可反复刷题练习。</p>
         </div>
         <div class="form-group">
             <label>重闯时是否重新抽题</label>
@@ -1013,7 +1013,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                 <div class="radio-item"><input type="radio" name="levelRedraw" checked><label>每次重新抽题</label></div>
                 <div class="radio-item"><input type="radio" name="levelRedraw"><label>保持相同题目</label></div>
             </div>
-            <p class="hint">选择重新抽题可增加刷题效果，选择相同题目可帮助巩固薄弱关卡。</p>
+            <p class="hint">选择「每次重新抽题」可提升练习覆盖面；选择「保持相同题目」可帮助用户巩固薄弱关卡。</p>
         </div>
         <div class="form-group">
             <label>取最高分规则</label>
@@ -1029,19 +1029,19 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon yellow">📋</div>
-        <div><div class="sec-title">闯关规则</div><div class="sec-subtitle">关卡解锁、实时校验、即时解析</div></div>
+        <div><div class="sec-title">闯关规则</div><div class="sec-subtitle">配置关卡解锁、实时校验与答案解析展示规则</div></div>
     </div>
     <div class="section-body">
-        <div class="info-box blue">⚔️ 闯关模式核心规则：用户必须按顺序闯关，前一关通过后才能解锁下一关。答题过程中实时校验闯关结果。</div>
+        <div class="info-box blue">⚔️ 闯关模式要求用户按顺序挑战关卡，前一关通过后才可解锁下一关。系统会在答题过程中实时校验闯关结果。</div>
         <div class="config-block">
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">顺序解锁</div><div class="sw-hint">前一关达到通关分数后，才解锁下一关</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">实时校验闯关结果</div><div class="sw-hint">每答一题即实时校验是否已达到通关分数</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">闯关成功弹窗</div><div class="sw-hint">闯关成功后弹出提示，用户可选择「继续答题」或「进入下一关」</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">闯关失败实时提示</div><div class="sw-hint">当剩余题目已无法达到通关分数时，实时提示失败</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">答完一题立即显示解析</div><div class="sw-hint">每答完一题后自动展示该题答案与解析，帮助用户即时学习</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">顺序解锁</div><div class="sw-hint">前一关达到通关分数后，下一关自动解锁。</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">实时校验闯关结果</div><div class="sw-hint">用户每完成一题，系统即校验当前成绩是否达到通关条件。</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">闯关成功提示</div><div class="sw-hint">闯关成功后展示提示，用户可选择「继续答题」或「进入下一关」。</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">闯关失败提示</div><div class="sw-hint">当剩余题目已无法达到通关分数时，系统实时提示本关挑战失败。</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">答题后展示解析</div><div class="sw-hint">用户完成单题作答后，系统自动展示该题答案与解析。</div></div><label class="switch"><input type="checkbox" checked disabled><span class="sw-slider"></span></label></div>
             <div class="sw-row"><div class="sw-text"><div class="sw-label">显示答题卡</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
         </div>
-        <div class="info-box yellow" style="margin-top:12px">💡 闯关成功弹窗示例：<strong>🎉 恭喜过关！</strong> 您可以「继续答题」获取更高分，或「进入下一关」开始新挑战。闯关失败提示：<strong>😢 很遗憾</strong>，剩余题目已无法达到通关分数，本次闯关失败。</div>
+        <div class="info-box yellow" style="margin-top:12px">💡 提示文案示例：闯关成功时展示「恭喜过关！可继续答题获取更高分，或进入下一关。」；闯关失败时展示「剩余题目已无法达到通关分数，本关挑战失败。」</div>
     </div>
 </div>
 
@@ -1049,10 +1049,10 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon blue">⚔️</div>
-        <div><div class="sec-title">关卡列表</div><div class="sec-subtitle">配置每关的题库、题型、题目数量、每题分值和通关分数</div></div>
+        <div><div class="sec-title">关卡配置</div><div class="sec-subtitle">配置每关题库、题型、题目数量、单题分值和通关分数</div></div>
     </div>
     <div class="section-body">
-        <div class="info-box green">⚔️ 闯关模式仅支持客观题（单选、多选、判断），不支持主观题。系统自动过滤主观题。</div>
+        <div class="info-box green">⚔️ 闯关模式仅支持客观题（单选、多选、判断），系统将自动过滤主观题。</div>
         <div class="config-block">
             <div class="config-block-title">📋 关卡配置 <span id="levelStageSummary" style="color:var(--text-muted);font-weight:400;font-size:12px;margin-left:8px">共 <strong>3</strong> 关 · <strong>45</strong> 题 · 总分 <strong>450</strong></span></div>
             <!-- Table Header -->
@@ -1086,7 +1086,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                     <div><input type="number" value="15" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
                     <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
                     <div><input type="number" value="70" min="0" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
-                    <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer">删除</span></div>
+                    <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer" title="删除第二关配置">删除</span></div>
                 </div>
                 <div style="display:grid;grid-template-columns:40px 1fr 1fr 1fr 80px 80px 80px 50px;gap:8px;align-items:center;padding:10px 0">
                     <div style="text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--primary-light);color:var(--primary);font-weight:700;font-size:12px">3</span></div>
@@ -1096,12 +1096,12 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
                     <div><input type="number" value="20" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
                     <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
                     <div><input type="number" value="80" min="0" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
-                    <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer">删除</span></div>
+                    <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer" title="删除第三关配置">删除</span></div>
                 </div>
             </div>
-            <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="addLevelStageStandalone()">+ 添加关卡</button>
+            <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="addLevelStageStandalone()" title="新增一关配置">+ 添加关卡</button>
         </div>
-        <div class="info-box blue" style="margin-top:12px">💡 每关可独立配置题库、题型、题目数量和通关分数。题型仅限客观题（单选、多选、判断），不支持主观题。</div>
+        <div class="info-box blue" style="margin-top:12px">💡 每关可独立配置题库、题型、题目数量和通关分数。题型仅支持客观题（单选、多选、判断）。</div>
     </div>
 </div>
 
@@ -1109,13 +1109,13 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon green">🔀</div>
-        <div><div class="sec-title">随机规则</div><div class="sec-subtitle">闯关模式固定题目与选项顺序，不做随机排序</div></div>
+        <div><div class="sec-title">随机规则</div><div class="sec-subtitle">闯关模式默认固定题目与选项顺序</div></div>
     </div>
     <div class="section-body">
-        <div class="info-box yellow">⚠️ 闯关模式默认<strong>不随机排序</strong>题目和选项，确保所有用户在同一关卡看到相同的题目顺序和选项顺序。</div>
+        <div class="info-box yellow">⚠️ 闯关模式默认<strong>不随机排序</strong>题目和选项，确保同一关卡下用户看到一致的题目顺序与选项顺序。</div>
         <div class="config-block">
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">题目顺序随机</div><div class="sw-hint">闯关模式建议关闭，保持一致体验</div></div><label class="switch"><input type="checkbox" disabled><span class="sw-slider"></span></label></div>
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">选项顺序随机</div><div class="sw-hint">闯关模式建议关闭，保持一致体验</div></div><label class="switch"><input type="checkbox" disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">题目顺序随机</div><div class="sw-hint">闯关模式下固定关闭，以保持关卡体验一致。</div></div><label class="switch"><input type="checkbox" disabled><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">选项顺序随机</div><div class="sw-hint">闯关模式下固定关闭，以保持选项展示一致。</div></div><label class="switch"><input type="checkbox" disabled><span class="sw-slider"></span></label></div>
         </div>
     </div>
 </div>
@@ -1124,7 +1124,7 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon yellow">🏆</div>
-        <div><div class="sec-title">排行榜规则</div><div class="sec-subtitle">闯关时间榜与总分榜，权重：闯关关卡数 > 分数</div></div>
+        <div><div class="sec-title">排行榜规则</div><div class="sec-subtitle">配置闯关时间榜与总分榜的展示及排序规则</div></div>
     </div>
     <div class="section-body">
         <div class="form-group">
@@ -1156,18 +1156,18 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 <div class="section">
     <div class="section-head">
         <div class="sec-icon blue">📊</div>
-        <div><div class="sec-title">分值规则</div></div>
+        <div><div class="sec-title">分值规则</div><div class="sec-subtitle">按关卡配置分值，并自动汇总总分与通关条件</div></div>
     </div>
     <div class="section-body">
-        <div class="info-box blue">💡 闯关模式的每题分值在上方关卡列表中逐关配置，系统自动汇总计算总分和通关条件。</div>
+        <div class="info-box blue">💡 闯关模式的单题分值在上方关卡配置中逐关维护，系统自动汇总总分并计算通关条件。</div>
         <div class="config-block">
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">每题分值</div><div class="sw-hint">在上方关卡列表中已逐关配置</div></div><span class="badge badge-blue">已配置</span></div>
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">总分计算</div><div class="sw-hint">系统根据每关题目数×分值自动汇总</div></div><span class="badge badge-green">自动计算</span></div>
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">通关条件</div><div class="sw-hint">每关达到通关分即为过关</div></div><span class="badge badge-blue">逐关配置</span></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">每题分值</div><div class="sw-hint">已在上方关卡配置中逐关设置。</div></div><span class="badge badge-blue">已配置</span></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">总分计算</div><div class="sw-hint">系统根据每关题目数量和单题分值自动汇总。</div></div><span class="badge badge-green">自动计算</span></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">通关条件</div><div class="sw-hint">用户每关达到通关分数后，即判定为本关通过。</div></div><span class="badge badge-blue">逐关配置</span></div>
         </div>
         <div class="form-row" style="margin-top:12px">
             <div class="form-group"><label>得分展示</label><select class="form-control"><option>实时展示（每题后）</option><option>每关结束后展示</option><option>活动结束后展示</option></select></div>
-            <div class="form-group"><label>答案解析展示</label><select class="form-control" disabled><option>答完每题立即展示（固定）</option></select><p class="hint">闯关模式固定为答完即显解析</p></div>
+            <div class="form-group"><label>答案解析展示</label><select class="form-control" disabled><option>答完每题立即展示（固定）</option></select><p class="hint">闯关模式固定为答题后展示解析。</p></div>
         </div>
     </div>
 </div>
@@ -1186,17 +1186,17 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
         <div style="margin-bottom:20px">
             <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:10px">答题时间与参与规则对比表</div>
             <table class="cmp-table">
-                <thead><tr><th style="width:14%">模块</th><th style="width:22%">功能点</th><th style="width:12%">考试模式</th><th style="width:14%">每日答题闯关模式</th><th>需求说明</th></tr></thead>
+                <thead><tr><th style="width:14%">模块</th><th style="width:22%">功能点</th><th style="width:12%">在线考试</th><th style="width:14%">每日趣味闯关模式</th><th>需求说明</th></tr></thead>
                 <tbody>
-                    <tr><td rowspan="5" style="font-weight:600;color:var(--text-primary);vertical-align:middle">答题时间</td><td>考试 / 答题开放时间</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">配置用户可以进入答题、点击「开始答题」的时间范围</td></tr>
-                    <tr><td>可设置答题时段</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">支持配置具体开放时段，例如 09:00-18:00</td></tr>
-                    <tr><td>考试时长 / 闯关时长限时</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">考试时长：用户点击「开始答题」后，单次考试最长可作答时间，例如 120 分钟</td></tr>
-                    <tr><td>每题限时</td><td class="na">— 不适用</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">限制用户每道题的作答时间</td></tr>
-                    <tr><td>闯关限时 + 每题限时</td><td class="na">— 不适用</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">同时限制每日闯关总时长和每道题作答时间</td></tr>
+                    <tr><td rowspan="5" style="font-weight:600;color:var(--text-primary);vertical-align:middle">答题时间</td><td>考试 / 答题开放日期</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">设置用户可进入答题并点击「开始答题」的时间范围</td></tr>
+                    <tr><td>每日可答题时段</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">支持设置具体开放时段，例如 09:00-18:00</td></tr>
+                    <tr><td>考试时长 / 闯关时长限时</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">考试时长：用户点击「开始答题」后，单次考试最长可作答时长，例如 120 分钟</td></tr>
+                    <tr><td>每题限时</td><td class="na">— 不适用</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">限制用户每道题的作答时长</td></tr>
+                    <tr><td>闯关限时 + 每题限时</td><td class="na">— 不适用</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">同时限制每日闯关总时长和每道题作答时长</td></tr>
                     <tr><td rowspan="2" style="font-weight:600;color:var(--text-primary);vertical-align:middle">参与次数</td><td>每日答题次数</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">支持每天仅可答 1 次、每天可答 N 次、每天不限次</td></tr>
-                    <tr><td>每人最多答题次数</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">限制用户在整个活动期间最多可答题次数</td></tr>
-                    <tr><td rowspan="2" style="font-weight:600;color:var(--text-primary);vertical-align:middle">参与规则</td><td>允许中断答题</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">控制用户答题过程中退出后是否允许继续答题</td></tr>
-                    <tr><td>中断后默认计时将继续</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">中断后倒计时继续，避免用户通过退出暂停计时</td></tr>
+                    <tr><td>活动期间每人最多答题次数</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">限制单个用户在活动期间的累计答题次数</td></tr>
+                    <tr><td rowspan="2" style="font-weight:600;color:var(--text-primary);vertical-align:middle">参与规则</td><td>允许中断答题</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">控制用户退出答题后是否可继续作答</td></tr>
+                    <tr><td>中断后继续计时</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">开启后，中断期间倒计时继续</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1204,17 +1204,17 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
         <div>
             <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:10px">题目与试卷配置对比表</div>
             <table class="cmp-table">
-                <thead><tr><th style="width:14%">模块</th><th style="width:22%">功能点</th><th style="width:12%">考试模式</th><th style="width:14%">每日答题闯关模式</th><th>需求说明</th></tr></thead>
+                <thead><tr><th style="width:14%">模块</th><th style="width:22%">功能点</th><th style="width:12%">在线考试</th><th style="width:14%">每日趣味闯关模式</th><th>需求说明</th></tr></thead>
                 <tbody>
-                    <tr><td rowspan="4" style="font-weight:600;color:var(--text-primary);vertical-align:middle">题目来源</td><td>选择试卷</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">考试模式从试卷库中选择一张试卷作为考试内容</td></tr>
+                    <tr><td rowspan="4" style="font-weight:600;color:var(--text-primary);vertical-align:middle">题目来源</td><td>选择试卷</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">在线考试从试卷库中选择一张试卷作为答题内容</td></tr>
                     <tr><td>固定题目</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">固定题目由管理员手动选择题目并设置分值（在试卷管理中配置）</td></tr>
                     <tr><td>随机抽题</td><td class="check">✅ 支持</td><td class="na">— 不适用</td><td style="font-size:12px;color:var(--text-secondary)">随机抽题按抽题规则自动组卷（在试卷管理中配置抽题规则）</td></tr>
-                    <tr><td>抽题规则</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">考试模式：在试卷管理中配置；闯关模式：在活动配置中配置每日抽题规则</td></tr>
+                    <tr><td>抽题规则</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">在线考试：在试卷管理中配置；闯关模式：在活动配置中配置每日抽题规则</td></tr>
                     <tr><td rowspan="2" style="font-weight:600;color:var(--text-primary);vertical-align:middle">随机规则</td><td>题目顺序随机</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">控制用户答题时题目展示顺序是否随机</td></tr>
                     <tr><td>选项顺序随机</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">控制选择题选项展示顺序是否随机</td></tr>
                     <tr><td rowspan="3" style="font-weight:600;color:var(--text-primary);vertical-align:middle">分值规则</td><td>每题分值</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">支持按题目或抽题规则配置每题分值</td></tr>
                     <tr><td>总分计算</td><td class="check">✅ 支持</td><td class="check">✅ 支持</td><td style="font-size:12px;color:var(--text-secondary)">系统根据题目数量和分值自动计算总分</td></tr>
-                    <tr><td>满分是否默认 100 分</td><td class="warn">⚠️ 待确认</td><td class="warn">⚠️ 待确认</td><td style="font-size:12px;color:var(--text-secondary)">建议支持系统自动换算为 100 分，也可保留原始总分</td></tr>
+                    <tr><td>满分是否默认 100 分</td><td class="warn">⚠️ 待确认</td><td class="warn">⚠️ 待确认</td><td style="font-size:12px;color:var(--text-secondary)">建议支持系统自动换算为 100 分制，也可保留原始总分</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1223,9 +1223,9 @@ input:checked+.sw-slider:before{transform:translateX(20px)}
 
 <!-- ===== ACTIONS ===== -->
 <div class="btn-group" style="background:var(--surface);padding:16px 24px;border-radius:var(--radius-lg);box-shadow:0 -4px 16px rgba(0,0,0,.08);position:sticky;bottom:16px;border:1px solid var(--border-light);z-index:50">
-    <button class="btn btn-success">💾 保存配置</button>
-    <button class="btn btn-primary">💾 保存并下一步</button>
-    <button class="btn btn-ghost">取消</button>
+    <button class="btn btn-success" title="保存当前配置并停留在本页">💾 保存配置</button>
+    <button class="btn btn-primary" title="保存当前配置并进入下一步">💾 保存并下一步</button>
+    <button class="btn btn-ghost" title="取消本次配置并返回上一页">取消</button>
 </div>
 
 </div>
@@ -1267,7 +1267,7 @@ function switchChMethod(method) {
 
 // ===== Bank source hints =====
 const bankSourceHints = {
-    'mine':   '📦 我的题库：从当前管理员自己维护的题库中抽题。',
+    'mine':   '📦 我的题库：从当前管理员维护的题库中抽题。',
     'org':    '🏛️ 机构题库：从当前机构统一维护的题库中抽题。',
     'public': '🌐 平台公共题库由平台统一维护，适合没有自建题库、希望快速创建答题活动的场景。',
     'all':    '📚 全部可用题库：从当前账号有权限使用的全部题库中抽题，范围最广。'
@@ -1343,7 +1343,7 @@ function addLevelStageStandalone() {
         <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
         <div><input type="number" value="10" min="1" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
         <div><input type="number" value="60" min="0" style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center"></div>
-        <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer">删除</span></div>
+        <div style="text-align:center"><span class="action-link danger" onclick="this.closest('[style*=grid]').remove();updateLevelSummary()" style="font-size:12px;cursor:pointer" title="删除当前关卡配置">删除</span></div>
     `;
     container.appendChild(newRow);
     levelStandaloneId++;

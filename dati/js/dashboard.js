@@ -14,10 +14,10 @@ registerPage('dashboard', () => {
         <table>
             <thead><tr><th>活动名称</th><th>模式</th><th>状态</th><th>参与人数</th><th>操作</th></tr></thead>
             <tbody>
-                <tr><td><strong>图书馆知识竞赛</strong></td><td><span class="badge badge-blue">考试模式</span></td><td><span class="badge badge-green">进行中</span></td><td>528</td><td><span class="action-link" onclick="navigateTo('activity-list')">查看</span></td></tr>
-                <tr><td><strong>21天阅读知识闯关</strong></td><td><span class="badge badge-green">每日答题闯关</span></td><td><span class="badge badge-green">进行中</span></td><td>728</td><td><span class="action-link" onclick="navigateTo('activity-list')">查看</span></td></tr>
-                <tr><td><strong>历史文化知识测试</strong></td><td><span class="badge badge-blue">考试模式</span></td><td><span class="badge badge-yellow">未开始</span></td><td>0</td><td><span class="action-link" onclick="navigateTo('activity-list')">查看</span></td></tr>
-                <tr><td><strong>非遗文化知识闯关</strong></td><td><span class="badge badge-green">每日答题闯关</span></td><td><span class="badge badge-gray">已结束</span></td><td>1,204</td><td><span class="action-link" onclick="navigateTo('activity-list')">查看</span></td></tr>
+                <tr><td><strong>图书馆知识竞赛</strong></td><td><span class="badge badge-blue">在线考试</span></td><td><span class="badge badge-green">进行中</span></td><td>528</td><td><span class="action-link" onclick="navigateTo('activity-list')">查看</span></td></tr>
+                <tr><td><strong>21天阅读知识闯关</strong></td><td><span class="badge badge-green">每日趣味闯关</span></td><td><span class="badge badge-green">进行中</span></td><td>728</td><td><span class="action-link" onclick="navigateTo('activity-list')">查看</span></td></tr>
+                <tr><td><strong>历史文化知识测试</strong></td><td><span class="badge badge-blue">在线考试</span></td><td><span class="badge badge-yellow">未开始</span></td><td>0</td><td><span class="action-link" onclick="navigateTo('activity-list')">查看</span></td></tr>
+                <tr><td><strong>非遗文化知识闯关</strong></td><td><span class="badge badge-green">每日趣味闯关</span></td><td><span class="badge badge-gray">已结束</span></td><td>1,204</td><td><span class="action-link" onclick="navigateTo('activity-list')">查看</span></td></tr>
             </tbody>
         </table>
     </div>

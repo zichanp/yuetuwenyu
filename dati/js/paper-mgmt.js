@@ -38,6 +38,9 @@ let pfTotalScore = 100;
 let pfNameDraft = '';
 let pfDescDraft = '';
 let pfPassDraft = 60;
+let paperEditorMountId = 'mainContent';
+let paperEditorEmbedded = false;
+let paperEditorAfterSave = null;
 
 const PAPER_DRAW_RULE_BANKS = [
   { source: '我的题库', bank: '图书馆知识题库' },
@@ -88,8 +91,8 @@ function capturePaperBasicDraft() {
 
 function rerenderPaperEditor({ capture = true } = {}) {
   if (capture) capturePaperBasicDraft();
-  const main = document.getElementById('mainContent');
-  if (main) main.innerHTML = renderPaperEditor(getEditingPaper());
+  const host = document.getElementById(paperEditorMountId || 'mainContent');
+  if (host) host.innerHTML = renderPaperEditor(getEditingPaper());
 }
 
 function paperDrawRuleBankValue(rule) {
@@ -161,7 +164,6 @@ function renderPaperTotalScoreField(ep) {
           <button type="button" class="score-total-option ${Number(pfTotalScore) === score ? 'active' : ''}" ${locked ? 'disabled' : `onclick="setPaperTotalScore(${score})"`}>${score} 分</button>
         `).join('')}
       </div>
-      <div class="hint" style="margin-top:8px">试卷被活动引用后，试卷总分不支持修改，请确认后再保存。</div>
       ${locked ? '<div class="hint" style="margin-top:4px;color:var(--warning)">当前试卷已被活动引用，为保证考试数据一致性，试卷总分不支持修改。</div>' : ''}
     </div>`;
 }
@@ -234,8 +236,11 @@ function renderPaperList() {
 }
 
 // ===== 创建/编辑 全页面 =====
-function openPaperEditor(editId) {
+function openPaperEditor(editId, options = {}) {
   const ep = editId ? papers.find(p => p.id === editId) : null;
+  paperEditorMountId = options.mountId || 'mainContent';
+  paperEditorEmbedded = !!options.embedded;
+  paperEditorAfterSave = typeof options.afterSave === 'function' ? options.afterSave : null;
   pfEditingId = editId || null;
   pfMode = ep ? ep.mode : '固定题目';
   pfTotalScore = ep ? (Number(ep.total) || 100) : 100;
@@ -258,13 +263,14 @@ function openPaperEditor(editId) {
       pfSections = [{ title: getDefaultSectionTitle(0), type: '随机抽题', questions: [], drawRules: normalizePaperDrawRules(pfDrawRules) }];
     }
   }
-  const main = document.getElementById('mainContent');
-  main.innerHTML = renderPaperEditor(ep);
-  window.scrollTo({ top:0, behavior:'smooth' });
+  const host = document.getElementById(paperEditorMountId || 'mainContent');
+  if (host) host.innerHTML = renderPaperEditor(ep);
+  if (!paperEditorEmbedded) window.scrollTo({ top:0, behavior:'smooth' });
 }
 
 function renderPaperEditor(ep) {
   const label = '试卷';
+  const hideBasicInfo = paperEditorEmbedded;
   return `
   <div class="review-crumb-card platform-review-back">
     <span class="action-link muted" onclick="navigateTo('paper-mgmt')">‹ 返回上一级</span>
@@ -275,6 +281,7 @@ function renderPaperEditor(ep) {
     ${renderPaperStructureBoard()}
     <div class="paper-editor-main">
   <!-- Basic Info -->
+  ${hideBasicInfo ? '' : `
   <div class="card">
     <div class="section"><div class="section-head"><div class="sec-icon blue">📋</div><div><div class="sec-title">基本信息</div></div></div><div class="section-body">
       <div class="form-group"><label><span class="req">*</span> ${label}名称</label><input class="form-control" id="pfName" placeholder="请输入${label}名称" value="${pfNameDraft}"></div>
@@ -282,7 +289,14 @@ function renderPaperEditor(ep) {
       ${renderPaperTotalScoreField(ep)}
       <div class="form-group"><label><span class="req">*</span> 及格分数</label><div class="inline-field"><input type="number" id="pfPass" value="${pfPassDraft}" min="0"><span>分</span></div></div>
     </div></div>
-  </div>
+  </div>`}
+  ${hideBasicInfo ? `
+  <div class="card">
+    <div class="section"><div class="section-head"><div class="sec-icon blue">📋</div><div><div class="sec-title">基本信息</div></div></div><div class="section-body">
+      ${renderPaperTotalScoreField(ep)}
+      <div class="form-group"><label><span class="req">*</span> 及格分数</label><div class="inline-field"><input type="number" id="pfPass" value="${pfPassDraft}" min="0"><span>分</span></div></div>
+    </div></div>
+  </div>` : ''}
   <!-- Question Config -->
   ${renderPaperQuestionConfig()}
   <!-- Actions -->
@@ -511,7 +525,8 @@ function renderSectionBlock(sec, si) {
         <span style="font-size:var(--font-size-xs);color:var(--text-muted)">(${qCount}题 / ${totalScore}分)</span>
       </div>
       <div style="display:flex;gap:8px">
-        <span class="action-link" onclick="addQToSection(${si})">添加题目</span>
+        <span class="action-link" onclick="openPaperQuestionCreateModal(${si})">添加题目</span>
+        <span class="action-link" onclick="addQToSection(${si})">从题库选择</span>
         <span class="action-link" onclick="editSection(${si})">修改名称</span>
         ${pfSections.length > 1 ? `<span class="action-link danger" onclick="delSection(${si})">删除</span>` : ''}
       </div>
@@ -531,9 +546,67 @@ function renderSectionBlock(sec, si) {
             <span class="action-link danger" style="font-size:var(--font-size-xs)" onclick="delQ(${si},${qi})">移除</span>
           </div>
         </div>`).join('')
-        : '<div style="padding:var(--spacing-lg);text-align:center;color:var(--text-muted);font-size:var(--font-size-xs)">暂未选择题目，点击「添加题目」从题库选题</div>'}
+        : '<div style="padding:var(--spacing-lg);text-align:center;color:var(--text-muted);font-size:var(--font-size-xs)">暂未选择题目，点击「添加题目」或「从题库选择」</div>'}
     </div>
   </div>`;
+}
+
+function openPaperQuestionCreateModal(si) {
+  const section = pfSections[si];
+  if (!section) return;
+  openModal('添加题目', renderQuestionForm(), () => {
+    if (!validateQuestionForm()) return false;
+    const values = getQuestionFormValues();
+    const baseId = Date.now();
+    const question = buildPaperQuestionFromForm({
+      id: baseId,
+      type: values.type,
+      bank: values.bank,
+      content: values.content,
+      answer: values.answer,
+      analysis: values.analysis,
+      state: values.state
+    });
+    section.questions.push(question);
+    rerenderPaperEditor();
+  }, { confirmText: '添加题目', modalClass: 'modal-xl question-form-modal' });
+  initQuestionForm();
+}
+
+function buildPaperQuestionFromForm({ id, type, bank, content, answer, analysis, state }) {
+  let options = '—';
+  let normalizedAnswer = answer;
+  if (type === '单选题' || type === '多选题') {
+    const opts = parseChoiceOptionsText(state?.optionsText || '');
+    options = opts.map(opt => `${opt.label}. ${opt.text || ''}`).join(' / ');
+    normalizedAnswer = (state?.answerText || answer || '').toUpperCase().replace(/[^A-Z]/g, '');
+  } else if (type === '判断题') {
+    const labels = getJudgeLabels(state?.mode);
+    options = labels.join(' / ');
+    normalizedAnswer = state?.answer || normalizedAnswer || labels[0];
+  } else if (type === '填空题') {
+    options = '—';
+    normalizedAnswer = state?.answerText || normalizedAnswer;
+  } else if (type === '简答题') {
+    options = '主观作答';
+    normalizedAnswer = state?.reference || normalizedAnswer;
+  } else if (type === '排序题') {
+    const items = parseSortItemsText(state?.itemsText || '');
+    options = items.map(item => `${item.label}. ${item.text || ''}`).join(' / ');
+    normalizedAnswer = state?.answerText || normalizedAnswer;
+  }
+  return {
+    id,
+    sourceId: `manual-${id}`,
+    content,
+    type,
+    bank: bank || '默认题库',
+    score: 10,
+    options,
+    answer: normalizedAnswer,
+    analysis,
+    status: '启用'
+  };
 }
 
 let pfDraggingQuestion = null;
@@ -722,6 +795,10 @@ function addQToSection(si) {
   }, { confirmText:'确认选择' });
 }
 
+function addQFromQuestionLibrary(si) {
+  addQToSection(si);
+}
+
 function updatePaperQuestionPickHint() {
   const count = document.querySelectorAll('.paper-question-pick:checked').length;
   const hint = document.getElementById('paperQuestionSelectHint');
@@ -745,7 +822,7 @@ function renderPaperRandomQuestionConfig() {
           <span>先添加大题，再为每个大题配置题库、题型、数量、分值等随机抽题规则。</span>
         </div>
       </div>
-      <div class="info-box green">🎯 当前为随机抽题：${`系统按「${pfRandomStrategy === 'sameForAll' ? '每人试卷相同' : '每人试卷不同'}」生成题目`}，配比实时计算。</div>
+      <div class="info-box green">🎯 当前为随机抽题：到达配置的出题时间后，系统按抽题规则从题库抽出题目；同一时段进入的用户看到相同题目。</div>
       ${sections.map((section, si) => renderRandomSectionBlock(section, si)).join('')}
       <button class="btn btn-outline" style="margin-top:14px" onclick="addRandomSection()">+ 添加大题</button>
     `;
@@ -864,8 +941,8 @@ function addRandomSection() {
 
 // ===== Save Paper =====
 function savePaper() {
-  const name = document.getElementById('pfName')?.value.trim();
-  if (!name) { alert('请填写试卷名称'); return; }
+  const nameInput = document.getElementById('pfName');
+  const name = nameInput ? nameInput.value.trim() : (pfNameDraft || getEditingPaper()?.name || '未命名试卷');
   const pass = parseInt(document.getElementById('pfPass')?.value) || 60;
   const desc = document.getElementById('pfDesc')?.value.trim() || '';
   const isFixed = pfMode.includes('固定');
@@ -889,12 +966,22 @@ function savePaper() {
       else { p.sections = JSON.parse(JSON.stringify(getRandomPaperSections())); p.drawRules = []; }
     }
   } else {
-    papers.push({
+    const nextPaper = {
       id: papers.length + 1, name, mode: pfMode, randomStrategy: isFixed ? undefined : pfRandomStrategy, retakeStrategy: isFixed ? undefined : pfRetakeStrategy, parentMode: 'exam', count, total, pass,
       creator: '管理员', date: new Date().toISOString().slice(0, 10), status: '启用', scope: '考试活动', desc,
       sections: isFixed ? JSON.parse(JSON.stringify(pfSections)) : JSON.parse(JSON.stringify(getRandomPaperSections())),
       drawRules: []
-    });
+    };
+    papers.push(nextPaper);
+    if (paperEditorEmbedded && paperEditorAfterSave) {
+      paperEditorAfterSave(nextPaper);
+      return;
+    }
+  }
+  if (paperEditorEmbedded && paperEditorAfterSave) {
+    const savedPaper = pfEditingId ? papers.find(x => x.id === pfEditingId) : papers[papers.length - 1];
+    paperEditorAfterSave(savedPaper || null);
+    return;
   }
   navigateTo('paper-mgmt');
 }

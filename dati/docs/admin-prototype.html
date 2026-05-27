@@ -289,8 +289,8 @@
             <div class="form-group"><label><span class="req">*</span>活动名称</label><input class="form-control" placeholder="请输入活动名称"></div>
             <div class="form-group"><label><span class="req">*</span>活动模式</label>
                 <div class="radio-group">
-                    <div class="radio-item"><input type="radio" name="mode" value="exam" checked><label>考试模式</label></div>
-                    <div class="radio-item"><input type="radio" name="mode" value="challenge"><label>每日答题闯关</label></div>
+                    <div class="radio-item"><input type="radio" name="mode" value="exam" checked><label>在线考试</label></div>
+                    <div class="radio-item"><input type="radio" name="mode" value="challenge"><label>每日趣味闯关</label></div>
                 </div>
                 <p class="hint">发布后不可修改，避免已报名/已答题数据口径混乱</p>
             </div>
@@ -306,12 +306,7 @@
                     <div style="display:flex;gap:8px"><select class="form-control" style="width:120px"><option>全国</option><option>省级</option><option>市级</option><option>本机构</option></select><select class="form-control"><option>-</option></select></div>
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label>单位角色</label><select class="form-control"><option>请选择</option><option>主办单位</option><option>承办单位</option><option>参赛单位</option></select></div>
-                <div class="form-group"><label><span class="req">*</span>是否需要报名</label>
-                    <div class="radio-group"><div class="radio-item"><input type="radio" name="needReg" value="1"><label>是</label></div><div class="radio-item"><input type="radio" name="needReg" value="0" checked><label>否</label></div></div>
-                </div>
-            </div>
+            <div class="form-group"><label>单位角色</label><select class="form-control"><option>请选择</option><option>主办单位</option><option>承办单位</option><option>参赛单位</option></select></div>
             <div class="form-group"><label>报名时间</label><div class="form-row"><input type="datetime-local" class="form-control"><input type="datetime-local" class="form-control" placeholder="结束时间"></div><p class="hint">报名结束时间不能晚于活动结束时间</p></div>
             <div class="form-group"><label>组织机构</label>
                 <div class="form-row" style="margin-bottom:8px"><input class="form-control" placeholder="主办单位"><input class="form-control" placeholder="承办单位"></div>
@@ -377,13 +372,13 @@
         <div class="card">
             <div class="card-title">答题配置</div>
             <div class="tabs" id="modeTabs">
-                <div class="tab active" onclick="switchModeTab('examConfig')">考试模式配置</div>
-                <div class="tab" onclick="switchModeTab('challengeConfig')">每日答题闯关配置</div>
+                <div class="tab active" onclick="switchModeTab('examConfig')">在线考试配置</div>
+                <div class="tab" onclick="switchModeTab('challengeConfig')">每日趣味闯关配置</div>
             </div>
 
-            <!-- === 考试模式 === -->
+            <!-- === 在线考试 === -->
             <div id="examConfig" class="tab-pane active">
-                <div class="info-box yellow">⚠️ 考试模式适合考试模式、测评、竞赛场景。考试模式偏正式测评，不建议首期设计复杂积分玩法。</div>
+                <div class="info-box yellow">⚠️ 在线考试适合在线考试、测评、竞赛场景。在线考试偏正式测评，不建议首期设计复杂积分玩法。</div>
                 <div class="form-group"><label><span class="req">*</span>考试开放时间</label><div class="form-row"><input type="datetime-local" class="form-control" value="2026-06-09T09:00"><input type="datetime-local" class="form-control" value="2026-06-09T18:00"></div><p class="hint">用户可以进入考试、点击「开始答题」的时间范围</p></div>
                 <div class="form-row">
                     <div class="form-group"><label><span class="req">*</span>考试时长（分钟）</label><input type="number" class="form-control" value="120"><p class="hint">用户点击「开始答题」后，单次考试最长可作答时间</p></div>
@@ -422,10 +417,10 @@
                 <div class="btn-group"><button class="btn btn-primary" onclick="goStep(5)">下一步</button><button class="btn btn-ghost" onclick="goStep(3)">上一步</button></div>
             </div>
 
-            <!-- === 每日答题闯关模式 === -->
+            <!-- === 每日趣味闯关模式 === -->
             <div id="challengeConfig" class="tab-pane">
-                <div class="info-box green">🎯 每日答题闯关适合连续参与、每日学习、积分排行场景。更适合积分、连续参与、排行榜、单位榜等激励玩法。</div>
-                <div class="form-group"><label><span class="req">*</span>答题开放时间</label><div class="form-row"><input type="datetime-local" class="form-control" value="2026-06-09T09:00"><input type="datetime-local" class="form-control" value="2026-06-30T18:00"></div></div>
+                <div class="info-box green">🎯 每日趣味闯关适合连续参与、每日学习、积分排行场景。更适合积分、连续参与、排行榜、单位榜等激励玩法。</div>
+                <div class="form-group"><label><span class="req">*</span>答题开放日期</label><div class="form-row"><input type="datetime-local" class="form-control" value="2026-06-09T09:00"><input type="datetime-local" class="form-control" value="2026-06-30T18:00"></div></div>
                 <div class="form-group"><label><span class="req">*</span>每日答题次数</label>
                     <div class="radio-group">
                         <div class="radio-item"><input type="radio" name="dailyN" checked><label>每天仅可答 1 次</label></div>
@@ -538,7 +533,7 @@
             <div class="form-group"><label>积分奖励设置</label>
                 <div class="config-block">
                     <div class="form-row">
-                        <div class="form-group"><label>分享奖励（考试模式）</label><div style="display:flex;gap:6px;align-items:center"><input type="number" class="form-control" style="width:80px" value="5"><span>积分/次</span></div></div>
+                        <div class="form-group"><label>分享奖励（在线考试）</label><div style="display:flex;gap:6px;align-items:center"><input type="number" class="form-control" style="width:80px" value="5"><span>积分/次</span></div></div>
                         <div class="form-group"><label>分享奖励（闯关模式）</label><div style="display:flex;gap:6px;align-items:center"><input type="number" class="form-control" style="width:80px" value="5"><span>积分/次</span></div></div>
                     </div>
                     <div class="form-group"><label>连续答题奖励（闯关模式）</label><div style="display:flex;gap:6px;align-items:center">连续<input type="number" class="form-control" style="width:60px" value="7">天，奖励<input type="number" class="form-control" style="width:60px" value="10">积分</div></div>
@@ -564,7 +559,7 @@
                 <div class="config-block-title">活动信息确认</div>
                 <div class="form-row">
                     <div><strong>活动名称：</strong>全民阅读知识竞赛</div>
-                    <div><strong>活动模式：</strong>考试模式</div>
+                    <div><strong>活动模式：</strong>在线考试</div>
                 </div>
                 <div class="form-row" style="margin-top:6px">
                     <div><strong>活动时间：</strong>2026-06-09 09:00 ~ 2026-06-09 18:00</div>
@@ -581,14 +576,14 @@
     <div class="page-header"><h2>📋 活动列表</h2><div class="breadcrumb">首页 / 活动管理 / 活动列表</div></div>
     <div class="card">
         <div class="filter-bar">
-            <input placeholder="活动名称"><select><option>全部模式</option><option>考试模式</option><option>每日答题闯关</option></select><select><option>全部状态</option><option>草稿</option><option>进行中</option><option>已结束</option></select>
+            <input placeholder="活动名称"><select><option>全部模式</option><option>在线考试</option><option>每日趣味闯关</option></select><select><option>全部状态</option><option>草稿</option><option>进行中</option><option>已结束</option></select>
             <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
         </div>
         <table class="data-table"><thead><tr><th>序号</th><th>活动名称</th><th>活动模式</th><th>活动时间</th><th>参与人数</th><th>状态</th><th>操作</th></tr></thead>
         <tbody>
-            <tr><td>1</td><td>全民阅读知识竞赛</td><td><span class="badge badge-blue">考试模式</span></td><td>2026-06-09 ~ 06-09</td><td>128</td><td><span class="badge badge-green">进行中</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">停用</span></td></tr>
-            <tr><td>2</td><td>21天阅读闯关</td><td><span class="badge badge-green">每日答题闯关</span></td><td>2026-06-01 ~ 06-30</td><td>256</td><td><span class="badge badge-green">进行中</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">停用</span></td></tr>
-            <tr><td>3</td><td>图书馆知识测评</td><td><span class="badge badge-blue">考试模式</span></td><td>2026-05-01 ~ 05-15</td><td>89</td><td><span class="badge badge-yellow">已结束</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">复制</span></td></tr>
+            <tr><td>1</td><td>全民阅读知识竞赛</td><td><span class="badge badge-blue">在线考试</span></td><td>2026-06-09 ~ 06-09</td><td>128</td><td><span class="badge badge-green">进行中</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">停用</span></td></tr>
+            <tr><td>2</td><td>21天阅读闯关</td><td><span class="badge badge-green">每日趣味闯关</span></td><td>2026-06-01 ~ 06-30</td><td>256</td><td><span class="badge badge-green">进行中</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">编辑</span><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">停用</span></td></tr>
+            <tr><td>3</td><td>图书馆知识测评</td><td><span class="badge badge-blue">在线考试</span></td><td>2026-05-01 ~ 05-15</td><td>89</td><td><span class="badge badge-yellow">已结束</span></td><td class="actions"><span style="color:#4A6CF7;cursor:pointer">数据</span><span style="color:#4A6CF7;cursor:pointer">复制</span></td></tr>
         </tbody></table>
     </div>
 </section>
@@ -824,7 +819,7 @@
     <div class="modal" style="max-width:780px">
         <div class="modal-head"><h3>创建试卷 / 题组</h3><button class="modal-close" onclick="hideModal('createPaperModal')">&times;</button></div>
         <div class="modal-body">
-            <div class="info-box blue">💡 请选择组卷模式。考试模式使用「试卷」，闯关模式使用「题组」。</div>
+            <div class="info-box blue">💡 请选择组卷模式。在线考试使用「试卷」，闯关模式使用「题组」。</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
                 <div style="border:2px solid #4A6CF7;border-radius:8px;padding:16px;cursor:pointer;text-align:center;background:#F8FAFF">
                     <div style="font-weight:600;color:#4A6CF7;margin-bottom:4px">固定题目</div>
