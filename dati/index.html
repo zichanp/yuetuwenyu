@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="知识问答活动管理系统 - 活动管理、题库管理、数据统计一体化平台">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>知识问答活动管理系统</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         window.__ASSET_VERSION__ = Date.now();
+        window.__loadScript__ = function(src) {
+            document.write('<script src="' + src + (src.includes('?') ? '&' : '?') + 'v=' + window.__ASSET_VERSION__ + '"><\/script>');
+        };
         document.write('<link rel="stylesheet" href="css/admin.css?v=' + window.__ASSET_VERSION__ + '">');
     </script>
 </head>
@@ -74,18 +80,20 @@
     </div>
 </div>
 <!-- ===== SCRIPTS ===== -->
-<script src="js/app.js?v=20260518-fullscreen-create-flow"></script>
-<script src="js/workbench.js?v=20260518-activity-sidebar-rework"></script>
-<script src="js/dashboard.js"></script>
-<script src="js/activity.js?v=20260520-quiz-create-label"></script>
-<script>document.write('<script src="js/quiz-activity-create.js?v=' + window.__ASSET_VERSION__ + '"><\/script>');</script>
-<script src="js/activity-manage.js"></script>
-<script src="js/question-bank.js?v=20260518-hide-secondary-return"></script>
-<script src="js/paper-mgmt.js?v=20260518-hide-secondary-return"></script>
-<script src="js/paper-review.js?v=20260518-hide-secondary-return"></script>
-<script src="js/practice-mgmt.js"></script>
-<script src="js/data-mgmt.js?v=20260519-daily-overview-filter"></script>
-<script src="js/submission-list.js"></script>
-<script src="js/leaderboard.js"></script>
+<script>__loadScript__('js/app.js');</script>
+<script>__loadScript__('js/workbench.js');</script>
+<script>__loadScript__('js/dashboard.js');</script>
+<script>__loadScript__('js/activity.js');</script>
+<script>__loadScript__('js/quiz-activity-create.js');</script>
+<script>__loadScript__('js/offline-activity-create.js');</script>
+<script>__loadScript__('js/activity-manage.js');</script>
+<script>__loadScript__('js/question-bank.js');</script>
+<script>__loadScript__('js/paper-mgmt.js');</script>
+<script>__loadScript__('js/paper-review.js');</script>
+<script>__loadScript__('js/practice-mgmt.js');</script>
+<script>__loadScript__('js/data-mgmt.js');</script>
+<script>__loadScript__('js/submission-list.js');</script>
+<script>__loadScript__('js/leaderboard.js');</script>
+<script>__loadScript__('js/station-activity.js');</script>
 </body>
 </html>

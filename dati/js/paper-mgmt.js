@@ -225,7 +225,7 @@ function renderPaperList() {
         <td><strong>${p.name}</strong><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${p.desc}</div></td>
         <td>${pmPaperModeBadges(p)}</td>
         <td>${p.count}</td><td><strong>${p.total}</strong></td><td>${p.pass}</td>
-        <td>${p.creator}</td><td>${p.date}</td>
+        <td>${p.creator}</td><td>${formatDateTimeSecond(p.date)}</td>
         <td>
           <span class="action-link" onclick="openPaperEditor(${p.id})">编辑</span>
           <span class="action-link danger" onclick="deletePaper(${p.id})">删除</span>
@@ -272,11 +272,7 @@ function renderPaperEditor(ep) {
   const label = '试卷';
   const hideBasicInfo = paperEditorEmbedded;
   return `
-  <div class="review-crumb-card platform-review-back">
-    <span class="action-link muted" onclick="navigateTo('paper-mgmt')">‹ 返回上一级</span>
-    <span class="review-divider"></span>
-    <strong>试卷管理</strong>
-  </div>
+  ${renderPaperEditorNav()}
   <div class="paper-editor-shell">
     ${renderPaperStructureBoard()}
     <div class="paper-editor-main">
@@ -305,6 +301,19 @@ function renderPaperEditor(ep) {
       <button class="btn btn-primary" onclick="savePaper()">保存</button>
     </div>
   </div>
+    </div>
+  </div>`;
+}
+
+function renderPaperEditorNav() {
+  const backAction = paperEditorEmbedded ? 'closePaperDrawer()' : "navigateTo('paper-mgmt')";
+  return `
+  <div class="paper-editor-nav">
+    <button type="button" class="paper-editor-back" onclick="${backAction}">‹ 返回上一级</button>
+    <span class="paper-editor-nav-divider"></span>
+    <div class="paper-editor-nav-title">
+      <strong>试卷管理</strong>
+      <span>${pfMode} · 配置基本信息、题目结构与分值</span>
     </div>
   </div>`;
 }
@@ -355,10 +364,7 @@ function renderFixedPreviewSection(section, si) {
   const totalScore = questions.reduce((sum, q) => sum + (Number(q.score) || 0), 0);
   return `
     <div class="ppb-section">
-      <button type="button" class="ppb-section-title" onclick="scrollToPaperEditorItem('paper-section-${si}')">
-        <span>${section.title}</span>
-        <em>${questions.length} 题 · 合计 ${totalScore} 分</em>
-      </button>
+      ${renderPreviewSectionHeader(section.title, `${questions.length} 题 · 合计 ${totalScore} 分`, si)}
       ${questions.length ? `
         <div class="ppb-question-grid">
           ${questions.map((q, qi) => `
@@ -379,10 +385,7 @@ function renderRandomPreviewSection(section, si) {
   const slots = buildRandomPreviewSlots(rules);
   return `
     <div class="ppb-section">
-      <button type="button" class="ppb-section-title" onclick="scrollToPaperEditorItem('paper-section-${si}')">
-        <span>${section.title}</span>
-        <em>${qCount} 题 · 合计 ${totalScore} 分</em>
-      </button>
+      ${renderPreviewSectionHeader(section.title, `${qCount} 题 · 合计 ${totalScore} 分`, si)}
       ${slots.length ? `
         <div class="ppb-question-grid random" aria-label="${section.title}预计题位">
           ${slots.map(slot => `
@@ -394,6 +397,21 @@ function renderRandomPreviewSection(section, si) {
       ` : ''}
       ${rules.length ? '' : '<div class="ppb-empty">当前大题暂无抽题规则</div>'}
     </div>`;
+}
+
+function renderPreviewSectionHeader(title, meta, si) {
+  const total = pfMode.includes('固定') ? pfSections.length : getRandomPaperSections().length;
+  return `
+      <div class="ppb-section-top">
+        <button type="button" class="ppb-section-title" onclick="scrollToPaperEditorItem('paper-section-${si}')">
+          <span>${title}</span>
+          <em>${meta}</em>
+        </button>
+        <div class="ppb-section-move" aria-label="${title}位置调整">
+          <button type="button" onclick="movePaperSection(${si}, -1)" ${si <= 0 ? 'disabled' : ''} title="上移">↑</button>
+          <button type="button" onclick="movePaperSection(${si}, 1)" ${si >= total - 1 ? 'disabled' : ''} title="下移">↓</button>
+        </div>
+      </div>`;
 }
 
 function buildRandomPreviewSlots(rules) {
@@ -614,6 +632,16 @@ let pfDraggingSection = null;
 
 function getPaperSectionCard(el) {
   return el && el.closest ? el.closest('.paper-section-card') : null;
+}
+
+function movePaperSection(si, direction) {
+  const target = si + direction;
+  if (!pfSections[si] || !pfSections[target]) return;
+  const [moved] = pfSections.splice(si, 1);
+  pfSections.splice(target, 0, moved);
+  normalizeDefaultSectionTitles();
+  rerenderPaperEditor();
+  setTimeout(() => scrollToPaperEditorItem(`paper-section-${target}`), 0);
 }
 
 function startDragSection(event, si) {
@@ -968,7 +996,7 @@ function savePaper() {
   } else {
     const nextPaper = {
       id: papers.length + 1, name, mode: pfMode, randomStrategy: isFixed ? undefined : pfRandomStrategy, retakeStrategy: isFixed ? undefined : pfRetakeStrategy, parentMode: 'exam', count, total, pass,
-      creator: '管理员', date: new Date().toISOString().slice(0, 10), status: '启用', scope: '考试活动', desc,
+      creator: '管理员', date: formatDateTimeSecond(new Date().toISOString().slice(0, 19)), status: '启用', scope: '考试活动', desc,
       sections: isFixed ? JSON.parse(JSON.stringify(pfSections)) : JSON.parse(JSON.stringify(getRandomPaperSections())),
       drawRules: []
     };
@@ -1054,7 +1082,7 @@ function copyPaper(paperId) {
     const newName = document.getElementById('copyPaperName')?.value.trim() || paper.name + '（副本）';
     papers.push({
       ...paper, id: papers.length + 1, name: newName,
-      date: new Date().toISOString().slice(0, 10), status: '停用',
+      date: formatDateTimeSecond(new Date().toISOString().slice(0, 19)), status: '停用',
       sections: paper.sections ? JSON.parse(JSON.stringify(paper.sections)) : [],
       drawRules: paper.drawRules ? JSON.parse(JSON.stringify(paper.drawRules)) : []
     });

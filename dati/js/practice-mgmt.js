@@ -3,12 +3,11 @@
 const PRACTICE_ITEMS = [
   {
     id: 'prac-1',
-    name: '第一场考试 · 模拟练习',
+    name: '第一场考试 · 刷题练习',
     scope: '场次级',
     relationType: '考试场次',
     relation: '第一场考试',
-    mode: '模拟考试',
-    source: '按第一场考试组卷规则生成模拟试卷',
+    source: '沿用第一场考试配置题库',
     time: '2026-06-06 09:00 - 2026-06-20 22:00',
     participants: 186,
     attempts: 342,
@@ -23,8 +22,7 @@ const PRACTICE_ITEMS = [
     scope: '活动级',
     relationType: '趣味闯关',
     relation: '趣味闯关活动',
-    mode: '题库刷题',
-    source: '图书馆知识题库、历史文化题库',
+    source: '沿用趣味闯关活动配置题库',
     time: '2026-06-01 00:00 - 2026-06-30 23:59',
     participants: 268,
     attempts: 916,
@@ -39,8 +37,7 @@ const PRACTICE_ITEMS = [
     scope: '活动级',
     relationType: '每日答题',
     relation: '每日答题活动',
-    mode: '题库刷题',
-    source: '非遗知识题库',
+    source: '沿用每日答题活动配置题库',
     time: '2026-06-10 09:00 - 2026-06-25 21:00',
     participants: 0,
     attempts: 0,
@@ -51,12 +48,11 @@ const PRACTICE_ITEMS = [
   },
   {
     id: 'prac-4',
-    name: '第二场考试 · 模拟练习',
+    name: '第二场考试 · 刷题练习',
     scope: '场次级',
     relationType: '考试场次',
     relation: '第二场考试',
-    mode: '模拟考试',
-    source: '按第二场考试组卷规则生成模拟试卷',
+    source: '沿用第二场考试配置题库',
     time: '2026-05-01 09:00 - 2026-05-10 20:00',
     participants: 142,
     attempts: 205,
@@ -68,14 +64,14 @@ const PRACTICE_ITEMS = [
 ];
 
 const PRACTICE_RECORDS = [
-  { id: 'rec-1', user: '王小明', phone: '138****1234', org: '生产部', practiceId: 'prac-1', practiceName: '第一场考试 · 模拟练习', relation: '第一场考试', mode: '模拟考试', seq: 3, total: 25, correct: 22, wrong: 3, accuracy: '88%', score: 92, duration: '18分42秒', submittedAt: '2026-06-12 15:30' },
-  { id: 'rec-2', user: '李小红', phone: '139****5678', org: '技术部', practiceId: 'prac-2', practiceName: '图书馆知识题库刷题', relation: '趣味闯关活动', mode: '题库刷题', seq: 2, total: 40, correct: 34, wrong: 6, accuracy: '85%', score: '-', duration: '24分18秒', submittedAt: '2026-06-12 10:20' },
-  { id: 'rec-3', user: '张小刚', phone: '137****9012', org: '销售部', practiceId: 'prac-2', practiceName: '图书馆知识题库刷题', relation: '趣味闯关活动', mode: '题库刷题', seq: 1, total: 40, correct: 27, wrong: 13, accuracy: '68%', score: '-', duration: '31分06秒', submittedAt: '2026-06-11 19:05' },
-  { id: 'rec-4', user: '赵一一', phone: '136****7788', org: '综合办公室', practiceId: 'prac-4', practiceName: '第二场考试 · 模拟练习', relation: '第二场考试', mode: '模拟考试', seq: 1, total: 30, correct: 26, wrong: 4, accuracy: '87%', score: 86, duration: '20分12秒', submittedAt: '2026-05-08 16:44' }
+  { id: 'rec-1', user: '王小明', phone: '138****1234', org: '生产部', practiceId: 'prac-1', practiceName: '第一场考试 · 刷题练习', relation: '第一场考试', bankSource: '第一场考试配置题库', seq: 3, total: 25, correct: 22, wrong: 3, accuracy: '88%', duration: '18分42秒', submittedAt: '2026-06-12 15:30' },
+  { id: 'rec-2', user: '李小红', phone: '139****5678', org: '技术部', practiceId: 'prac-2', practiceName: '图书馆知识题库刷题', relation: '趣味闯关活动', bankSource: '趣味闯关活动配置题库', seq: 2, total: 40, correct: 34, wrong: 6, accuracy: '85%', duration: '24分18秒', submittedAt: '2026-06-12 10:20' },
+  { id: 'rec-3', user: '张小刚', phone: '137****9012', org: '销售部', practiceId: 'prac-2', practiceName: '图书馆知识题库刷题', relation: '趣味闯关活动', bankSource: '趣味闯关活动配置题库', seq: 1, total: 40, correct: 27, wrong: 13, accuracy: '68%', duration: '31分06秒', submittedAt: '2026-06-11 19:05' },
+  { id: 'rec-4', user: '赵一一', phone: '136****7788', org: '综合办公室', practiceId: 'prac-4', practiceName: '第二场考试 · 刷题练习', relation: '第二场考试', bankSource: '第二场考试配置题库', seq: 1, total: 30, correct: 26, wrong: 4, accuracy: '87%', duration: '20分12秒', submittedAt: '2026-05-08 16:44' }
 ];
 
 const PRACTICE_DETAIL_QUESTIONS = [
-  { no: 1, type: '单选题', title: '以下哪一项最符合正式考试前模拟练习的目标？', userAnswer: 'B', correctAnswer: 'B', ok: true, score: 4, analysis: '模拟练习用于熟悉题型、流程和考试节奏，不计入正式成绩。' },
+  { no: 1, type: '单选题', title: '以下哪一项最符合正式答题前刷题练习的目标？', userAnswer: 'B', correctAnswer: 'B', ok: true, score: 4, analysis: '刷题练习用于熟悉题库内容和答题节奏，不计入正式成绩。' },
   { no: 2, type: '多选题', title: '题库刷题默认会展示哪些反馈内容？', userAnswer: 'A、B、C', correctAnswer: 'A、B、C', ok: true, score: 6, analysis: '题库刷题固定即时显示对错、正确答案和解析。' },
   { no: 3, type: '判断题', title: '练习成绩会计入正式考试排名。', userAnswer: '正确', correctAnswer: '错误', ok: false, score: 0, analysis: '练习仅用于自测和后台统计，不计入正式成绩、排名或评奖。' },
   { no: 4, type: '单选题', title: '随机练习同一次练习内是否允许重复题目？', userAnswer: '允许', correctAnswer: '不允许', ok: false, score: 0, analysis: '同一次随机练习内题目不可重复，多次练习之间允许重复抽题。' }
@@ -105,27 +101,18 @@ function practiceStatusBadge(status) {
   return `<span class="badge ${map[status] || 'badge-gray'}">${status}</span>`;
 }
 
-function practiceModeBadge(mode) {
-  return `<span class="badge ${mode === '模拟考试' ? 'badge-blue' : 'badge-green'}">${mode}</span>`;
-}
-
-function practiceScopeBadge(scope) {
-  return `<span class="badge ${scope === '场次级' ? 'badge-blue' : 'badge-green'}">${scope}</span>`;
-}
-
 function renderPracticeListPage() {
   const rows = PRACTICE_ITEMS.map(item => `
     <tr>
-      <td><strong>${item.name}</strong><div class="table-subtext">${item.source}</div></td>
-      <td><strong>${item.relation}</strong><div class="table-subtext">${item.relationType}</div></td>
-      <td>${practiceScopeBadge(item.scope)}</td>
-      <td>${practiceModeBadge(item.mode)}</td>
-      <td>${item.time}</td>
+      <td><strong>${item.name}</strong></td>
+      <td><strong>${item.relation}</strong><div class="table-subtext">${item.relationType} · ${item.scope}</div></td>
+      <td>${item.source}</td>
+      <td>${formatDateTimeRangeSecond(item.time)}</td>
       <td>${item.participants}</td>
       <td>${item.attempts}</td>
       <td><strong>${item.avg}</strong></td>
       <td>${practiceStatusBadge(item.status)}</td>
-      <td>${item.updatedAt}</td>
+      <td>${formatDateTimeSecond(item.updatedAt)}</td>
       <td>
         <span class="action-link" onclick="navigateTo('practice-records', { params: { practiceId: '${item.id}' } })">查看记录</span>
       </td>
@@ -143,7 +130,7 @@ function renderPracticeListPage() {
 
       <div class="practice-table-card">
         <div class="practice-card-title"><strong>练习能力列表</strong><span>共 ${PRACTICE_ITEMS.length} 条</span></div>
-        ${tableWrap(['练习名称', '关联对象', '配置范围', '练习模式', '开放时间', '参与人数', '练习次数', '平均表现', '状态', '更新时间', '操作'], rows)}
+        ${tableWrap(['练习名称', '关联活动/场次', '题库来源', '开放时间', '参与人数', '练习次数', '平均正确率', '状态', '更新时间', '操作'], rows)}
       </div>
     </div>`;
 }
@@ -309,28 +296,32 @@ function renderPracticeRecordsPage() {
       <td>${item.org}</td>
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${item.practiceName}">${item.practiceName}</td>
       <td>${item.relation}</td>
-      <td>${practiceModeBadge(item.mode)}</td>
+      <td>${item.bankSource}</td>
       <td>第 ${item.seq} 次</td>
       <td>${item.total}</td>
       <td>${item.correct}</td>
       <td>${item.wrong}</td>
       <td><strong>${item.accuracy}</strong></td>
-      <td>${item.score}</td>
       <td>${item.duration}</td>
-      <td>${item.submittedAt}</td>
+      <td>${formatDateTimeSecond(item.submittedAt)}</td>
       <td><span class="action-link" onclick="openPracticeRecordDrawer('${item.id}')">查看答题详情</span></td>
     </tr>`).join('');
   return `
     <div class="practice-page">
+      <section class="review-header-card">
+        <button class="review-header-back" onclick="goBackFromPage('practice-records')">‹ 返回上一级</button>
+        <span class="review-header-divider"></span>
+        <div>
+          <h2>练习提交明细</h2>
+        </div>
+      </section>
       <div class="practice-page-head">
-        <div><h2>练习提交明细</h2><p>按练习能力、关联对象和用户维度查询提交记录，可进入右侧抽屉浏览每道题答题明细。</p></div>
+        <div><p>按练习名称、题库来源和用户维度查询提交记录，可进入右侧抽屉浏览每道题答题明细。</p></div>
         <button class="btn btn-outline">导出练习记录</button>
       </div>
       <div class="practice-filter-card">
         <div class="practice-filter-grid records">
-          <label><span>练习名称</span><select class="form-control"><option>全部练习</option>${PRACTICE_ITEMS.map(item => `<option ${item.id === practiceId ? 'selected' : ''}>${item.name}</option>`).join('')}</select></label>
-          <label><span>关联对象</span><select class="form-control"><option>全部</option>${Array.from(new Set(PRACTICE_ITEMS.map(item => item.relation))).map(name => `<option>${name}</option>`).join('')}</select></label>
-          <label><span>练习模式</span><select class="form-control"><option>全部</option><option>题库刷题</option><option>模拟考试</option></select></label>
+          <label><span>题库来源</span><select class="form-control"><option>全部</option>${Array.from(new Set(PRACTICE_RECORDS.map(item => item.bankSource))).map(name => `<option>${name}</option>`).join('')}</select></label>
           <label><span>用户姓名</span><input class="form-control" placeholder="请输入用户姓名"></label>
           <label><span>手机号</span><input class="form-control" placeholder="请输入手机号"></label>
           <label><span>所属单位</span><input class="form-control" placeholder="请输入所属单位"></label>
@@ -340,7 +331,7 @@ function renderPracticeRecordsPage() {
       </div>
       <div class="practice-table-card">
         <div class="practice-card-title"><strong>练习提交记录</strong><span>共 ${records.length} 条</span></div>
-        ${tableWrap(['用户姓名', '手机号', '所属单位', '练习名称', '关联对象', '练习模式', '练习次数', '题目数量', '答对', '答错', '正确率', '得分', '用时', '提交时间', '操作'], rows)}
+        ${tableWrap(['用户姓名', '手机号', '所属单位', '练习名称', '关联活动/场次', '题库来源', '练习次数', '题目数量', '答对', '答错', '正确率', '用时', '提交时间', '操作'], rows)}
       </div>
     </div>`;
 }
@@ -372,8 +363,8 @@ function openPracticePaperPicker() {
   openModal('选择试卷', `
     <div class="practice-modal-filter"><input class="form-control" placeholder="试卷名称"><select class="form-control"><option>全部试卷类型</option><option>固定题目</option><option>随机抽题</option></select><select class="form-control"><option>可用试卷</option></select></div>
     ${tableWrap(['试卷名称', '试卷类型', '题目数量', '试卷总分', '答题时长', '更新时间', '操作'], `
-      <tr><td>2026 华服知识竞赛模拟试卷</td><td>固定题目</td><td>25</td><td>100</td><td>20 分钟</td><td>2026-05-26</td><td><span class="action-link">选择</span></td></tr>
-      <tr><td>华服知识竞赛随机模拟试卷</td><td>随机抽题</td><td>25</td><td>100</td><td>20 分钟</td><td>2026-05-30</td><td><span class="action-link">选择</span></td></tr>
+      <tr><td>2026 华服知识竞赛模拟试卷</td><td>固定题目</td><td>25</td><td>100</td><td>20 分钟</td><td>${formatDateTimeSecond('2026-05-26')}</td><td><span class="action-link">选择</span></td></tr>
+      <tr><td>华服知识竞赛随机模拟试卷</td><td>随机抽题</td><td>25</td><td>100</td><td>20 分钟</td><td>${formatDateTimeSecond('2026-05-30')}</td><td><span class="action-link">选择</span></td></tr>
     `)}
   `, null, { hideCancel: true, confirmText: '关闭', modalClass: 'modal-xl' });
 }
@@ -413,12 +404,11 @@ function openPracticeRecordDrawer(recordId) {
         <div class="practice-detail-grid">
           ${practiceDetailField('用户姓名', record.user)}
           ${practiceDetailField('手机号', record.phone)}
-          ${practiceDetailField('关联对象', record.relation)}
-          ${practiceDetailField('练习模式', record.mode)}
-          ${practiceDetailField('得分', record.score)}
+          ${practiceDetailField('关联活动/场次', record.relation)}
+          ${practiceDetailField('题库来源', record.bankSource)}
           ${practiceDetailField('正确率', record.accuracy)}
           ${practiceDetailField('用时', record.duration)}
-          ${practiceDetailField('提交时间', record.submittedAt)}
+          ${practiceDetailField('提交时间', formatDateTimeSecond(record.submittedAt))}
         </div>
         <div class="practice-question-list">
           ${PRACTICE_DETAIL_QUESTIONS.map(q => `

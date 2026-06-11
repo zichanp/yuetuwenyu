@@ -19,11 +19,11 @@ registerPage('leaderboard', () => {
             <div class="info-box blue" style="margin-bottom:16px">🏆 排序规则：<strong>累计总积分 &gt; 有效参与天数 &gt; 累计用时 &gt; 最早达成时间</strong></div>
             ${tableWrap(
                 ['排名', '姓名', '手机号', '选送单位', '累计总积分', '有效参与天数', '累计用时', '最早达成时间'],
-                `<tr><td>🥇 1</td><td><strong>张三</strong></td><td>138****1234</td><td>市图书馆</td><td><strong style="color:var(--primary)">2,850</strong></td><td>28 天</td><td>4h 32min</td><td>2026-06-01</td></tr>
-                <tr><td>🥈 2</td><td><strong>李四</strong></td><td>139****5678</td><td>大学图书馆</td><td><strong>2,780</strong></td><td>27 天</td><td>5h 10min</td><td>2026-06-02</td></tr>
-                <tr><td>🥉 3</td><td><strong>王五</strong></td><td>136****9012</td><td>区图书馆</td><td><strong>2,650</strong></td><td>25 天</td><td>4h 55min</td><td>2026-06-01</td></tr>
-                <tr><td>4</td><td>赵六</td><td>137****3456</td><td>省图书馆</td><td>2,520</td><td>24 天</td><td>5h 20min</td><td>2026-06-03</td></tr>
-                <tr><td>5</td><td>孙七</td><td>135****7890</td><td>市图书馆</td><td>2,480</td><td>23 天</td><td>4h 45min</td><td>2026-06-02</td></tr>`
+                `<tr><td>🥇 1</td><td><strong>张三</strong></td><td>138****1234</td><td>市图书馆</td><td><strong style="color:var(--primary)">2,850</strong></td><td>28 天</td><td>4h 32min</td><td>${formatDateTimeSecond('2026-06-01')}</td></tr>
+                <tr><td>🥈 2</td><td><strong>李四</strong></td><td>139****5678</td><td>大学图书馆</td><td><strong>2,780</strong></td><td>27 天</td><td>5h 10min</td><td>${formatDateTimeSecond('2026-06-02')}</td></tr>
+                <tr><td>🥉 3</td><td><strong>王五</strong></td><td>136****9012</td><td>区图书馆</td><td><strong>2,650</strong></td><td>25 天</td><td>4h 55min</td><td>${formatDateTimeSecond('2026-06-01')}</td></tr>
+                <tr><td>4</td><td>赵六</td><td>137****3456</td><td>省图书馆</td><td>2,520</td><td>24 天</td><td>5h 20min</td><td>${formatDateTimeSecond('2026-06-03')}</td></tr>
+                <tr><td>5</td><td>孙七</td><td>135****7890</td><td>市图书馆</td><td>2,480</td><td>23 天</td><td>4h 45min</td><td>${formatDateTimeSecond('2026-06-02')}</td></tr>`
             )}
         </div>
 
@@ -106,6 +106,3 @@ function switchLbTab(tabId) {
     const pane = card.querySelector(`[data-tab-pane="${tabId}"]`);
     if (pane) pane.style.display = 'block';
 }
-
-// ===== 证书管理 =====
-registerPage('certificates', () => renderPlanningEmptyPage('活动证明', '活动证明模块正在规划中。'));

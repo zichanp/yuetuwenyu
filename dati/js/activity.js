@@ -2,15 +2,16 @@
 
 // ===== ACTIVITY LIST (Level 2 - Card-based layout) =====
 registerPage('activity-list', () => {
+    const isOfflineList = currentPageParams?.activityType === 'offline';
     return `
-    ${pageHeader('📋 活动列表', '活动管理 / 活动列表')}
+    ${pageHeader(isOfflineList ? '📍 活动报名列表' : '📋 活动列表', isOfflineList ? '活动管理 / 工作台 / 活动报名 / 活动列表' : '活动管理 / 活动列表')}
 
     <!-- Filter Bar -->
     <div class="card" style="padding:var(--spacing-lg) var(--spacing-xl);margin-bottom:var(--spacing-lg)">
         <div class="form-row-4" style="margin-bottom:var(--spacing-md)">
             <div class="form-group"><label>活动名称</label><input class="form-control" placeholder="请输入活动名称"></div>
-            <div class="form-group"><label>活动工具</label><select class="form-control"><option>全部工具</option><option>知识问答</option><option>任务打卡</option><option>征集类</option></select></div>
-            <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>在线考试</option><option>每日答题</option><option>趣味闯关</option></select></div>
+            <div class="form-group"><label>活动工具</label><select class="form-control"><option>${isOfflineList ? '活动报名' : '全部工具'}</option><option>知识问答</option><option>任务打卡</option><option>征集类</option></select></div>
+            <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>${isOfflineList ? '讲座沙龙' : '在线考试'}</option><option>${isOfflineList ? '培训会议' : '每日答题'}</option><option>${isOfflineList ? '展览导览' : '趣味闯关'}</option></select></div>
             <div class="form-group"><label>活动状态</label><select class="form-control"><option>全部状态</option><option>未发布</option><option>预告中</option><option>进行中</option><option>已结束</option><option>已下架</option></select></div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:var(--spacing-sm)">
@@ -21,20 +22,26 @@ registerPage('activity-list', () => {
 
     <!-- Action Bar -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--spacing-lg)">
-        <button class="btn btn-primary" onclick="navigateTo('quiz-activity-create')">+ 创建活动</button>
+        ${isOfflineList
+            ? `<button class="btn btn-primary" onclick="navigateTo('offline-activity-create')">+ 发布活动</button>`
+            : renderGlobalActivityCreateDropdown()
+        }
     </div>
 
     <!-- Activity Cards -->
     <div style="display:flex;flex-direction:column;gap:var(--spacing-xs)">
-        ${activityCard({title:'阅读成长知识竞赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'知识问答',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
-        ${activityCard({title:'华服知识测评',status:'进行中',statusCls:'badge-status-ongoing',tool:'知识问答',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
-        ${activityCard({title:'法律翻译知识初赛',status:'已结束',statusCls:'badge-status-ended',tool:'知识问答',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--warning),var(--warning-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:false})}
-        ${activityCard({title:'舍不得的丽江——丽江礼物"文创大赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'任务打卡',toolCls:'badge-green',grad:'linear-gradient(135deg,var(--success),var(--success-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true})}
-        ${activityCard({title:'【第十六届"华政杯"全国法律翻译大赛】打卡赛...',status:'已结束',statusCls:'badge-status-ended',tool:'任务打卡',toolCls:'badge-green',grad:'linear-gradient(135deg,var(--text-tertiary),var(--text-quaternary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,series:true})}
-        ${activityCard({title:'知识问答+文末福利|『锦绣华服·智传千年』华服...',status:'已下架',statusCls:'badge-status-offline',tool:'知识问答',toolCls:'badge-quiz',grad:'linear-gradient(135deg,var(--danger),var(--danger-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅读文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true})}
+        ${isOfflineList ? renderOfflineActivityCards() : `
+        ${activityCard({title:'阅读成长知识竞赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'知识问答',mode:'在线考试',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
+        ${activityCard({title:'华服知识测评',status:'进行中',statusCls:'badge-status-ongoing',tool:'知识问答',mode:'每日答题',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
+        ${activityCard({title:'法律翻译知识初赛',status:'已结束',statusCls:'badge-status-ended',tool:'知识问答',mode:'在线考试',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--warning),var(--warning-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:false})}
+        ${activityCard({title:'城市阅读季 · 讲座沙龙',status:'进行中',statusCls:'badge-status-ongoing',tool:'活动报名',mode:'讲座沙龙',toolCls:'badge-red',grad:'linear-gradient(135deg,#F97316,#FB7185)',time:'2026-06-26 14:00 至 2026-06-26 15:30',host:'阅途文化集团',creator:'周贺贺  2026-06-01 12:00',canManage:true,manageType:'offline'})}
+        ${activityCard({title:'舍不得的丽江——丽江礼物"文创大赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'任务打卡',toolCls:'badge-green',grad:'linear-gradient(135deg,var(--success),var(--success-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true})}
+        ${activityCard({title:'【第十六届"华政杯"全国法律翻译大赛】打卡赛...',status:'已结束',statusCls:'badge-status-ended',tool:'任务打卡',toolCls:'badge-green',grad:'linear-gradient(135deg,var(--text-tertiary),var(--text-quaternary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,series:true})}
+        ${activityCard({title:'知识问答+文末福利|『锦绣华服·智传千年』华服...',status:'已下架',statusCls:'badge-status-offline',tool:'知识问答',mode:'趣味闯关',toolCls:'badge-quiz',grad:'linear-gradient(135deg,var(--danger),var(--danger-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true})}
+        `}
     </div>
 
-    ${renderStandardPagination(5)}`;
+    ${renderStandardPagination(isOfflineList ? 5 : 6)}`;
 });
 
 function renderLegacyQuizTotalScoreBlock() {
@@ -62,6 +69,14 @@ function renderLegacyQuizTotalScoreBlock() {
     </div>`;
 }
 
+function renderOfflineActivityCards() {
+    return `
+        ${activityCard({title:'城市阅读季 · 讲座沙龙',status:'进行中',statusCls:'badge-status-ongoing',tool:'活动报名',mode:'讲座沙龙',toolCls:'badge-red',grad:'linear-gradient(135deg,#F97316,#FB7185)',time:'2026-06-26 14:00 至 2026-06-26 15:30',host:'阅途文化集团',creator:'周贺贺  2026-06-01 12:00',canManage:true,manageType:'offline'})}
+        ${activityCard({title:'非遗手作体验课',status:'预告中',statusCls:'badge-status-upcoming',tool:'活动报名',mode:'培训体验',toolCls:'badge-red',grad:'linear-gradient(135deg,#06B6D4,#22C55E)',time:'2026-07-03 10:00 至 2026-07-03 11:30',host:'阅途文化集团',creator:'林月  2026-06-02 09:30',canManage:true,manageType:'offline'})}
+        ${activityCard({title:'图书馆夜读会',status:'未发布',statusCls:'badge-status-offline',tool:'活动报名',mode:'读书会',toolCls:'badge-red',grad:'linear-gradient(135deg,#6366F1,#A855F7)',time:'2026-07-12 19:00 至 2026-07-12 21:00',host:'阅途文化集团',creator:'王默  2026-06-03 16:00',canManage:true,manageType:'offline'})}
+    `;
+}
+
 function renderLegacyScoreNotice(current = 100, target = 100) {
     const diff = Math.abs(target - current);
     const cls = current === target ? 'ok' : current > target ? 'error' : 'warn';
@@ -74,6 +89,9 @@ function renderLegacyScoreNotice(current = 100, target = 100) {
 }
 
 function activityCard(c) {
+    const toolLabel = formatActivityToolLabel(c);
+    const activityTime = formatDateTimeRangeSecond(c.time);
+    const creatorText = formatCreatorWithTimeSecond(c.creator);
     return `
     <div class="card" style="padding:var(--spacing-lg);display:flex;gap:var(--spacing-lg);align-items:center;position:relative;margin-bottom:0">
         ${c.series ? '<div style="position:absolute;top:0;left:0;background:var(--warning);color:var(--text-inverse);padding:2px var(--spacing-sm);border-radius:0 0 var(--radius-sm) 0;font-size:11px;font-weight:600">系列活动</div>' : ''}
@@ -84,13 +102,13 @@ function activityCard(c) {
                 <span class="badge ${c.statusCls}">${c.status}</span>
             </div>
             <div style="display:flex;align-items:center;gap:var(--spacing-sm);margin-bottom:var(--spacing-xs)">
-                <span class="badge ${c.toolCls}">${c.tool}</span>
+                <span class="badge ${c.toolCls}">${toolLabel}</span>
                 ${renderScorePublishProgressBadge(c.scorePublishProgress)}
             </div>
             <div style="display:flex;align-items:center;gap:var(--spacing-lg);font-size:var(--font-size-xs);color:var(--text-tertiary);flex-wrap:wrap">
-                <span>🕐 ${c.time}</span>
+                <span>🕐 ${activityTime}</span>
                 <span>🏢 ${c.host}</span>
-                <span>👤 ${c.creator}</span>
+                <span>👤 ${creatorText}</span>
             </div>
         </div>
         <div style="display:flex;align-items:center;gap:var(--spacing-xxs);flex-shrink:0;${c.series ? 'margin-top:8px' : ''}">
@@ -101,8 +119,8 @@ function activityCard(c) {
         <div style="display:flex;align-items:center;gap:var(--spacing-xxs);flex-shrink:0;border-left:1px solid var(--border-color-light);padding-left:var(--spacing-md);${c.series ? 'margin-top:8px' : ''}">
             ${renderQuizPublishScoreButton(c.scorePublishProgress, c)}
             ${c.canManage
-                ? `<button class="btn btn-primary btn-sm" onclick="${c.manageType === 'quiz' ? `enterQuizActivityManage('${escHtml(c.title)}', '${escHtml(c.time)}')` : `navigateTo('activity-manage')`}">进入管理</button>
-                   <button class="btn btn-outline btn-sm" onclick="${c.manageType === 'quiz' ? `navigateTo('quiz-activity-create', { params: { mode: 'edit' } })` : `navigateTo('activity-create')`}">编辑活动</button>`
+                ? `<button class="btn btn-primary btn-sm" onclick="${c.manageType === 'quiz' ? `enterQuizActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.mode || '')}')` : c.manageType === 'offline' ? `enterOfflineActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : `navigateTo('activity-manage')`}">进入管理</button>
+                   <button class="btn btn-outline btn-sm" onclick="${c.manageType === 'quiz' ? `navigateTo('quiz-activity-create', { params: { mode: 'edit' } })` : c.manageType === 'offline' ? `navigateTo('offline-activity-create', { params: { mode: 'edit' } })` : `navigateTo('activity-create')`}">编辑活动</button>`
                 : `<button class="btn btn-outline btn-sm">查看数据</button>
                    <button class="btn btn-outline btn-sm">创建副本</button>`
             }
@@ -111,10 +129,40 @@ function activityCard(c) {
     </div>`;
 }
 
-function enterQuizActivityManage(activityName, activityTime) {
+function formatCreatorWithTimeSecond(value) {
+    const text = String(value || '');
+    const match = text.match(/^(.*?)(\d{4}-\d{2}-\d{2}(?: \d{1,2}:\d{2}(?::\d{2})?)?)$/);
+    return match ? `${match[1]}${formatDateTimeSecond(match[2])}` : text;
+}
+
+function formatActivityToolLabel(c) {
+    if (c.tool !== '知识问答') return c.tool;
+    const mode = normalizeQuizActivityModeLabel(c.mode || c.quizMode || c.activityType);
+    return `知识问答 - ${mode}`;
+}
+
+function normalizeQuizActivityModeLabel(mode) {
+    const text = String(mode || '').trim();
+    if (text === 'exam' || text === '在线考试') return '在线考试';
+    if (text === 'daily' || text === '每日答题') return '每日答题';
+    if (text === 'level' || text === 'challenge' || text === '趣味闯关') return '趣味闯关';
+    return '在线考试';
+}
+
+function enterQuizActivityManage(activityName, activityTime, activityMode = '') {
     currentManageActivity.name = activityName;
     currentManageActivity.type = '知识问答';
     currentManageActivity.status = '未发布';
+    currentManageActivity.time = activityTime;
+    currentManageActivity.quizMode = normalizeQuizActivityModeLabel(activityMode);
+    currentManageActivity.allowResume = !!currentManageActivity.allowResume;
+    enterManageMode(activityName);
+}
+
+function enterOfflineActivityManage(activityName, activityTime, activityStatus = '') {
+    currentManageActivity.name = activityName;
+    currentManageActivity.type = '活动报名';
+    currentManageActivity.status = activityStatus || '进行中';
     currentManageActivity.time = activityTime;
     enterManageMode(activityName);
 }
@@ -176,7 +224,7 @@ function renderQuizActivityList() {
         ${quizCard({
             title: '红色经典诵读 · 党史知识闯关赛',
             status: '进行中', statusCls: 'badge-status-ongoing',
-            mode: '知识问答',
+            mode: '趣味闯关',
             scorePublishProgress: { published: 3, total: 5, reviewing: 1, pending: 1 },
             time: '2026-02-20 09:00 至 2026-05-01 23:59',
             host: '复旦大学图书馆',
@@ -219,10 +267,12 @@ function quizCard(c) {
                 ? 'ended'
                 : 'unpublished';
     const primaryAction = c.unpublished
-        ? `<button class="btn btn-primary btn-sm">发布</button>`
+        ? `<button class="btn btn-primary btn-sm" onclick="openExamPublishConfirm()">发布</button>`
         : `<button class="btn btn-primary btn-sm" onclick="navigateTo('activity-manage')">进入管理</button>`;
     const secondaryAction = `<button class="btn btn-outline btn-sm" onclick="navigateTo('quiz-activity-create', { params: { mode: 'edit' } })">编辑活动</button>`;
 
+    const activityTime = formatDateTimeRangeSecond(c.time);
+    const creatorText = formatCreatorWithTimeSecond(c.creator);
     return `
     <div class="quiz-list-item">
         <div class="quiz-list-thumb" style="background:${c.grad}"></div>
@@ -234,13 +284,13 @@ function quizCard(c) {
                 <button class="wb-icon-btn" title="二维码">▦</button>
             </div>
             <div class="quiz-list-tags">
-                <span class="badge badge-mode">${c.mode}</span>
+                <span class="badge badge-mode">${formatActivityToolLabel({ tool: '知识问答', mode: c.mode })}</span>
                 ${renderScorePublishProgressBadge(c.scorePublishProgress)}
             </div>
             <div class="quiz-list-meta">
-                <span>活动时间：${c.time}</span>
+                <span>活动时间：${activityTime}</span>
                 <span>主办单位：${c.host}</span>
-                <span>创建人：${c.creator}</span>
+                <span>创建人：${creatorText}</span>
                 <span>参与：${c.participants}</span>
                 <span>完成率：${c.rate}</span>
             </div>
@@ -331,7 +381,226 @@ function renderActivityCreate() {
         <div class="btn-group">
             <button class="btn btn-ghost">取消</button>
             <button class="btn btn-ghost">💾 保存草稿</button>
-            ${currentStep < 5 ? '<button class="btn btn-primary" onclick="goStep(' + (currentStep + 1) + ')">下一步</button>' : '<button class="btn btn-success" onclick="openModal(\'发布确认\',\'确定发布该活动？发布后活动模式不可修改。\',()=>{alert(\'活动已发布\')})\">🚀 发布活动</button>'}
+            ${currentStep < 5 ? '<button class="btn btn-primary" onclick="goStep(' + (currentStep + 1) + ')">下一步</button>' : '<button class="btn btn-success" onclick="openExamPublishConfirm()">🚀 发布活动</button>'}
+        </div>
+    </div>`;
+}
+
+function openExamPublishConfirm() {
+    activityMode = 'exam';
+    openModal('配置信息确认', renderExamPublishConfirm(), () => {
+        if (!document.getElementById('examPublishAgreement')?.checked) {
+            const tip = document.getElementById('examPublishAgreementTip');
+            if (tip) tip.textContent = '请先阅读并同意相关协议及管理规范';
+            return false;
+        }
+        openModal('发布成功', '<p>在线考试活动已发布。用户端将按当前配置开放报名与答题入口。</p>', () => navigateTo('quiz-activity-list'), {
+            hideCancel: true,
+            confirmText: '返回活动列表',
+            modalClass: 'modal-md'
+        });
+        return false;
+    }, {
+        confirmText: '发布活动',
+        cancelText: '取消',
+        modalClass: 'modal-xl exam-publish-confirm-modal'
+    });
+    setupExamPublishAgreement();
+}
+
+function setupExamPublishAgreement() {
+    const foot = document.getElementById('modalFoot');
+    const confirmBtn = document.getElementById('modalConfirm');
+    if (!foot || !confirmBtn) return;
+
+    if (!document.getElementById('examPublishAgreementWrap')) {
+        foot.insertAdjacentHTML('afterbegin', `
+            <div class="exam-publish-agreement-wrap" id="examPublishAgreementWrap">
+                <label class="exam-publish-agreement">
+                    <input type="checkbox" id="examPublishAgreement">
+                    <span>已阅读并同意 <a href="javascript:void(0)">《阅途文遇活动发布与管理规范》</a></span>
+                </label>
+                <div class="exam-publish-agreement-tip" id="examPublishAgreementTip"></div>
+            </div>
+        `);
+    }
+
+    const checkbox = document.getElementById('examPublishAgreement');
+    if (!checkbox) return;
+
+    const sync = () => {
+        const checked = checkbox.checked;
+        confirmBtn.disabled = !checked;
+        confirmBtn.classList.toggle('is-disabled', !checked);
+        const tip = document.getElementById('examPublishAgreementTip');
+        if (tip && checked) tip.textContent = '';
+    };
+
+    checkbox.onchange = sync;
+    sync();
+}
+
+function renderConfirmRows(rows) {
+    return rows.map(row => `
+        <div class="exam-confirm-row">
+            <div class="exam-confirm-label">${row.label}</div>
+            <div class="exam-confirm-value">${row.value}</div>
+        </div>
+    `).join('');
+}
+
+function renderConfirmRules(rules) {
+    return rules.map(rule => `
+        <div class="exam-rule-item">
+            <span class="exam-rule-check">✓</span>
+            <div><strong>${rule.title}</strong><span>${rule.desc}</span></div>
+        </div>
+    `).join('');
+}
+
+function renderConfirmEditButton() {
+    return '<button type="button" class="exam-confirm-edit" disabled title="暂不支持跳转修改">修改</button>';
+}
+
+function renderExamPublishConfirm() {
+    const sections = [
+        { step: 1, key: 'basic', title: '基本信息' },
+        { step: 2, key: 'intro', title: '活动介绍' },
+        { step: 3, key: 'signupAnswer', title: '报名/答题' },
+        { step: 4, key: 'appearance', title: '外观装修' },
+        { step: 5, key: 'other', title: '其他设置（可选）' }
+    ];
+
+    return `
+    <div class="exam-confirm-shell">
+        <div class="exam-confirm-note">
+            <strong>请在发布前确认以下配置。</strong>
+            <span>活动发布后，活动模式、所选试卷、考试开放时间、答题次数等关键字段将影响用户参与，请确认无误后发布。</span>
+        </div>
+        <div class="exam-confirm-layout">
+            <div class="exam-confirm-content">
+                <section class="exam-confirm-section" id="examConfirmBasic">
+                    <div class="exam-confirm-section-head">
+                        <h4>基本信息</h4>
+                        ${renderConfirmEditButton()}
+                    </div>
+                    ${renderConfirmRows([
+                        { label: '活动名称', value: '新员工入职 · 图书馆业务知识考核' },
+                        { label: '活动模式', value: '<span class="badge badge-blue">在线考试</span>' },
+                        { label: '活动范围', value: '全国' },
+                        { label: '活动状态', value: '未发布' }
+                    ])}
+                    <div class="confirm-chip-row"><span>赛事</span><span>读书</span><span>线上活动</span><span>活动报名</span><span>全国性活动</span><span>我是主办单位</span></div>
+                    <div class="confirm-preview-grid">
+                        <div class="confirm-preview-card">
+                            <strong>报名时间</strong>
+                            <span>2026-06-01 09:00 至 2026-06-08 18:00</span>
+                        </div>
+                        <div class="confirm-preview-card">
+                            <strong>组织机构</strong>
+                            <span>主办单位：中国国际贸易学会、海南大学</span>
+                            <span>承办单位：阅途文遇活动运营中心</span>
+                            <span>协办单位：图书馆行业合作单位</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="exam-confirm-section" id="examConfirmIntro">
+                    <div class="exam-confirm-section-head">
+                        <h4>活动介绍</h4>
+                        ${renderConfirmEditButton()}
+                    </div>
+                    <div class="confirm-rich-list">
+                        <div><strong>活动背景</strong><p>围绕华服文化、传统礼仪、典籍阅读与图书馆业务知识，组织线上线下结合的知识挑战活动，帮助参与者在答题中了解中华优秀传统文化。</p></div>
+                        <div><strong>活动对象</strong><p>面向全国图书馆从业者、阅读推广志愿者、高校学生及传统文化爱好者开放参与。</p></div>
+                        <div><strong>规则说明</strong><p>参与者完成报名后进入在线考试。系统按固定试卷出题，达到及格线即视为通过；活动结束后按成绩生成排行榜。</p></div>
+                    </div>
+                </section>
+
+                <section class="exam-confirm-section" id="examConfirmSignupAnswer">
+                    <div class="exam-confirm-section-head">
+                        <h4>报名/答题</h4>
+                        ${renderConfirmEditButton()}
+                    </div>
+                    <div class="confirm-group-card">
+                        <div class="confirm-group-head"><strong>组别一</strong><span class="badge badge-green">已配置</span><em>配置进度 2/2</em></div>
+                        <div class="confirm-preview-grid">
+                            <div class="confirm-preview-card">
+                                <strong>报名表</strong>
+                                <span>字段：姓名、手机号、单位、职务、所在地区</span>
+                                <span>实名信息与提交规则已配置</span>
+                            </div>
+                            <div class="confirm-preview-card">
+                                <strong>答题配置</strong>
+                                <span>在线考试 · 固定试卷 · 限时作答</span>
+                                <span>考试开放时间：2026-06-09 09:00 至 2026-06-09 18:00 <span class="locked-tag">锁定</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exam-paper-confirm-card">
+                        <div class="exam-paper-confirm-title">图书馆知识竞赛试卷 <span class="badge badge-green">固定题目</span></div>
+                        <div class="exam-paper-confirm-grid"><span>题目数量：50</span><span>试卷总分：100</span><span>题型组成：单选 40、判断 10</span><span>状态：已发布</span></div>
+                    </div>
+                    ${renderConfirmRows([
+                        { label: '考试时长', value: '120 分钟 <span class="locked-tag">锁定</span>' },
+                        { label: '答题次数', value: '活动期间每人最多 1 次；达到次数上限后不可再次开始考试' },
+                        { label: '及格分数', value: '60 分 <span class="locked-tag">锁定</span>' },
+                        { label: '解析展示时机', value: '交卷后立即展示解析' },
+                        { label: '报名须知', value: '已配置报名须知、参与说明和注意事项' }
+                    ])}
+                </section>
+
+                <section class="exam-confirm-section" id="examConfirmAppearance">
+                    <div class="exam-confirm-section-head">
+                        <h4>外观装修</h4>
+                        ${renderConfirmEditButton()}
+                    </div>
+                    <div class="confirm-appearance-grid">
+                        <div class="confirm-theme-card"><strong>主题色 / 背景色</strong><div><i style="background:#00527a"></i><i style="background:#6fd5e5"></i></div><span>已选择蓝绿色活动主题</span></div>
+                        <div class="confirm-cover-card"><strong>封面图</strong><div>文脉之光</div><span>16:9 活动封面已配置</span></div>
+                    </div>
+                    <div class="confirm-nav-preview">
+                        <strong>导航显隐</strong>
+                        <span>活动首页 <em>必选</em></span><span>排行榜：个人成绩排行榜，展示前 100 名；单位报名人数排行榜，展示前 100 名</span><span>活动动态：已开启</span><span>资源推荐：已开启</span>
+                    </div>
+                    <div class="confirm-logo-row"><strong>LOGO配置</strong><span class="confirm-logo-box">阅途文遇<small>www.yuetu100.com</small></span><em>跳转：https://www.yuetu100.com · 居左展示</em></div>
+                </section>
+
+                <section class="exam-confirm-section" id="examConfirmOther">
+                    <div class="exam-confirm-section-head">
+                        <h4>其他设置（可选）</h4>
+                        ${renderConfirmEditButton()}
+                    </div>
+                    <div class="confirm-shortcut-list">
+                        <div><strong>资料下载</strong><span>附件下载 · 资料数量：3 · 已配置</span></div>
+                        <div><strong>问题答疑</strong><span>查看文本 · 已配置</span></div>
+                    </div>
+                    <div class="confirm-official-group">
+                        <strong>官方活动群</strong>
+                        <span>群二维码、弹窗标题、弹窗文案均已配置</span>
+                        <em>弹窗标题：扫码加入官方活动群</em>
+                        <em>弹窗文案：保存二维码图片，微信扫一扫添加</em>
+                    </div>
+                    <div class="exam-rule-list confirm-rule-list">
+                        ${renderConfirmRules([
+                            { title: '中断答题后计时继续', desc: '关闭浏览器或退出页面后，考试倒计时仍继续。' },
+                            { title: '超时自动交卷', desc: '考试时长耗尽后，系统自动提交试卷。' },
+                            { title: '允许跳题', desc: '考生可跳过当前题目，稍后返回作答。' },
+                            { title: '显示答题卡', desc: '展示题目作答状态，方便定位未答题目。' },
+                            { title: '支持提前交卷', desc: '答题未满时长也可主动提交试卷。' }
+                        ])}
+                    </div>
+                </section>
+            </div>
+
+            <aside class="exam-confirm-nav">
+                <h4>配置项一览</h4>
+                ${sections.map((section, idx) => `
+                    <a href="#examConfirm${section.key.charAt(0).toUpperCase() + section.key.slice(1)}" class="${idx === 0 ? 'active' : ''}">
+                        <span>${section.step}</span>${section.title}${idx < sections.length - 1 ? '<em>»</em>' : ''}
+                    </a>
+                `).join('')}
+            </aside>
         </div>
     </div>`;
 }

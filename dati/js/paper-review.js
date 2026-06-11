@@ -1,11 +1,11 @@
 /* paper-review.js — 阅卷管理 */
 
 const REVIEW_EXAMS = [
-  { id: 'exam-2024-safety', name: '2024年度员工安全生产知识考试', paperType: 'fixed', time: '2024-03-01 09:00:00', startTime: '2024-03-01 09:00:00', endTime: '2024-03-01 11:00:00', subjective: 5, pending: 15, reviewed: 35, assignStatus: '已分配', assignMethod: 'question', status: '阅卷中', abnormal: 1, totalQuestions: 10, reviewedQuestions: 7, pendingQuestions: 3, totalStudents: 50, reviewedStudents: 35, pendingStudents: 15 },
-  { id: 'exam-2024-culture-q2', name: '2024年第二季度企业文化考试', paperType: 'fixed', time: '2024-03-05 14:00:00', startTime: '2024-03-05 14:00:00', endTime: '2024-03-05 16:00:00', subjective: 3, pending: 0, reviewed: 50, assignStatus: '已分配', assignMethod: 'paper-quota', status: '已完成', abnormal: 0, totalQuestions: 8, reviewedQuestions: 8, pendingQuestions: 0, totalStudents: 50, reviewedStudents: 50, pendingStudents: 0 },
-  { id: 'exam-fixed-all-review', name: '固定题目复核考试', paperType: 'fixed', time: '2024-03-08 09:30:00', startTime: '2024-03-08 09:30:00', endTime: '2024-03-08 11:30:00', subjective: 4, pending: 20, reviewed: 40, assignStatus: '已分配', assignMethod: 'paper-all', status: '阅卷中', abnormal: 0, totalQuestions: 7, reviewedQuestions: 4, pendingQuestions: 3, totalStudents: 60, reviewedStudents: 40, pendingStudents: 20 },
-  { id: 'exam-random-quota', name: '随机抽题能力测评', paperType: 'random', time: '2024-03-10 10:00:00', startTime: '2024-03-10 10:00:00', endTime: '2024-03-10 12:00:00', subjective: 4, pending: 30, reviewed: 0, assignStatus: '已分配', assignMethod: 'paper-quota', status: '待阅', abnormal: 0, totalQuestions: 6, reviewedQuestions: 0, pendingQuestions: 6, totalStudents: 30, reviewedStudents: 0, pendingStudents: 30 },
-  { id: 'exam-random-all-review', name: '随机抽题复评考试', paperType: 'random', time: '2024-03-12 15:30:00', startTime: '2024-03-12 15:30:00', endTime: '2024-03-12 17:30:00', subjective: 3, pending: 12, reviewed: 18, assignStatus: '未分配', assignMethod: 'paper-all', status: '待阅', abnormal: 0, totalQuestions: 5, reviewedQuestions: 0, pendingQuestions: 5, totalStudents: 30, reviewedStudents: 18, pendingStudents: 12 }
+  { id: 'exam-2024-safety', name: '2024年度员工安全生产知识考试', paperType: 'fixed', time: '2024-03-01 09:00:00', startTime: '2024-03-01 09:00:00', endTime: '2024-03-01 11:00:00', subjective: 5, pending: 15, reviewed: 35, assignStatus: '已分配', assignMethod: 'question', status: '阅卷中', scorePublishStatus: '未发布', abnormal: 1, totalQuestions: 10, reviewedQuestions: 7, pendingQuestions: 3, totalStudents: 50, reviewedStudents: 35, pendingStudents: 15 },
+  { id: 'exam-2024-culture-q2', name: '2024年第二季度企业文化考试', paperType: 'fixed', time: '2024-03-05 14:00:00', startTime: '2024-03-05 14:00:00', endTime: '2024-03-05 16:00:00', subjective: 3, pending: 0, reviewed: 50, assignStatus: '已分配', assignMethod: 'paper-quota', status: '已完成', scorePublishStatus: '未发布', abnormal: 0, totalQuestions: 8, reviewedQuestions: 8, pendingQuestions: 0, totalStudents: 50, reviewedStudents: 50, pendingStudents: 0 },
+  { id: 'exam-fixed-all-review', name: '固定题目复核考试', paperType: 'fixed', time: '2024-03-08 09:30:00', startTime: '2024-03-08 09:30:00', endTime: '2024-03-08 11:30:00', subjective: 4, pending: 20, reviewed: 40, assignStatus: '已分配', assignMethod: 'paper-all', status: '阅卷中', scorePublishStatus: '未发布', abnormal: 0, totalQuestions: 7, reviewedQuestions: 4, pendingQuestions: 3, totalStudents: 60, reviewedStudents: 40, pendingStudents: 20 },
+  { id: 'exam-random-quota', name: '随机抽题能力测评', paperType: 'random', time: '2024-03-10 10:00:00', startTime: '2024-03-10 10:00:00', endTime: '2024-03-10 12:00:00', subjective: 4, pending: 30, reviewed: 0, assignStatus: '已分配', assignMethod: 'paper-quota', status: '待阅', scorePublishStatus: '未发布', abnormal: 0, totalQuestions: 6, reviewedQuestions: 0, pendingQuestions: 6, totalStudents: 30, reviewedStudents: 0, pendingStudents: 30 },
+  { id: 'exam-random-all-review', name: '随机抽题复评考试', paperType: 'random', time: '2024-03-12 15:30:00', startTime: '2024-03-12 15:30:00', endTime: '2024-03-12 17:30:00', subjective: 3, pending: 12, reviewed: 18, assignStatus: '未分配', assignMethod: 'paper-all', status: '待阅', scorePublishStatus: '未发布', abnormal: 0, totalQuestions: 5, reviewedQuestions: 0, pendingQuestions: 5, totalStudents: 30, reviewedStudents: 18, pendingStudents: 12 }
 ];
 
 const REVIEW_ALL_PAPERS = [
@@ -170,7 +170,7 @@ let reviewAssignPaperType = QUESTION_ASSIGN_PAPER.paperType || 'fixed';
 let reviewAssignDimension = 'question';
 let reviewAssignPaperMode = 'quota';
 let reviewAssignSaved = false;
-let skipReviewTeacherReadyReminder = false;
+let paperQuotaConfigured = false;
 let reviewTeacherLookupState = {
   keyword: '',
   matches: [],
@@ -311,6 +311,10 @@ function paperReviewStatusBadge(status) {
   return `<span class="badge ${map[status] || 'badge-gray'}">${status}</span>`;
 }
 
+function paperReviewCompletionBadge(status) {
+  return paperReviewStatusBadge(status === '已完成' ? '已完成' : '未完成');
+}
+
 function reviewAssignMethodText(method) {
   const map = {
     question: '按题目分配',
@@ -339,8 +343,8 @@ function reviewEscapeAttr(text) {
 }
 
 function formatExamTimeRange(exam) {
-  if (exam.startTime && exam.endTime) return `${exam.startTime} 至 ${exam.endTime}`;
-  return exam.time || '-';
+  if (exam.startTime && exam.endTime) return `${formatDateTimeSecond(exam.startTime)} 至 ${formatDateTimeSecond(exam.endTime)}`;
+  return formatDateTimeSecond(exam.time || '-');
 }
 
 function getPaperAssignStatus(exam) {
@@ -448,7 +452,7 @@ function renderAllReviewPaperListPage() {
               <td><strong title="${reviewEscapeAttr(item.activity)}">${item.activity}</strong></td>
               <td>${item.exam}</td>
               <td>${item.paper}</td>
-              <td>${item.time}</td>
+              <td>${formatDateTimeSecond(item.time)}</td>
               <td>${item.pending}</td>
               <td>${item.reviewed}</td>
               <td>${reviewProgress(item.pending, item.reviewed, item.status === '已完成' ? 'var(--success)' : 'var(--primary)')}</td>
@@ -478,13 +482,13 @@ function renderActivityReviewPaperListPage() {
         <thead>
           <tr>
             <th>考试名称</th>
-            <th>试卷类型</th>
+            <th>组卷方式</th>
             <th>考试时间</th>
             <th>主观题数量</th>
-            <th>答卷总份数</th>
             <th>阅卷入口</th>
             <th>完成进度</th>
             <th>阅卷状态</th>
+            <th>成绩发布状态</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -495,14 +499,16 @@ function renderActivityReviewPaperListPage() {
               <td>${paperTypeText(exam.paperType)}</td>
               <td class="review-exam-time-cell">${formatExamTimeRange(exam)}</td>
               <td>${exam.subjective}</td>
-              <td>${exam.pending + exam.reviewed}</td>
               <td>${renderReviewEntryCell(exam)}</td>
-              <td>${renderWideProgress(getProgressReviewedTotal(exam), getProgressTaskTotal(exam), exam.status === '已完成' ? 'var(--success)' : 'var(--primary)')}</td>
-              <td>${paperReviewStatusBadge(exam.status)}</td>
+              <td>${getProgressReviewedTotal(exam)}/${getProgressTaskTotal(exam)}</td>
+              <td>${paperReviewCompletionBadge(exam.status)}</td>
+              <td>${scorePublishStatusBadge(exam)}</td>
               <td>
+                <div class="review-operation-actions">
                 ${renderReviewPublishScoreButton(exam)}
+                <span class="action-link" onclick="openQuestionAssignWithTeacherReminder('${exam.id}')">分配任务</span>
                 <span class="action-link" onclick="openReviewProgressDetail('${exam.id}')">进度详情</span>
-                <span class="action-link" onclick="openQuestionAssignWithTeacherReminder('${exam.id}')">${exam.assignStatus === '未分配' ? '配置分配' : '调整分配'}</span>
+                </div>
               </td>
             </tr>`).join('')}
         </tbody>
@@ -565,8 +571,17 @@ function setReviewConfigStatusFilter(filter) {
 }
 
 function renderReviewPublishScoreButton(exam) {
-  const enabled = exam?.status === '已完成';
+  const enabled = exam?.status === '已完成' && getScorePublishStatus(exam) !== '已发布';
   return `<button class="btn btn-sm review-publish-score-btn ${enabled ? 'btn-primary' : 'is-disabled'}" ${enabled ? `onclick="openReviewPublishScoreConfirm('${exam.id}')"` : 'disabled'}>发布成绩</button>`;
+}
+
+function getScorePublishStatus(exam) {
+  return exam?.scorePublishStatus === '已发布' ? '已发布' : '未发布';
+}
+
+function scorePublishStatusBadge(exam) {
+  const status = getScorePublishStatus(exam);
+  return `<span class="badge ${status === '已发布' ? 'badge-green' : 'badge-gray'}">${status}</span>`;
 }
 
 function openReviewPublishScoreConfirm(examId) {
@@ -576,7 +591,10 @@ function openReviewPublishScoreConfirm(examId) {
     <p>发布后，用户端将立即可见本次成绩。请确认主观题评分无误后再继续。
 
 </p>
-  `, () => navigateTo('paper-review-all'), { confirmText: '确认发布', cancelText: '暂不发布', danger: true });
+  `, () => {
+    exam.scorePublishStatus = '已发布';
+    navigateTo(currentPage || 'paper-review');
+  }, { confirmText: '确认发布', cancelText: '暂不发布', danger: true });
 }
 
 function renderReviewEntryBar() {
@@ -934,7 +952,7 @@ function renderReviewDetailPage() {
     <div class="reviewer-progress-table-wrap">
       <table class="reviewer-progress-table">
         <thead>
-          <tr><th>考试名称</th><th>试卷类型</th><th>考试时间</th><th>主观题数量</th><th>答卷总份数</th><th>完成进度</th><th>阅卷状态</th><th>操作</th></tr>
+          <tr><th>考试名称</th><th>组卷方式</th><th>考试时间</th><th>主观题数量</th><th>完成进度</th><th>阅卷状态</th><th>成绩发布状态</th><th>操作</th></tr>
         </thead>
         <tbody>
           ${REVIEW_EXAMS.map(exam => `
@@ -943,13 +961,15 @@ function renderReviewDetailPage() {
               <td>${paperTypeText(exam.paperType)}</td>
               <td class="review-exam-time-cell">${formatExamTimeRange(exam)}</td>
               <td>${exam.subjective}</td>
-              <td>${exam.pending + exam.reviewed}</td>
-              <td>${renderWideProgress(getProgressReviewedTotal(exam), getProgressTaskTotal(exam), exam.status === '已完成' ? 'var(--success)' : 'var(--primary)')}</td>
+              <td>${getProgressReviewedTotal(exam)}/${getProgressTaskTotal(exam)}</td>
               <td>${paperReviewStatusBadge(exam.status)}</td>
+              <td>${scorePublishStatusBadge(exam)}</td>
               <td>
+                <div class="review-operation-actions">
                 ${renderReviewPublishScoreButton(exam)}
+                <span class="action-link" onclick="openQuestionAssignWithTeacherReminder('${exam.id}')">分配任务</span>
                 <span class="action-link" onclick="openReviewProgressDetail('${exam.id}')">进度详情</span>
-                <span class="action-link" onclick="openQuestionAssignWithTeacherReminder('${exam.id}')">${exam.assignStatus === '未分配' ? '配置分配' : '调整分配'}</span>
+                </div>
               </td>
             </tr>
           `).join('')}
@@ -986,7 +1006,7 @@ function renderReviewAssignDetailPage() {
       <div class="review-assign-detail-head">
         <div>
           <h2>${exam.name}</h2>
-          <p>${reviewAssignMethodText(exam.assignMethod)} · ${exam.time}</p>
+          <p>${reviewAssignMethodText(exam.assignMethod)} · ${formatDateTimeSecond(exam.time)}</p>
         </div>
         <button class="btn btn-outline" onclick="openQuestionAssignWithTeacherReminder('${exam.id}')">调整分配</button>
       </div>
@@ -1165,9 +1185,7 @@ function renderPaperAllAssignDetail(exam) {
 
 function renderSinglePaperProgressDetailPage() {
   const exam = REVIEW_EXAMS.find(e => e.id === reviewProgressDetailExamId) || REVIEW_EXAMS[0];
-  const canViewByQuestion = exam.paperType === 'fixed' && exam.assignMethod === 'question';
-  if (!canViewByQuestion && reviewProgressDetailView === 'question') reviewProgressDetailView = 'teacher';
-  const isQuestionView = canViewByQuestion && reviewProgressDetailView === 'question';
+  reviewProgressDetailView = 'teacher';
   return `
   <div class="review-shell">
   ${renderReviewStructureNav('阅卷管理')}
@@ -1179,12 +1197,7 @@ function renderSinglePaperProgressDetailPage() {
         <p>${paperTypeText(exam.paperType)} · ${reviewAssignMethodText(exam.assignMethod)} · ${formatExamTimeRange(exam)}</p>
       </div>
     </div>
-    <div class="review-view-tabs boxed">
-      ${canViewByQuestion ? `<button class="${isQuestionView ? 'active' : ''}" onclick="switchSinglePaperProgressView('question')">按题目查看</button>` : ''}
-      <button class="${isQuestionView ? '' : 'active'}" onclick="switchSinglePaperProgressView('teacher')">按老师查看</button>
-    </div>
-    ${!canViewByQuestion ? `<div class="review-assign-detail-note">${exam.paperType === 'random' ? '随机抽题考卷不支持按题目查看进度。' : '当前为按答卷分配，进度按老师接收的整份答卷任务统计。'}</div>` : ''}
-    ${isQuestionView ? renderSinglePaperQuestionProgress(exam) : renderSinglePaperTeacherProgress(exam)}
+    ${renderSinglePaperTeacherProgress(exam)}
   </section>
   </div>`;
 }
@@ -1217,21 +1230,17 @@ function renderSinglePaperQuestionProgress(exam) {
 function renderSinglePaperTeacherProgress(exam) {
   const rows = getTeacherProgressRows(exam);
   return `
-    <div class="review-detail-title">老师工作量</div>
     <div class="reviewer-progress-table-wrap">
       <table class="reviewer-progress-table progress-teacher-table">
         <thead>
-          <tr><th>老师姓名</th><th>所属单位</th><th>已阅</th><th>完成率</th><th>评阅范围</th><th>最后批阅时间</th><th>状态</th></tr>
+          <tr><th>老师姓名</th><th>已阅</th><th>最后批阅时间</th><th>状态</th></tr>
         </thead>
         <tbody>
           ${rows.map(row => `
             <tr>
               <td>${row.teacher.name}</td>
-              <td>${row.teacher.orgName}</td>
               <td>${row.reviewed} / ${row.assigned}</td>
-              <td>${renderWideProgress(row.reviewed, row.assigned)}</td>
-              <td>${row.scope}</td>
-              <td>2026-05-13 14:30</td>
+              <td>${formatDateTimeSecond('2026-05-13 14:30')}</td>
               <td>${paperReviewStatusBadge(getProgressRowStatus(row.reviewed, row.assigned))}</td>
             </tr>
           `).join('')}
@@ -1348,11 +1357,12 @@ function renderReviewTeacherManagePage(options = {}) {
           ${REVIEW_TEACHERS.map(t => `
             <tr>
               <td></td>
-              <td><span class="review-inline-text">${t.name}</span><button class="icon-btn review-inline-edit" onclick="editReviewTeacher('${t.id}')">✎</button></td>
-              <td><span class="review-inline-text">${t.account}</span><button class="icon-btn review-inline-edit" onclick="editReviewTeacher('${t.id}')">✎</button></td>
-              <td><span class="review-inline-text review-password-text">${t.showPassword ? t.password : maskTeacherPassword(t.password)}</span><button class="icon-btn review-inline-edit" onclick="toggleReviewTeacherPassword('${t.id}')">👁</button><button class="icon-btn review-inline-edit" onclick="editReviewTeacher('${t.id}')">✎</button></td>
-              <td>${t.addedAt || '-'}</td>
+              <td><span class="review-inline-text">${t.name}</span></td>
+              <td><span class="review-inline-text">${t.account}</span></td>
+              <td><span class="review-inline-text review-password-text">${t.showPassword ? t.password : maskTeacherPassword(t.password)}</span><button class="icon-btn review-password-toggle" onclick="toggleReviewTeacherPassword('${t.id}')">👁</button></td>
+              <td>${formatDateTimeSecond(t.addedAt || '-')}</td>
               <td>
+                <span class="action-link" onclick="editReviewTeacher('${t.id}')">编辑</span>
                 <span class="action-link" onclick="copyReviewTeacherRow('${t.id}')">复制信息</span>
                 <span class="action-link danger-link" onclick="removeReviewTeacher('${t.id}')">删除</span>
               </td>
@@ -1372,12 +1382,7 @@ function renderQuestionAssignPage() {
   reviewAssignPaperMode = 'quota';
   normalizeQuestionOwnerAssignments();
   const list = QUESTION_ASSIGN_LIST;
-  const assignedCount = QUESTION_ASSIGN_LIST.filter(q => q.teacherIds.length).length;
-  const unassignedCount = QUESTION_ASSIGN_LIST.filter(q => q.assignStatus !== '已完成' && !q.teacherIds.length).length;
-  const teacherCount = getActiveAssignTeachers().length;
   const activeQuestion = getVisibleAssignQuestion(list);
-  const readyQuestions = QUESTION_ASSIGN_LIST.filter(q => q.teacherIds.length || q.assignStatus === '已完成');
-  const totalAnswers = QUESTION_ASSIGN_LIST.reduce((sum, q) => sum + q.answerCount, 0);
   return `
   <div class="question-assign-page assign-config-page">
     <div class="review-crumb-card platform-review-back">
@@ -1386,25 +1391,19 @@ function renderQuestionAssignPage() {
       <strong>主观题阅卷分配</strong>
     </div>
 
-    <section class="assign-paper-card card">
-      <div class="assign-paper-head">
-        <div class="assign-paper-main">
-          <span>试卷名称</span><strong>${p.paperName}</strong>
-          <span>试卷类型</span><strong>${effectivePaperType === 'fixed' ? '固定题目' : '随机抽题'}</strong>
-        </div>
-        ${assignStatusBadge(p.assignStatus)}
+    <section class="assign-paper-card">
+      <div class="assign-paper-main">
+        <span>试卷名称</span><strong>${p.paperName}</strong>
       </div>
       <div class="assign-summary">
+        ${renderAssignSummaryMetric('试卷类型', effectivePaperType === 'fixed' ? '固定题目' : '随机抽题')}
         ${renderAssignSummaryMetric('简答题', p.subjectiveQuestionCount, '', '道')}
-        ${renderAssignSummaryMetric('答卷总数', p.totalMarkingTaskCount, '', '份')}
-        ${renderAssignSummaryMetric('可用老师', teacherCount, '', '位')}
       </div>
     </section>
 
     ${renderReviewAssignRulePage(list, activeQuestion)}
 
     <div class="assign-footer">
-      <span>${getReviewAssignFooterText(readyQuestions.length, unassignedCount, totalAnswers)}</span>
       <div>
         <button class="btn btn-outline" onclick="saveQuestionAssign()">保存</button>
         <button class="btn btn-primary" onclick="confirmQuestionAssign()">确认分配并开启</button>
@@ -1473,7 +1472,7 @@ function renderMyReviewTasksPage(options = {}) {
                 </div>
               </td>
               <td>${renderWideProgress(task.reviewedAttempts, task.assignedAttempts)}</td>
-              <td>${task.deadline}</td>
+              <td>${formatDateTimeSecond(task.deadline)}</td>
               <td>${paperReviewStatusBadge(task.status === '待阅卷' ? '待阅' : task.status)}</td>
               <td>
                 <div class="my-review-actions">
@@ -1533,7 +1532,7 @@ function renderReviewAttemptListPage() {
           <tr>
             <td><strong>${attempt.student}</strong><br><span class="muted">${attempt.unit}</span></td>
             <td>已交卷</td>
-            <td>${attempt.submitTime}</td>
+            <td>${formatDateTimeSecond(attempt.submitTime)}</td>
             <td>${attempt.objectiveScore}</td>
             <td>${attempt.reviewedQuestions} / ${attempt.reviewedQuestions + attempt.pendingQuestions}</td>
             <td>${paperReviewStatusBadge(attempt.status)}</td>
@@ -1610,17 +1609,43 @@ function renderQuestionDimensionWorkbench(list, activeQuestion) {
 function renderPaperDimensionWorkbench() {
   const activeTeachers = getDefaultPaperQuotaTeachers();
   reviewAssignPaperMode = 'quota';
-  const toolbarText = `${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷，${activeTeachers.length} 位老师参与分配`;
+  const totalPaperCount = QUESTION_ASSIGN_PAPER.submittedPaperCount;
+  const assignedTotal = getPaperAssignedPendingTotal(activeTeachers);
+  const reviewedTotal = paperQuotaConfigured ? getPaperReviewedTotal(activeTeachers) : 0;
+  const reviewedPercent = Math.min(100, Math.round(reviewedTotal / Math.max(1, totalPaperCount) * 100));
   return `
-    <section class="assign-toolbar card">
-      <div class="assign-toolbar-notice"><strong>按数量分配答卷：</strong>为每位老师设置需要批阅的答卷数量，系统按配置分配考生答卷。</div>
-      <div class="assign-toolbar-actions">
-        <span>${toolbarText}</span>
+    <section class="assign-overview-card card">
+      <div class="assign-overview-head">
+        <div>
+          <strong>主观题阅卷分配</strong>
+        </div>
+        <em>已阅卷率 ${reviewedPercent}%</em>
+      </div>
+      <div class="assign-overview-stats">
+        ${renderAssignOverviewStat('总份数', totalPaperCount, '份', 'primary')}
+        ${renderAssignOverviewStat('已分配', assignedTotal, '份', 'info')}
+        ${renderAssignOverviewStat('已阅卷', reviewedTotal, '份', 'success')}
       </div>
     </section>
     <section class="assign-paper-workbench card">
       ${renderPaperAssignQuota()}
     </section>`;
+}
+
+function renderAssignOverviewStat(label, value, unit, tone = '') {
+  return `
+    <div class="assign-overview-stat ${tone}">
+      <span>${label}</span>
+      <strong>${value}<em>${unit}</em></strong>
+    </div>`;
+}
+
+function renderAssignOverviewChip(label, value, unit) {
+  return `
+    <div class="assign-overview-chip">
+      <span>${label}</span>
+      <strong>${value}<em>${unit}</em></strong>
+    </div>`;
 }
 
 function renderPaperAssignModeCard(value, title, desc) {
@@ -1743,47 +1768,42 @@ function renderPaperAssignAllTeachers() {
 
 function renderPaperAssignQuota() {
   const activeTeachers = getDefaultPaperQuotaTeachers();
-  const totalQuota = activeTeachers.reduce((sum, t) => sum + getTeacherPaperQuota(t), 0);
-  const remaining = QUESTION_ASSIGN_PAPER.submittedPaperCount - totalQuota;
-  const reviewedTotal = activeTeachers.reduce((sum, t) => sum + getTeacherPaperReviewedCount(t), 0);
-  const adjustableTotal = activeTeachers.reduce((sum, t) => sum + getTeacherAdjustablePaperCount(t), 0);
   return `
     <div class="assign-paper-mode-panel">
       <div class="assign-quota-head">
         <div>
-          <strong>按数量分配答卷</strong>
-          <span>已配置 ${totalQuota} / ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份${remaining === 0 ? '，数量匹配' : `，剩余 ${remaining} 份`}</span>
-          <em>当前已批阅 ${reviewedTotal} 份；重新分配只调整未批阅答卷，不会抵消老师已完成的批阅份数。</em>
-        </div>
-        <div>
-          <button class="btn btn-outline btn-sm" onclick="averagePaperQuota()">平均分配</button>
+          <strong>老师分配明细</strong>
+          ${paperQuotaConfigured ? '' : '<em>尚未分配，列表展示待批阅初始值；点击“分配”统一配置。</em>'}
+          <div class="assign-quota-actions">
+            <button class="btn btn-primary btn-sm assign-quota-primary-btn" onclick="openPaperQuotaAssignModal()">分配</button>
+          </div>
         </div>
       </div>
-      <div class="assign-quota-list">
+      <div class="assign-quota-list ${paperQuotaConfigured ? '' : 'is-initial'}">
+        <div class="assign-quota-row assign-quota-row-head">
+          <span>老师姓名</span>
+          ${paperQuotaConfigured ? '<span>已批阅</span>' : ''}
+          <span>待批阅</span>
+        </div>
         ${activeTeachers.map(t => {
           const quota = getTeacherPaperQuota(t);
           const reviewed = getTeacherPaperReviewedCount(t);
-          const adjustable = getTeacherAdjustablePaperCount(t);
+          if (paperQuotaConfigured) {
+            return `
+            <div class="assign-quota-row">
+              <span><strong>${t.name}</strong></span>
+              <span>${reviewed}</span>
+              <span>${Math.max(0, quota - reviewed)}</span>
+            </div>`;
+          }
           return `
-          <label class="assign-quota-row assign-quota-row-with-progress">
-            <span class="assign-teacher-avatar">${t.name.slice(0, 1)}</span>
-            <span><strong>${t.name}</strong><em>${t.orgName}</em></span>
-            <span class="assign-quota-status"><strong>${reviewed}</strong><em>已批阅</em></span>
-            <span class="assign-quota-status"><strong>${Math.max(0, quota - reviewed)}</strong><em>待批阅</em></span>
-            <span class="assign-quota-status"><strong>${adjustable}</strong><em>可重新分配</em></span>
-            <input type="number" min="${reviewed}" max="${QUESTION_ASSIGN_PAPER.submittedPaperCount}" value="${quota}" onchange="setTeacherPaperQuota('${t.id}', this.value)">
-            <b>份答卷</b>
-          </label>`;
+          <div class="assign-quota-row">
+            <span><strong>${t.name}</strong></span>
+            <span>0</span>
+          </div>`;
         }).join('')}
       </div>
-      <div class="assign-quota-preview ${remaining === 0 ? 'ok' : 'warning'}">
-        ${remaining === 0 ? `配置数量已覆盖全部答卷；其中 ${reviewedTotal} 份已批阅结果将保留，仅 ${adjustableTotal} 份未批阅答卷参与重新分配。` : '分配数量需要等于答卷总数，保存或确认前请补齐。'}
-      </div>
     </div>`;
-}
-
-function getReviewAssignFooterText(readyCount, unassignedCount, totalAnswers) {
-  return `按数量分配答卷 · 共 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷`;
 }
 
 function setReviewAssignDimension(value) {
@@ -1822,29 +1842,110 @@ function getTeacherPaperReviewedCount(t) {
   return Math.min(getTeacherPaperQuota(t), t.paperReviewedCount || 0);
 }
 
-function getTeacherAdjustablePaperCount(t) {
-  return Math.max(0, getTeacherPaperQuota(t) - getTeacherPaperReviewedCount(t));
+function getTeacherPaperPendingCount(t) {
+  return paperQuotaConfigured ? Math.max(0, getTeacherPaperQuota(t) - getTeacherPaperReviewedCount(t)) : 0;
 }
 
-function setTeacherPaperQuota(teacherId, value) {
-  const teacher = getAssignTeacher(teacherId);
-  if (!teacher) return;
-  const reviewed = getTeacherPaperReviewedCount(teacher);
-  teacher.paperQuota = Math.max(reviewed, Number(value) || 0);
-  reviewAssignSaved = false;
-  navigateTo('paper-review-assign-question');
+function getPaperReviewedTotal(teachers = getDefaultPaperQuotaTeachers()) {
+  return teachers.reduce((sum, t) => sum + getTeacherPaperReviewedCount(t), 0);
 }
 
-function averagePaperQuota() {
+function getPaperAdjustableTotal(teachers = getDefaultPaperQuotaTeachers()) {
+  return Math.max(0, QUESTION_ASSIGN_PAPER.submittedPaperCount - getPaperReviewedTotal(teachers));
+}
+
+function getPaperAssignedPendingTotal(teachers = getDefaultPaperQuotaTeachers()) {
+  if (!paperQuotaConfigured) return 0;
+  return teachers.reduce((sum, t) => sum + getTeacherPaperPendingCount(t), 0);
+}
+
+function getTeacherPendingDraft(t) {
+  if (typeof t.paperPendingDraft === 'number') return t.paperPendingDraft;
+  return getTeacherPaperPendingCount(t);
+}
+
+function openPaperQuotaAssignModal() {
   const activeTeachers = getDefaultPaperQuotaTeachers();
-  if (!activeTeachers.length) return;
-  const base = Math.floor(QUESTION_ASSIGN_PAPER.submittedPaperCount / activeTeachers.length);
-  const rest = QUESTION_ASSIGN_PAPER.submittedPaperCount % activeTeachers.length;
-  activeTeachers.forEach((teacher, index) => {
-    teacher.paperQuota = base + (index < rest ? 1 : 0);
+  const assignedTotal = activeTeachers.reduce((sum, t) => sum + getTeacherPendingDraft(t), 0);
+  const reviewedTotal = getPaperReviewedTotal(activeTeachers);
+  const totalPaperCount = QUESTION_ASSIGN_PAPER.submittedPaperCount;
+  const adjustableTotal = Math.max(0, totalPaperCount - reviewedTotal);
+  const assignSummary = paperQuotaConfigured ? `
+      <div class="paper-quota-assign-metric">
+        <span>当前已阅卷</span>
+        <strong>${reviewedTotal}<em>份</em></strong>
+      </div>
+      <div class="paper-quota-assign-metric primary">
+        <span>可调整</span>
+        <strong>${adjustableTotal}<em>份</em></strong>
+      </div>` : `
+      <div class="paper-quota-assign-metric">
+        <span>答卷份数</span>
+        <strong>${totalPaperCount}<em>份</em></strong>
+      </div>
+      <div class="paper-quota-assign-metric primary">
+        <span>待分配</span>
+        <strong>${adjustableTotal}<em>份</em></strong>
+      </div>`;
+  const assignNotice = paperQuotaConfigured
+    ? '已阅卷答卷会被锁定保留，本次只分配可调整的答卷。'
+    : '管理员首次分配时，请为各阅卷老师配置待批阅答卷份数。';
+  const rows = activeTeachers.map(t => `
+    <tr>
+      <td>${t.name}</td>
+      <td><input class="form-control paper-quota-list-input" type="number" min="0" max="${adjustableTotal}" value="${getTeacherPendingDraft(t)}" data-teacher-id="${t.id}" oninput="updatePaperQuotaAssignModalTotal()"></td>
+    </tr>`).join('');
+  openModal('分配答卷', `
+    <div class="paper-quota-assign-summary">
+      ${assignSummary}
+    </div>
+    <div class="paper-quota-assign-notice">
+      ${assignNotice}
+    </div>
+    <div class="paper-quota-assign-total" data-require-full="${paperQuotaConfigured ? 'false' : 'true'}" data-total="${adjustableTotal}">本次分配：<strong><b id="paperQuotaAssignTotal">${assignedTotal}</b>/${adjustableTotal}</strong></div>
+    <table class="assign-modal-table paper-quota-assign-table">
+      <thead><tr><th>老师姓名</th><th>待批阅</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `, applyPaperQuotaAssignList, { confirmText: '确定', cancelText: '取消', modalClass: 'modal-lg' });
+  updatePaperQuotaAssignModalTotal();
+}
+
+function applyPaperQuotaAssignList() {
+  if (!paperQuotaConfigured) {
+    const assignedTotal = getPaperQuotaAssignModalTotal();
+    const adjustableTotal = getPaperAdjustableTotal();
+    if (assignedTotal !== adjustableTotal) return false;
+  }
+  document.querySelectorAll('.paper-quota-list-input').forEach(input => {
+    const teacher = getAssignTeacher(input.dataset.teacherId);
+    if (!teacher) return;
+    const pending = Math.max(0, Number(input.value) || 0);
+    teacher.paperPendingDraft = pending;
+    teacher.paperQuota = getTeacherPaperReviewedCount(teacher) + pending;
   });
+  paperQuotaConfigured = true;
+  QUESTION_ASSIGN_PAPER.assignedTaskCount = getPaperAssignedPendingTotal();
+  QUESTION_ASSIGN_PAPER.unassignedTaskCount = Math.max(0, getPaperAdjustableTotal() - QUESTION_ASSIGN_PAPER.assignedTaskCount);
   reviewAssignSaved = false;
   navigateTo('paper-review-assign-question');
+}
+
+function getPaperQuotaAssignModalTotal() {
+  return Array.from(document.querySelectorAll('.paper-quota-list-input'))
+    .reduce((sum, input) => sum + Math.max(0, Number(input.value) || 0), 0);
+}
+
+function updatePaperQuotaAssignModalTotal() {
+  const total = getPaperQuotaAssignModalTotal();
+  const target = document.getElementById('paperQuotaAssignTotal');
+  if (target) target.textContent = total;
+  const totalWrap = document.querySelector('.paper-quota-assign-total');
+  const confirmBtn = document.getElementById('modalConfirm');
+  if (!totalWrap || !confirmBtn) return;
+  const requireFull = totalWrap.dataset.requireFull === 'true';
+  const requiredTotal = Number(totalWrap.dataset.total) || 0;
+  confirmBtn.disabled = requireFull && total !== requiredTotal;
 }
 
 function renderQuestionAssignPanel(list, activeQuestion, batchQuestions = []) {
@@ -2438,23 +2539,7 @@ function openQuestionAssign(examId) {
 }
 
 function openQuestionAssignWithTeacherReminder(examId) {
-  if (skipReviewTeacherReadyReminder) {
-    openQuestionAssign(examId);
-    return;
-  }
-  openModal('请先确认阅卷老师', `
-    <div class="review-teacher-ready-modal">
-      <p>分配阅卷老师前，请先在 <strong>阅卷管理 - 阅卷老师</strong> 中维护好本活动的阅卷老师。</p>
-      <button class="btn btn-outline btn-sm" onclick="closeModal();navigateTo('paper-review-teachers')">前往阅卷老师</button>
-      <label class="assign-check review-single-check">
-        <input type="checkbox" id="skipReviewTeacherReadyReminder">
-        下次不再提醒
-      </label>
-    </div>
-  `, () => {
-    skipReviewTeacherReadyReminder = !!document.getElementById('skipReviewTeacherReadyReminder')?.checked;
-    openQuestionAssign(examId);
-  }, { confirmText: '继续分配', cancelText: '取消' });
+  openQuestionAssign(examId);
 }
 
 function openReviewTeacherManagePage(event) {
@@ -2538,7 +2623,7 @@ function saveQuestionAssign() {
   reviewAssignDimension = 'paper';
   reviewAssignPaperMode = 'quota';
   if (!isPaperQuotaValid()) {
-    openModal('无法保存', `<p>按数量分配时，每位老师配置数量之和必须等于 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷。</p>`, null, { hideCancel: true, confirmText: '知道了' });
+    openModal('无法保存', `<p>${getPaperQuotaValidationMessage()}</p>`, null, { hideCancel: true, confirmText: '知道了' });
     return;
   }
   reviewAssignSaved = true;
@@ -2549,7 +2634,7 @@ function confirmQuestionAssign() {
   reviewAssignDimension = 'paper';
   reviewAssignPaperMode = 'quota';
   if (!isPaperQuotaValid()) {
-    openModal('无法确认分配并开启', `<p>按数量分配时，每位老师配置数量之和必须等于 ${QUESTION_ASSIGN_PAPER.submittedPaperCount} 份答卷。</p>`, null, { hideCancel: true, confirmText: '知道了' });
+    openModal('无法确认分配并开启', `<p>${getPaperQuotaValidationMessage()}</p>`, null, { hideCancel: true, confirmText: '知道了' });
     return;
   }
   reviewAssignSaved = false;
@@ -2558,8 +2643,14 @@ function confirmQuestionAssign() {
 
 function isPaperQuotaValid() {
   const activeTeachers = getDefaultPaperQuotaTeachers();
-  const totalQuota = activeTeachers.reduce((sum, t) => sum + getTeacherPaperQuota(t), 0);
-  return totalQuota === QUESTION_ASSIGN_PAPER.submittedPaperCount;
+  if (!paperQuotaConfigured) return false;
+  return getPaperAssignedPendingTotal(activeTeachers) === getPaperAdjustableTotal(activeTeachers);
+}
+
+function getPaperQuotaValidationMessage() {
+  if (!paperQuotaConfigured) return '请先点击“分配”，为老师配置待批阅答卷数量。';
+  const activeTeachers = getDefaultPaperQuotaTeachers();
+  return `本次分配数量需要等于可调整的 ${getPaperAdjustableTotal(activeTeachers)} 份答卷。`;
 }
 
 function cancelQuestionAssign() {
@@ -2638,7 +2729,7 @@ function openAddReviewTeacher() {
 function renderAddReviewTeacherModal() {
   const isEdit = !!reviewTeacherFormState.id;
   const canSubmit = !!reviewTeacherFormState.name.trim() && !!reviewTeacherFormState.account.trim() && !!reviewTeacherFormState.password.trim();
-  openModal('添加阅卷老师', `
+  openModal(isEdit ? '编辑阅卷老师' : '添加阅卷老师', `
     <div class="review-teacher-modal review-teacher-add-modal review-teacher-simple-modal">
       <p class="review-teacher-modal-subtitle">${isEdit ? '修改阅卷老师信息。' : '新增阅卷老师请填写名称、账号和密码。'}</p>
       <div class="review-setting-grid review-teacher-simple-grid">
@@ -3208,7 +3299,7 @@ function renderStudentReviewMarkingPage() {
       <div class="student-review-meta">
         <span>${task?.paper || '安全生产知识主观题试卷'}</span>
         <span>${attempt.unit}</span>
-        <span>提交时间：${attempt.submitTime}</span>
+        <span>提交时间：${formatDateTimeSecond(attempt.submitTime)}</span>
       </div>
     </section>
 
@@ -3446,7 +3537,7 @@ function completeAttemptAndPromptNext() {
     <div class="attempt-next-modal">
       <p>下一份：</p>
       <strong>${next.student} 第 ${next.attemptNo} 次答题</strong>
-      <span>${next.unit}｜客观题 ${next.objectiveScore} 分｜${next.submitTime}</span>
+      <span>${next.unit}｜客观题 ${next.objectiveScore} 分｜${formatDateTimeSecond(next.submitTime)}</span>
     </div>
   `, () => openAttemptReview(next.id, 0), { confirmText: '继续批阅' });
   const confirmBtn = document.getElementById('modalConfirm');

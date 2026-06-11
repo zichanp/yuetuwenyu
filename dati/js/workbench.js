@@ -46,10 +46,10 @@ const ACTIVITY_TYPES = [
         ]
     },
     {
-        key: 'offline', title: '线下活动', desc: '征文、摄影、书画、视频等作品征集活动',
+        key: 'offline', title: '活动报名', desc: '征文、摄影、书画、视频等作品征集活动',
         color: '#FF3B30', created: 15, running: 3, layout: 'col',
         links: [
-            { label: '活动列表', page: 'activity-list' },
+            { label: '活动列表', page: 'activity-list', params: { activityType: 'offline', activityLabel: '活动报名' } },
             { label: '签到管理' },
             { label: '数据概况' }
         ]
@@ -109,7 +109,7 @@ function renderTypeCard(t) {
     ].filter(Boolean).join(';');
     const linksHtml = t.links.map(l => {
         const isActive = l.label === t.active;
-        const onclick = l.page ? `onclick="navigateTo('${l.page}')"` : '';
+        const onclick = l.page ? `onclick="navigateTo('${l.page}'${l.params ? `, { params: ${JSON.stringify(l.params)} }` : ''})"` : '';
         const style = isActive
             ? `color:var(--primary);font-weight:var(--font-weight-semibold);cursor:pointer;font-size:var(--font-size-sm);display:inline-flex;align-items:center;gap:4px`
             : `color:var(--text-secondary);cursor:pointer;font-size:var(--font-size-sm)`;
@@ -149,7 +149,7 @@ function renderTypeCard(t) {
 const RECOMMENDED_ACTIVITIES = [
     { title: '获奖名单+文末福利｜「锦绣华服·智传千年」华服...', type: '作品征集', status: '预告中', statusColor: '#FF9500', action: '组织单位登记', thumb: 'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)' },
     { title: '舍不得的丽江——丽江礼物” 文创大赛', type: '知识问答', status: '预告中', statusColor: '#FF9500', action: '已参与组织', thumb: 'linear-gradient(135deg,#B8E7F5,#EAF9FF 55%,#8CC7E8)' },
-    { title: '【第十六届“华政杯”全国法律翻译大赛】打卡赛...', type: '线下活动', status: '进行中', statusColor: '#22C55E', action: '申请被驳回', thumb: 'linear-gradient(135deg,#F97316,#FCA5A5 55%,#FDE68A)' }
+    { title: '【第十六届“华政杯”全国法律翻译大赛】打卡赛...', type: '活动报名', status: '进行中', statusColor: '#22C55E', action: '申请被驳回', thumb: 'linear-gradient(135deg,#F97316,#FCA5A5 55%,#FDE68A)' }
 ];
 
 function renderRecommendItem(item, i) {
@@ -165,8 +165,8 @@ function renderRecommendItem(item, i) {
             </div>
             <div class="wb-rec-type">${item.type}</div>
             <div class="wb-rec-meta">
-                <span>活动时间：2026-01-03 9:00 至 2026-01-20 12:00</span>
-                <span>主办单位：阅读文化集团</span>
+                <span>活动时间：${formatDateTimeRangeSecond('2026-01-03 9:00 至 2026-01-20 12:00')}</span>
+                <span>主办单位：阅途文化集团</span>
             </div>
         </div>
         <div class="wb-rec-actions">
@@ -363,26 +363,7 @@ registerPage('workbench', () => {
             <div class="wb-profile-stat"><span>总活动数量</span><strong>180</strong></div>
             <div class="wb-profile-stat"><span>总参与人数</span><strong>100000</strong></div>
             <div style="display:flex;gap:var(--spacing-xs);margin-top:var(--spacing-md)">
-                <div class="activity-dropdown">
-                    <button class="btn btn-primary" onclick="toggleActivityDropdown(event)" style="background:var(--color-gold-500);border-color:var(--color-gold-500)">+ 创建活动</button>
-                    <div class="activity-dropdown-menu" id="activityDropdownMenu">
-                        <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
-                            <div class="ad-icon" style="background:#FFF7E6;color:#FA8C16">🪧</div>征集类
-                        </div>
-                        <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
-                            <div class="ad-icon" style="background:#E6FFFB;color:#13C2C2">⭐</div>任务打卡
-                        </div>
-                        <div class="activity-dropdown-item" onclick="navigateTo('quiz-activity-create');closeActivityDropdown()">
-                            <div class="ad-icon" style="background:#F6FFED;color:#52C41A">📚</div>知识问答
-                        </div>
-                        <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
-                            <div class="ad-icon" style="background:#FFF1F0;color:#F5222D">📍</div>线下活动
-                        </div>
-                        <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
-                            <div class="ad-icon" style="background:#E6F7FF;color:#1890FF">🙋</div>投票
-                        </div>
-                    </div>
-                </div>
+                ${renderGlobalActivityCreateDropdown({ buttonStyle: 'background:var(--color-gold-500);border-color:var(--color-gold-500)' })}
                 <button class="btn btn-outline" style="border-color:var(--color-gold-500);color:var(--color-gold-500)">+ 专题活动</button>
             </div>
         </div>

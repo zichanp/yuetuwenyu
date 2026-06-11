@@ -59,17 +59,84 @@ function examQuestionTypeOptions(selected = '全部题型', includeAll = true) {
     return types.map(t => `<option ${normalized === t ? 'selected' : ''}>${t}</option>`).join('');
 }
 
+function formatDateTimeSecond(value) {
+    const text = String(value ?? '').trim();
+    if (!text || text === '-' || text === '—' || text === '待发布') return text || '-';
+    const normalized = text.replace('T', ' ');
+    if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return `${normalized} 00:00:00`;
+    if (/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}$/.test(normalized)) return `${normalized}:00`;
+    if (/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}$/.test(normalized)) return normalized;
+    if (/^\d{2}:\d{2}$/.test(normalized)) return `${normalized}:00`;
+    return text;
+}
+
+function formatDateTimeRangeSecond(value) {
+    const text = String(value ?? '').trim();
+    if (!text) return '-';
+    if (text.includes(' 至 ')) {
+        return text.split(' 至 ').map(part => formatDateTimeSecond(part)).join(' 至 ');
+    }
+    if (text.includes(' - ')) {
+        const parts = text.split(' - ');
+        if (parts.length === 2 && /^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}$/.test(parts[0]) && /^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}$/.test(parts[1])) {
+            return parts.map(part => formatDateTimeSecond(part)).join(' - ');
+        }
+        const startDate = parts[0]?.match(/^(\d{4}-\d{2}-\d{2}) /)?.[1];
+        if (parts.length === 2 && startDate && /^\d{1,2}:\d{2}$/.test(parts[1])) {
+            return `${formatDateTimeSecond(parts[0])} - ${formatDateTimeSecond(`${startDate} ${parts[1]}`)}`;
+        }
+    }
+    return formatDateTimeSecond(text);
+}
+
 // ===== ACTIVITY DROPDOWN =====
+function renderGlobalActivityCreateDropdown(options = {}) {
+    const {
+        buttonClass = 'btn btn-primary',
+        buttonStyle = '',
+        buttonText = '+ 创建活动'
+    } = options;
+    const styleAttr = buttonStyle ? ` style="${buttonStyle}"` : '';
+
+    return `
+        <div class="activity-dropdown">
+            <button class="${buttonClass}" onclick="toggleActivityDropdown(event)"${styleAttr}>${buttonText}</button>
+            <div class="activity-dropdown-menu">
+                <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
+                    <div class="ad-icon" style="background:#FFF7E6;color:#FA8C16">🪧</div>征集类
+                </div>
+                <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
+                    <div class="ad-icon" style="background:#E6FFFB;color:#13C2C2">⭐</div>任务打卡
+                </div>
+                <div class="activity-dropdown-item" onclick="navigateTo('quiz-activity-create');closeActivityDropdown()">
+                    <div class="ad-icon" style="background:#F6FFED;color:#52C41A">📚</div>知识问答
+                </div>
+                <div class="activity-dropdown-item" onclick="navigateTo('offline-activity-create');closeActivityDropdown()">
+                    <div class="ad-icon" style="background:#FFF1F0;color:#F5222D">📍</div>活动报名
+                </div>
+                <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
+                    <div class="ad-icon" style="background:#E6F7FF;color:#1890FF">🙋</div>投票
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function toggleActivityDropdown(e) {
     e.stopPropagation();
-    const menu = document.getElementById('activityDropdownMenu');
+    const dropdown = e.currentTarget.closest('.activity-dropdown');
+    const menu = dropdown?.querySelector('.activity-dropdown-menu');
     if (!menu) return;
+    const willShow = !menu.classList.contains('show');
+    closeActivityDropdown();
+    if (!willShow) return;
     menu.classList.toggle('show');
 }
 
 function closeActivityDropdown() {
-    const menu = document.getElementById('activityDropdownMenu');
-    if (menu) menu.classList.remove('show');
+    document.querySelectorAll('.activity-dropdown-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+    });
 }
 
 // Close dropdown on outside click
@@ -106,7 +173,9 @@ let currentManageActivity = {
     name: '阅启新篇·读享时光 —— 阅途成长共读计划',
     type: '知识问答',
     status: '进行中',
-    time: '2026-03-06 10:10:10 至 2026-03-26 23:59:59'
+    time: '2026-03-06 10:10:10 至 2026-03-26 23:59:59',
+    quizMode: '在线考试',
+    allowResume: false
 };
 
 const PAGE_META = {
@@ -115,15 +184,27 @@ const PAGE_META = {
     'activity-list': { title: '活动列表', tabTitle: '活动列表', parentPath: 'workbench', breadcrumb: ['活动管理', '活动列表'], showBack: false, generateTab: true },
     'activity-module-placeholder': { title: '活动模块', tabTitle: params => params?.module || '活动模块', parentPath: 'workbench', breadcrumb: ['活动管理', '活动模块'], showBack: false, generateTab: true },
     'quiz-activity-list': { title: '知识问答活动列表', tabTitle: '知识问答', parentPath: 'workbench', breadcrumb: ['活动管理', '活动概况', '知识问答', '活动列表'], showBack: true, generateTab: true },
-    dashboard: { title: '运营驾驶舱', tabTitle: '运营驾驶舱', parentPath: 'workbench', breadcrumb: ['活动管理', '运营驾驶舱'], showBack: false, generateTab: true },
+    dashboard: { title: '运营驾驶舱', tabTitle: '运营驾驶舱', parentPath: null, breadcrumb: ['运营管理', '运营驾驶舱'], showBack: false, generateTab: true },
     'activity-stat-placeholder': { title: '数据统计', tabTitle: '数据统计', parentPath: 'workbench', breadcrumb: ['活动管理', '数据统计'], showBack: false, generateTab: true },
     'activity-manage': { title: '活动管理', tabTitle: () => `活动管理-${currentManageActivity.name}`, parentPath: 'activity-list', breadcrumb: ['活动管理', currentManageActivity.name, '活动概览'], showBack: true, generateTab: true },
     'activity-overview': { title: '活动管理', tabTitle: () => `活动管理-${currentManageActivity.name}`, parentPath: 'activity-list', breadcrumb: ['活动管理', currentManageActivity.name, '活动概览'], showBack: true, generateTab: true },
     'org-mgmt': { title: '组织机构', tabTitle: '组织机构', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '组织机构'], showBack: true, generateTab: true },
     registration: { title: '报名情况', tabTitle: '报名情况', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '报名情况'], showBack: true, generateTab: true },
+    'offline-checkin-staff': { title: '签到工作人员', tabTitle: '签到工作人员', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '签到工作人员'], showBack: true, generateTab: true },
+    'activity-feedback': { title: '活动反馈', tabTitle: '活动反馈', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '活动反馈'], showBack: true, generateTab: true },
     'exam-records': { title: '用户答题情况', tabTitle: '用户答题情况', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况'], showBack: true, generateTab: true },
+    'offline-signin-stats': { title: '用户签到情况', tabTitle: '用户签到情况', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '数据统计', '用户签到情况'], showBack: true, generateTab: true },
+    'user-qualified': { title: '用户达标情况', tabTitle: '用户达标情况', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '数据统计', '用户达标情况'], showBack: true, generateTab: true },
+    'daily-score-detail': { title: '得分明细', tabTitle: '得分明细', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '得分明细'], showBack: true, generateTab: true },
+    'daily-user-detail': { title: '每日记录', tabTitle: '每日记录', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '每日记录'], showBack: true, generateTab: true },
+    'exam-session-detail': { title: '考试场次', tabTitle: '考试场次', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '考试场次'], showBack: true, generateTab: true },
+    'level-user-detail': { title: '关卡记录', tabTitle: '关卡记录', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '关卡记录'], showBack: true, generateTab: true },
+    'level-answer-detail': { title: '过关详情', tabTitle: '过关详情', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '过关详情'], showBack: true, generateTab: true },
     'answer-detail': { title: '答卷详情', tabTitle: '答卷详情', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '答卷详情'], showBack: true, generateTab: true },
     'unit-data': { title: '单位数据情况', tabTitle: '单位数据情况', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况'], showBack: true, generateTab: true },
+    'unit-exam-detail': { title: '单位考试明细', tabTitle: '单位考试明细', parentPath: 'unit-data', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况', '单位考试明细'], showBack: true, generateTab: true },
+    'unit-daily-detail': { title: '单位每日答题明细', tabTitle: '单位每日答题明细', parentPath: 'unit-data', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况', '单位每日答题明细'], showBack: true, generateTab: true },
+    'unit-level-detail': { title: '单位闯关明细', tabTitle: '单位闯关明细', parentPath: 'unit-data', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况', '单位闯关明细'], showBack: true, generateTab: true },
     'submission-list': { title: '投稿情况', tabTitle: '投稿情况', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '投稿情况'], showBack: true, generateTab: true },
     'question-bank': { title: '题库管理', tabTitle: '题库管理', parentPath: 'workbench', breadcrumb: ['活动管理', '题库管理'], showBack: true, generateTab: true },
     'paper-mgmt': { title: '试卷管理', tabTitle: '试卷管理', parentPath: 'workbench', breadcrumb: ['活动管理', '试卷管理'], showBack: true, generateTab: true },
@@ -157,6 +238,8 @@ const PAGE_META = {
     'recommend-resources': { title: '推荐资源', tabTitle: '推荐资源', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '推荐资源'], showBack: true, generateTab: true },
     'more-functions': { title: '更多功能', tabTitle: '更多功能', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '更多功能'], showBack: true, generateTab: true },
     'activity-data': { title: '数据概况', tabTitle: '数据概况', parentPath: 'workbench', breadcrumb: ['活动管理', '数据概况'], showBack: true, generateTab: true },
+    'station-activity-list': { title: '分站活动', tabTitle: '分站活动', parentPath: 'dashboard', breadcrumb: ['运营管理', '分站活动'], showBack: false, generateTab: true },
+    'station-activity-create': { title: params => params?.mode === 'edit' ? '编辑分站活动' : '新建分站活动', tabTitle: params => params?.mode === 'edit' ? '编辑分站活动' : '新建分站活动', parentPath: 'station-activity-list', breadcrumb: ['运营管理', '分站活动', '新建分站活动'], showBack: true, generateTab: true },
     'resource-mgmt': { title: '资源管理', tabTitle: '资源管理', parentPath: 'workbench', breadcrumb: ['资源管理'], showBack: false, generateTab: true },
     'data-mgmt': { title: '数据管理', tabTitle: '数据管理', parentPath: 'workbench', breadcrumb: ['数据管理'], showBack: false, generateTab: true },
     'system-mgmt': { title: '系统管理', tabTitle: '系统管理', parentPath: 'workbench', breadcrumb: ['系统管理'], showBack: false, generateTab: true }
@@ -166,17 +249,17 @@ const PAGE_META = {
 
 // Activity Management sidebar (when not inside a specific activity) — per Image 2
 const SIDEBAR_ACTIVITY = [
-    { page: 'workbench', icon: '🏠', label: '活动概况' },
-    { page: 'activity-list', icon: '🗂️', label: '活动列表' },
-    { label: '征集类', icon: '📝', key: 'collection' },
-    { label: '任务打卡', icon: '✅', key: 'task' },
-    { label: '知识问答', icon: '📚', key: 'quiz', activityPage: 'quiz-activity-list' },
-    { label: '线下活动', icon: '📍', key: 'offline' },
-    { label: '投票', icon: '🗳️', key: 'vote' },
+    { page: 'workbench', icon: '🌐', label: '活动概况' },
+    { page: 'activity-list', icon: '🌐', label: '活动列表' },
+    { label: '征集类', icon: '🌐', key: 'collection' },
+    { label: '任务打卡', icon: '🌐', key: 'task' },
+    { label: '知识问答', icon: '🌐', key: 'quiz', activityPage: 'quiz-activity-list' },
+    { label: '活动报名', icon: '🌐', key: 'offline' },
+    { label: '投票', icon: '🌐', key: 'vote' },
     { label: '外语闯关', icon: '🌐', key: 'language' },
-    { label: '会议微网站', icon: '🎤', key: 'meeting' },
-    { label: '超链接图文', icon: '🔗', key: 'link' },
-    { page: 'activity-stat-placeholder', icon: '📊', label: '数据统计' }
+    { label: '会议微网站', icon: '🌐', key: 'meeting' },
+    { label: '超链接图文', icon: '🌐', key: 'link' },
+    { page: 'activity-stat-placeholder', icon: '🌐', label: '数据统计' }
 ];
 
 const ACTIVITY_SIDEBAR_MODULES_BY_TYPE = {
@@ -237,7 +320,6 @@ const SIDEBAR_ACTIVITY_MANAGE = [
             { page: 'paper-review-teachers', label: '阅卷老师' }
         ]
     },
-    { page: 'practice-list', label: '练习记录' },
     {
         page: 'certificate-mgmt',
         label: '奖证管理',
@@ -248,15 +330,50 @@ const SIDEBAR_ACTIVITY_MANAGE = [
     },
     { page: 'activity-dynamic', label: '活动动态' },
     { page: 'recommend-resources', label: '推荐资源' },
+    { page: 'daily-score-detail', label: '得分明细' },
+    { page: 'activity-feedback', label: '活动反馈' },
     {
         page: 'exam-records',
         label: '数据统计',
         children: [
             { page: 'exam-records', label: '用户答题情况' },
+            { page: 'user-qualified', label: '用户达标情况' },
             { page: 'unit-data', label: '单位数据情况' }
         ]
     },
     { page: 'more-functions', label: '更多功能' }
+];
+
+const SIDEBAR_OFFLINE_ACTIVITY_MANAGE = [
+    { page: 'activity-overview', label: '活动概览' },
+    { page: 'org-mgmt', label: '组织机构' },
+    { page: 'registration', label: '报名情况' },
+    { page: 'offline-checkin-staff', label: '签到工作人员' },
+    {
+        page: 'certificate-mgmt',
+        label: '奖证管理',
+        children: [
+            { page: 'certificate-mgmt', label: '奖项列表' },
+            { page: 'certificates', label: '活动证明' }
+        ]
+    },
+    { page: 'activity-dynamic', label: '活动动态' },
+    { page: 'recommend-resources', label: '推荐资源' },
+    { page: 'activity-feedback', label: '活动反馈' },
+    {
+        page: 'offline-signin-stats',
+        label: '数据统计',
+        children: [
+            { page: 'offline-signin-stats', label: '用户签到情况' },
+            { page: 'unit-data', label: '单位数据情况' }
+        ]
+    },
+    { page: 'more-functions', label: '更多功能' }
+];
+
+const SIDEBAR_OPERATION = [
+    { page: 'dashboard', icon: '📊', label: '运营驾驶舱' },
+    { page: 'station-activity-list', icon: '🏫', label: '分站活动' }
 ];
 
 // Section → page ID mapping for auto-detect
@@ -284,12 +401,19 @@ const SECTION_PAGE_MAP = {
     'practice-records':   'activity',
     'activity-data':      'activity',
     'activity-stat-placeholder': 'activity',
-    'dashboard':          'activity',
+    'offline-activity-create': 'activity',
+    'dashboard':          'operation',
+    'station-activity-list': 'operation',
+    'station-activity-create': 'operation',
     // Manage mode pages → activity section
     'activity-overview': 'activity',
     'org-mgmt':          'activity',
     'registration':      'activity',
+    'activity-feedback': 'activity',
     'exam-records':      'activity',
+    'daily-score-detail': 'activity',
+    'level-user-detail': 'activity',
+    'level-answer-detail': 'activity',
     'answer-detail':     'activity',
     'paper-review':      'activity',
     'paper-review-student-list': 'activity',
@@ -306,6 +430,9 @@ const SECTION_PAGE_MAP = {
     'practice-records':  'activity',
     'certificate-mgmt':  'activity',
     'unit-data':         'activity',
+    'unit-exam-detail':  'activity',
+    'unit-daily-detail': 'activity',
+    'unit-level-detail': 'activity',
     'activity-dynamic':  'activity',
     'recommend-resources': 'activity',
     'more-functions':   'activity',
@@ -314,11 +441,12 @@ const SECTION_PAGE_MAP = {
     'system-mgmt':      'system'
 };
 
-const MANAGE_NAV_PAGE_IDS = new Set(SIDEBAR_ACTIVITY_MANAGE.flatMap(m => [m.page, ...(m.children || []).map(child => child.page)]));
+const MANAGE_NAV_PAGE_IDS = new Set([...SIDEBAR_ACTIVITY_MANAGE, ...SIDEBAR_OFFLINE_ACTIVITY_MANAGE].flatMap(m => [m.page, ...(m.children || []).map(child => child.page)]));
 const MANAGE_PAGE_IDS = new Set(MANAGE_NAV_PAGE_IDS);
-['paper-review-student-list', 'paper-review-question-list', 'paper-review-attempt-list', 'paper-review-marking', 'paper-review-question-marking', 'paper-review-detail', 'paper-review-teachers', 'paper-review-assign-question', 'paper-review-my-tasks', 'practice-create', 'submission-list', 'leaderboard', 'answer-detail'].forEach(id => MANAGE_PAGE_IDS.add(id));
+['paper-review-student-list', 'paper-review-question-list', 'paper-review-attempt-list', 'paper-review-marking', 'paper-review-question-marking', 'paper-review-detail', 'paper-review-teachers', 'paper-review-assign-question', 'paper-review-my-tasks', 'practice-create', 'submission-list', 'leaderboard', 'daily-user-detail', 'exam-session-detail', 'level-user-detail', 'level-answer-detail', 'answer-detail', 'unit-exam-detail', 'unit-daily-detail', 'unit-level-detail'].forEach(id => MANAGE_PAGE_IDS.add(id));
 const ACTIVITY_PAGE_IDS = new Set(SIDEBAR_ACTIVITY.map(m => m.page).filter(Boolean));
-const SIDEBAR_NAV_PAGE_IDS = new Set([...ACTIVITY_PAGE_IDS, ...MANAGE_NAV_PAGE_IDS]);
+const OPERATION_PAGE_IDS = new Set(SIDEBAR_OPERATION.map(m => m.page).filter(Boolean));
+const SIDEBAR_NAV_PAGE_IDS = new Set([...ACTIVITY_PAGE_IDS, ...OPERATION_PAGE_IDS, ...MANAGE_NAV_PAGE_IDS]);
 
 // ===== TOP NAV SWITCHING =====
 
@@ -362,7 +490,7 @@ function renderSidebar() {
     let menuItems = [];
 
     if (isInManageMode) {
-        menuItems = SIDEBAR_ACTIVITY_MANAGE;
+        menuItems = currentManageActivity.type === '活动报名' ? SIDEBAR_OFFLINE_ACTIVITY_MANAGE : SIDEBAR_ACTIVITY_MANAGE;
     } else {
         // Section-specific sidebar
         switch (topNavSection) {
@@ -372,6 +500,8 @@ function renderSidebar() {
             case 'home':
             case 'resource':
             case 'operation':
+                menuItems = SIDEBAR_OPERATION;
+                break;
             case 'data':
             case 'system':
             default:
@@ -469,6 +599,7 @@ function renderManageSidebarTree(menuItems) {
         'paper-review-question-marking': 'paper-review-my-tasks',
         'practice-create': 'practice-list',
         'certificates': 'certificate-mgmt',
+        'daily-score-detail': 'daily-score-detail',
         'unit-data': 'unit-data'
     };
     const activePage = activeMap[currentPage] || currentPage;
@@ -516,7 +647,10 @@ function toggleManageSidebarGroup(pageId, event) {
 
 registerPage('activity-dynamic', () => renderPublicFeatureEmptyPage());
 registerPage('recommend-resources', () => renderPublicFeatureEmptyPage());
-registerPage('more-functions', () => renderPlaceholderPage('更多功能', 'activity', '更多扩展能力将在这里统一管理。'));
+registerPage('more-functions', () => renderMoreFunctionsPage());
+registerPage('offline-checkin-staff', () => renderPlanningEmptyPage('签到工作人员', '签到工作人员模块正在规划中，后续可在这里维护活动现场核验人员。'));
+registerPage('offline-signin-stats', () => renderPlanningEmptyPage('用户签到情况', '用户签到情况模块正在规划中，后续可在这里查看报名用户的签到数据。'));
+registerPage('activity-feedback', () => renderPlanningEmptyPage('活动反馈', '活动反馈功能暂未实现，后续可在这里统一管理用户反馈。'));
 registerPage('activity-stat-placeholder', () => renderPlanningEmptyPage('数据统计', '数据统计模块待研发中，后续将在这里统一展示活动数据分析、趋势概览与指标看板。'));
 registerPage('activity-module-placeholder', () => {
     const activityLabel = currentPageParams?.activityLabel || '活动';
@@ -528,9 +662,12 @@ registerPage('activity-module-placeholder', () => {
 
 function renderActivityHeader() {
     const a = currentManageActivity;
+    const backAction = currentPage === 'practice-records'
+        ? "goBackFromPage('practice-records')"
+        : 'exitManageMode()';
     return `
     <div class="manage-topbar-inner">
-        <button class="manage-topbar-back" onclick="exitManageMode()" aria-label="返回上一页">
+        <button class="manage-topbar-back" onclick="${backAction}" aria-label="返回上一页">
             <span>‹</span>返回上一页
         </button>
         <div class="manage-topbar-cover" aria-hidden="true"></div>
@@ -893,7 +1030,7 @@ function navigateTo(pageId, options = {}) {
     } else {
         upsertPageTab(pageId, currentPageParams, currentPageSource);
     }
-    const isIndependentCreatePage = ['quiz-activity-create', 'activity-create'].includes(pageId);
+    const isIndependentCreatePage = ['quiz-activity-create', 'activity-create', 'offline-activity-create'].includes(pageId);
     document.body.classList.toggle('independent-create-page', isIndependentCreatePage);
     document.body.classList.toggle('manage-mode', isInManageMode);
 
@@ -984,26 +1121,293 @@ function renderPublicFeatureEmptyPage() {
     </div>`;
 }
 
+function renderMoreFunctionsPage() {
+    const isQuiz = currentManageActivity.type === '知识问答';
+    const resumeEnabled = !!currentManageActivity.allowResume;
+    const resumeMode = currentManageActivity.quizMode || '在线考试';
+    const resumeHint = resumeMode === '趣味闯关'
+        ? '开启后，用户重新进入闯关时可从上次退出位置继续作答，退出期间不计入答题时长。'
+        : resumeMode === '每日答题'
+            ? '开启后，用户重新进入每日答题时可从上次退出位置继续作答，退出期间不计入答题时长。'
+            : '开启后，用户重新进入考试时可从上次退出位置继续作答，退出期间不计入答题时长。';
+    return `
+    <div class="more-functions-page">
+        <h2>更多功能</h2>
+        ${isQuiz ? `
+        <section class="more-functions-card">
+            <div class="more-functions-card-head">
+                <h3>答题设置</h3>
+                <p class="more-functions-answer-tip">
+                    仅在 “在线考试” 模式下，展示该答题设置<br>
+                    其他两种答题模式（每日答题、趣味闯关）不显示该配置区块。系统默认：如用户答题过程中异常退出，再次进入时可从上次退出时所在题目继续作答。
+                </p>
+            </div>
+            <div class="more-functions-panel more-functions-panel-compact">
+                <div class="more-functions-row">
+                    <div class="more-functions-label">
+                        <strong>允许断点续答</strong>
+                        <span class="more-functions-help tooltip" data-tooltip="${resumeHint}">?</span>
+                    </div>
+                    <div class="more-functions-control">
+                        <label class="switch more-functions-switch" aria-label="允许断点续答">
+                            <input type="checkbox" id="moreFunctionsResumeSwitch" ${resumeEnabled ? 'checked' : ''} onchange="toggleMoreFunctionsResume(this.checked)">
+                            <span class="sw-slider"></span>
+                        </label>
+                        <span class="more-functions-status" id="moreFunctionsResumeStatus">${resumeEnabled ? '已开启' : '未开启'}</span>
+                    </div>
+                </div>
+            </div>
+        </section>` : ''}
+        <section class="more-functions-card">
+            <h3>组织机构/单位设置</h3>
+            <div class="more-functions-panel">
+                <div class="more-functions-row">
+                    <div class="more-functions-label">
+                        <strong>允许其他单位参与组织</strong>
+                        <span class="more-functions-help tooltip" data-tooltip="开启后，符合活动范围的单位可成为本活动的「组织单位」，协助活动推广，并可查看其自身单位的报名、打卡情况。">?</span>
+                    </div>
+                    <div class="more-functions-control">
+                        <label class="switch more-functions-switch">
+                            <input type="checkbox" id="moreFunctionsOrgSwitch" onchange="toggleMoreFunctionsOrgSettings(this.checked)">
+                            <span class="sw-slider"></span>
+                        </label>
+                        <span class="more-functions-status" id="moreFunctionsOrgStatus">已关闭</span>
+                    </div>
+                </div>
+                <div class="more-functions-audit" id="moreFunctionsAuditRow" hidden>
+                    <span>是否需要审核</span>
+                    <label><input type="radio" name="moreFunctionsAudit" checked> 是</label>
+                    <label><input type="radio" name="moreFunctionsAudit"> 否</label>
+                </div>
+            </div>
+        </section>
+    </div>`;
+}
+
+function toggleMoreFunctionsResume(isOpen) {
+    currentManageActivity.allowResume = !!isOpen;
+    const status = document.getElementById('moreFunctionsResumeStatus');
+    if (status) status.textContent = isOpen ? '已开启' : '未开启';
+}
+
+function toggleMoreFunctionsOrgSettings(isOpen) {
+    const status = document.getElementById('moreFunctionsOrgStatus');
+    const auditRow = document.getElementById('moreFunctionsAuditRow');
+    if (status) status.textContent = isOpen ? '已开启' : '已关闭';
+    if (auditRow) auditRow.hidden = !isOpen;
+}
+
 function renderActivityDataPage() {
     return pageHeader('📊 数据概况', '活动管理 / 数据概况') + `
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--spacing-md);margin-bottom:var(--spacing-lg)">
-        ${statCard('528', '总参与人数', 'linear-gradient(135deg,#4A6CF7,#3B5DE7)')}
-        ${statCard('73.1%', '完成率', 'linear-gradient(135deg,#10B981,#059669)')}
-        ${statCard('78.5', '平均分', 'linear-gradient(135deg,#F59E0B,#D97706)')}
-        ${statCard('82.3%', '通过率', 'linear-gradient(135deg,#8B5CF6,#7C3AED)')}
-    </div>
-    <div class="card" style="padding:var(--spacing-lg)">
-        <h3 style="font-size:var(--font-size-base);font-weight:700;margin-bottom:var(--spacing-md)">活动数据汇总</h3>
-        <div class="info-box blue">💡 数据概况展示所有活动的关键指标汇总。点击具体活动进入管理后可查看该活动的详细数据。</div>
-        <div style="margin-top:var(--spacing-md)">
-            ${tableWrap(
-                ['活动名称', '活动类型', '参与人数', '完成率', '平均分', '状态'],
-                `<tr><td>阅启新篇·读享时光</td><td><span class="badge badge-blue">知识问答</span></td><td>528</td><td>73.1%</td><td>78.5</td><td><span class="badge badge-green">进行中</span></td></tr>
-                 <tr><td>华服知识竞赛</td><td><span class="badge badge-blue">知识问答</span></td><td>320</td><td>85.2%</td><td>82.1</td><td><span class="badge badge-green">进行中</span></td></tr>
-                 <tr><td>非遗文化闯关</td><td><span class="badge badge-blue">知识问答</span></td><td>156</td><td>91.0%</td><td>88.3</td><td><span class="badge badge-green">进行中</span></td></tr>`
-            )}
+    <section class="quiz-data-page">
+        <div class="quiz-data-toolbar card">
+            <label><span>时间范围</span><select class="form-control"><option>近 30 天</option><option>近 7 天</option><option>本月</option><option>全部时间</option></select></label>
+            <label><span>活动状态</span><select class="form-control"><option>全部状态</option><option>进行中</option><option>未开始</option><option>已结束</option></select></label>
+            <label><span>答题模式</span><select class="form-control"><option>全部模式</option><option>在线考试</option><option>每日答题</option><option>闯关答题</option></select></label>
+            <label><span>活动名称</span><input class="form-control" placeholder="请输入活动名称"></label>
+            <div class="quiz-data-toolbar-actions">
+                <button class="btn btn-primary">查询</button>
+                <button class="btn btn-outline">重置</button>
+                <button class="btn btn-outline">导出</button>
+            </div>
         </div>
+
+        <div class="quiz-data-metric-grid">
+            ${renderQuizDataMetric('活动总数', '12', '进行中 6 / 已结束 4', '规模', 'blue')}
+            ${renderQuizDataMetric('总参与人次', '3,842', '较上期 +12.8%', '触达', 'cyan')}
+            ${renderQuizDataMetric('完成率', '76.4%', '完成 2,936 / 开始 3,842', '体验', 'green')}
+            ${renderQuizDataMetric('通过率', '81.7%', '通过 2,399 / 完成 2,936', '难度', 'purple')}
+            ${renderQuizDataMetric('平均分', '79.6', '及格线均值 60 分', '质量', 'orange')}
+            ${renderQuizDataMetric('异常活动', '4', '需优先查看', '风险', 'red')}
+        </div>
+
+        <div class="quiz-data-grid primary">
+            <section class="card quiz-data-chart-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>参与趋势</h3>
+                        <p>按日查看全部知识问答活动的参与、完成与通过变化</p>
+                    </div>
+                    <div class="activity-segment"><button class="active">参与</button><button>完成</button><button>通过</button></div>
+                </div>
+                ${renderQuizTrendChart()}
+                <div class="quiz-data-chart-legend">
+                    <span><i style="background:#2F54EB"></i>参与人次</span>
+                    <span><i style="background:#52C41A"></i>完成人次</span>
+                    <span><i style="background:#FAAD14"></i>通过人次</span>
+                </div>
+            </section>
+
+            <section class="card quiz-data-chart-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>答题转化漏斗</h3>
+                        <p>定位从开始答题到通过的主要流失环节</p>
+                    </div>
+                </div>
+                ${renderQuizDataFunnel()}
+            </section>
+        </div>
+
+        <div class="quiz-data-grid secondary">
+            <section class="card quiz-data-alert-card">
+                <div class="activity-card-head compact">
+                    <div>
+                        <h3>运营提醒</h3>
+                        <p>按低参与、低完成、低通过和低分自动标记</p>
+                    </div>
+                </div>
+                <div class="activity-todo-list">
+                    ${renderQuizDataAlert('high', '2 个活动通过率低于 60%', '优先检查题目难度、及格线和题库配置。')}
+                    ${renderQuizDataAlert('medium', '3 个活动完成率低于 70%', '建议排查活动说明、答题入口和题量长度。')}
+                    ${renderQuizDataAlert('medium', '“非遗文化闯关”平均用时偏长', '可能存在题目理解成本高或关卡配置偏重。')}
+                    ${renderQuizDataAlert('low', '近 7 天参与人次上涨 12.8%', '“华服知识竞赛”贡献主要增量，可复用推广配置。')}
+                </div>
+            </section>
+
+            <section class="card quiz-data-rank-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>活动表现排行</h3>
+                        <p>同时查看高贡献活动和待优化活动</p>
+                    </div>
+                </div>
+                <div class="quiz-data-rank-grid">
+                    ${renderQuizRankList('参与人数 TOP', QUIZ_DATA_ACTIVITIES.slice().sort((a, b) => b.participants - a.participants).slice(0, 5), 'participants')}
+                    ${renderQuizRankList('低完成率预警', QUIZ_DATA_ACTIVITIES.slice().sort((a, b) => a.completion - b.completion).slice(0, 5), 'completion')}
+                </div>
+            </section>
+        </div>
+
+        <section class="card quiz-data-table-card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>活动数据明细</h3>
+                    <p>点击查看可进入单个活动管理页，继续分析用户、单位和题目数据</p>
+                </div>
+            </div>
+            ${tableWrap(
+                ['活动名称', '状态', '答题模式', '参与人数', '答题人次', '完成人数', '完成率', '通过率', '平均分', '平均用时', '异常标记', '操作'],
+                QUIZ_DATA_ACTIVITIES.map(renderQuizDataTableRow).join(''),
+                { total: QUIZ_DATA_ACTIVITIES.length }
+            )}
+        </section>
+    </section>`;
+}
+
+const QUIZ_DATA_ACTIVITIES = [
+    { name: '阅启新篇·读享时光', status: '进行中', mode: '在线考试', participants: 528, attempts: 684, completed: 386, completion: 73.1, pass: 82.3, avg: 78.5, duration: '18分35秒', risk: '完成率偏低' },
+    { name: '华服知识竞赛', status: '进行中', mode: '每日答题', participants: 620, attempts: 1186, completed: 548, completion: 88.4, pass: 86.8, avg: 82.1, duration: '09分42秒', risk: '表现优秀' },
+    { name: '非遗文化闯关', status: '进行中', mode: '闯关答题', participants: 312, attempts: 456, completed: 198, completion: 63.5, pass: 71.2, avg: 76.4, duration: '24分16秒', risk: '用时偏长' },
+    { name: '法律翻译知识初赛', status: '已结束', mode: '在线考试', participants: 486, attempts: 508, completed: 451, completion: 92.8, pass: 88.9, avg: 84.7, duration: '21分08秒', risk: '正常' },
+    { name: '阅读安全生产测评', status: '已结束', mode: '在线考试', participants: 416, attempts: 436, completed: 296, completion: 71.2, pass: 58.4, avg: 67.9, duration: '22分54秒', risk: '通过率过低' },
+    { name: '每日阅读知识挑战', status: '进行中', mode: '每日答题', participants: 758, attempts: 1488, completed: 642, completion: 84.7, pass: 80.5, avg: 79.8, duration: '08分26秒', risk: '正常' },
+    { name: '图书馆服务规范问答', status: '未开始', mode: '在线考试', participants: 0, attempts: 0, completed: 0, completion: 0, pass: 0, avg: '-', duration: '-', risk: '待开始' },
+    { name: '古籍保护知识测评', status: '进行中', mode: '在线考试', participants: 238, attempts: 316, completed: 152, completion: 63.9, pass: 55.3, avg: 69.1, duration: '19分52秒', risk: '通过率过低' },
+    { name: '文化志愿者培训考试', status: '已结束', mode: '在线考试', participants: 484, attempts: 512, completed: 263, completion: 54.3, pass: 79.1, avg: 77.3, duration: '17分20秒', risk: '完成率过低' }
+];
+
+function renderQuizDataMetric(label, value, note, tag, tone) {
+    return `
+    <section class="card quiz-data-metric ${tone}">
+        <div class="quiz-data-metric-top">
+            <span>${label}</span>
+            <b>${tag}</b>
+        </div>
+        <strong>${value}</strong>
+        <p>${note}</p>
+    </section>`;
+}
+
+function renderQuizTrendChart() {
+    const days = ['5/28', '5/29', '5/30', '5/31', '6/1', '6/2', '6/3'];
+    const joined = [360, 420, 386, 512, 486, 548, 624];
+    const completed = [268, 302, 296, 388, 362, 428, 486];
+    const passed = [216, 248, 236, 318, 296, 346, 398];
+    const max = Math.max(...joined);
+    const bars = days.map((day, index) => `
+        <div class="quiz-trend-day">
+            <div class="quiz-trend-bars">
+                <i style="height:${Math.round(joined[index] / max * 100)}%;background:#2F54EB"></i>
+                <i style="height:${Math.round(completed[index] / max * 100)}%;background:#52C41A"></i>
+                <i style="height:${Math.round(passed[index] / max * 100)}%;background:#FAAD14"></i>
+            </div>
+            <span>${day}</span>
+        </div>`).join('');
+    return `<div class="quiz-trend-chart">${bars}</div>`;
+}
+
+function renderQuizDataFunnel() {
+    const steps = [
+        { label: '开始答题', value: '3,842', pct: 100, color: '#2F54EB' },
+        { label: '提交完成', value: '2,936', pct: 76, color: '#52C41A' },
+        { label: '达到及格线', value: '2,399', pct: 62, color: '#FAAD14' },
+        { label: '获得证明/积分', value: '1,842', pct: 48, color: '#722ED1' }
+    ];
+    return `
+    <div class="activity-funnel quiz-data-funnel">
+        ${steps.map(step => `
+            <div class="activity-funnel-step">
+                <div class="activity-funnel-top"><span>${step.label}</span><strong>${step.value}</strong></div>
+                <div class="activity-funnel-track"><div style="width:${step.pct}%;background:${step.color}"></div></div>
+                <div class="activity-funnel-pct">${step.pct}%</div>
+            </div>
+        `).join('')}
     </div>`;
+}
+
+function renderQuizDataAlert(level, title, desc) {
+    const mark = level === 'high' ? '高' : level === 'medium' ? '中' : '低';
+    return `
+    <div class="activity-todo-item ${level}">
+        <span>${mark}</span>
+        <div><strong>${title}</strong><p>${desc}</p></div>
+    </div>`;
+}
+
+function renderQuizRankList(title, rows, metric) {
+    const max = Math.max(...rows.map(row => metric === 'participants' ? row.participants : row.completion), 1);
+    return `
+    <div class="quiz-rank-list">
+        <h4>${title}</h4>
+        ${rows.map((row, index) => {
+            const value = metric === 'participants' ? row.participants : row.completion;
+            const text = metric === 'participants' ? `${value} 人` : `${value}%`;
+            const tone = metric === 'participants' ? '#2F54EB' : (value < 65 ? '#F5222D' : '#FAAD14');
+            return `
+            <div class="quiz-rank-row">
+                <span>${index + 1}</span>
+                <div>
+                    <strong>${row.name}</strong>
+                    <i><b style="width:${Math.max(8, Math.round(value / max * 100))}%;background:${tone}"></b></i>
+                </div>
+                <em>${text}</em>
+            </div>`;
+        }).join('')}
+    </div>`;
+}
+
+function renderQuizDataTableRow(row) {
+    const statusCls = row.status === '进行中' ? 'badge-green' : row.status === '已结束' ? 'badge-gray' : 'badge-yellow';
+    const riskCls = row.risk.includes('过低') || row.risk.includes('偏低') || row.risk.includes('偏长') ? 'badge-yellow'
+        : row.risk === '表现优秀' ? 'badge-green'
+        : row.risk === '待开始' ? 'badge-gray'
+        : 'badge-blue';
+    return `
+    <tr>
+        <td><strong>${row.name}</strong></td>
+        <td><span class="badge ${statusCls}">${row.status}</span></td>
+        <td><span class="badge badge-blue">${row.mode}</span></td>
+        <td>${row.participants}</td>
+        <td>${row.attempts}</td>
+        <td>${row.completed}</td>
+        <td><span class="activity-rate ${row.completion < 65 ? 'risk' : row.completion < 75 ? 'warn' : 'good'}">${row.completion}%</span></td>
+        <td><span class="activity-rate ${row.pass < 60 ? 'risk' : row.pass < 75 ? 'warn' : 'good'}">${row.pass}%</span></td>
+        <td>${row.avg}</td>
+        <td>${row.duration}</td>
+        <td><span class="badge ${riskCls}">${row.risk}</span></td>
+        <td><button class="btn btn-ghost btn-sm">查看</button></td>
+    </tr>`;
 }
 
 // ===== MODAL =====
@@ -1015,6 +1419,10 @@ function openModal(title, bodyHtml, onConfirm, opts = {}) {
     titleEl.textContent = title;
     bodyEl.innerHTML = bodyHtml;
     overlay.querySelector('.modal').className = `modal ${opts.modalClass || ''}`.trim();
+    Array.from(overlay.classList)
+        .filter(cls => cls.startsWith('modal-layer-'))
+        .forEach(cls => overlay.classList.remove(cls));
+    if (opts.overlayClass) overlay.classList.add(opts.overlayClass);
     overlay.classList.add('show');
 
     const confirmBtn = document.getElementById('modalConfirm');

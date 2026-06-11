@@ -87,7 +87,7 @@ function renderQuestionBankList() {
                 <td><strong>${b.name}</strong><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${b.desc}</div></td>
                 <td><strong style="color:var(--primary)">${b.count}</strong></td>
                 <td>${b.creator}</td>
-                <td>${b.date}</td>
+                <td>${formatDateTimeSecond(b.date)}</td>
                 <td><span class="badge ${b.status === '启用' ? 'badge-green' : 'badge-gray'}">${b.status}</span></td>
                 <td>
                     <span class="action-link" onclick="openQuestionManage(${b.id})">管理题目</span>
@@ -151,7 +151,6 @@ function renderQuestionManagePage() {
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="openCreateQuestionModal()">+ 添加题目</button>
                 <button class="btn btn-outline" onclick="openBatchImportModal()">📥 批量导入</button>
-                <button class="btn btn-outline" onclick="showAiQuestionComingSoon()">AI生成题目</button>
             </div>
         </div>
         ${tableWrap(
@@ -196,10 +195,6 @@ function filterQuestions() {
     });
 }
 
-function showAiQuestionComingSoon() {
-    alert('即将上线，敬请期待');
-}
-
 // ===== Modal: 创建题库 =====
 function openCreateBankModal() {
     openModal('创建题库', `
@@ -214,7 +209,7 @@ function openCreateBankModal() {
             name,
             count: 0,
             creator: '管理员',
-            date: new Date().toISOString().slice(0, 10),
+            date: formatDateTimeSecond(new Date().toISOString().slice(0, 19)),
             status: document.getElementById('newBankStatus').value,
             desc: document.getElementById('newBankDesc').value.trim()
         });
@@ -300,8 +295,9 @@ function openEditQuestionModal(qId) {
     initQuestionForm(q);
 }
 
-function renderQuestionForm(q) {
+function renderQuestionForm(q, options = {}) {
     const isEdit = !!q;
+    const allowedTypes = Array.isArray(options.allowedTypes) && options.allowedTypes.length ? options.allowedTypes : SYSTEM_QUESTION_TYPE_LABELS;
     const type = isEdit ? (q.type === '问答题' ? '简答题' : q.type) : '单选题';
     const answer = isEdit ? q.answer : 'A';
     const bankValue = getQuestionFormBankValue(q);
@@ -316,7 +312,9 @@ function renderQuestionForm(q) {
             </div>
             <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                 <div class="form-group"><label><span class="req">*</span> 题型</label>
-                    <select class="form-control" id="qType" onchange="setQuestionType(this.value)">${questionTypeOptions(type)}</select>
+                    <select class="form-control" id="qType" onchange="setQuestionType(this.value)">
+                        ${allowedTypes.map(t => `<option ${type === t ? 'selected' : ''}>${t}</option>`).join('')}
+                    </select>
                 </div>
                 <div class="form-group"><label>题库</label>
                     <select class="form-control" id="qBank">${renderQuestionBankOptions(bankValue)}</select>
@@ -765,7 +763,6 @@ function openBatchImportModal() {
         </div>
         <div class="form-group"><label>导入选项</label>
             <div class="config-block">
-                <div class="sw-row"><div class="sw-text"><div class="sw-label">遇到重复题目时</div></div><select style="padding:4px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px"><option>跳过</option><option>覆盖</option></select></div>
                 <div class="sw-row"><div class="sw-text"><div class="sw-label">导入后自动启用</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
             </div>
         </div>

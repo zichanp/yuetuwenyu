@@ -202,7 +202,7 @@ function renderSubmissionRow(s, idx) {
         <td>${submissionStatusBadge(s.status)}</td>
         <td>${reviewStatusBadge(s.review)}</td>
         <td>${violationStatusBadge(s.violation)}</td>
-        <td><span style="font-size:var(--font-size-xs);color:var(--text-tertiary)">${s.submitTime}</span></td>
+        <td><span style="font-size:var(--font-size-xs);color:var(--text-tertiary)">${formatDateTimeSecond(s.submitTime)}</span></td>
         <td>
             <div class="sub-actions">
                 <span class="action-link" onclick="viewSubmissionDetail('${s.id}')">详情</span>
@@ -572,8 +572,8 @@ function viewSubmissionDetail(id) {
                 ${detailField('审核状态', reviewStatusBadge(s.review))}
                 ${detailField('违规状态', violationStatusBadge(s.violation))}
                 ${detailField('点赞/票数', `${s.likes} 赞 / ${s.votes} 票`)}
-                ${detailField('投稿时间', s.submitTime)}
-                ${detailField('更新时间', s.updateTime)}
+                ${detailField('投稿时间', formatDateTimeSecond(s.submitTime))}
+                ${detailField('更新时间', formatDateTimeSecond(s.updateTime))}
             </div>
         </div>
     </div>
@@ -675,7 +675,7 @@ function viewSubmissionDetail(id) {
                 </thead>
                 <tbody>
                     ${s.review !== '待审核' ? `
-                    <tr><td>${s.updateTime}</td><td>管理员A</td><td>${reviewStatusBadge(s.review)}</td><td>${s.review === '通过' ? '作品符合征集要求' : '作品不符合征集主题要求，请重新投稿'}</td></tr>
+                    <tr><td>${formatDateTimeSecond(s.updateTime)}</td><td>管理员A</td><td>${reviewStatusBadge(s.review)}</td><td>${s.review === '通过' ? '作品符合征集要求' : '作品不符合征集主题要求，请重新投稿'}</td></tr>
                     ` : `<tr><td colspan="4" style="text-align:center;color:var(--text-quaternary);padding:var(--spacing-xl)">暂无审核记录</td></tr>`}
                 </tbody>
             </table>
