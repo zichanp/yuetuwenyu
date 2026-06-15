@@ -184,6 +184,9 @@ const PAGE_META = {
     'activity-list': { title: '活动列表', tabTitle: '活动列表', parentPath: 'workbench', breadcrumb: ['活动管理', '活动列表'], showBack: false, generateTab: true },
     'activity-module-placeholder': { title: '活动模块', tabTitle: params => params?.module || '活动模块', parentPath: 'workbench', breadcrumb: ['活动管理', '活动模块'], showBack: false, generateTab: true },
     'quiz-activity-list': { title: '知识问答活动列表', tabTitle: '知识问答', parentPath: 'workbench', breadcrumb: ['活动管理', '活动概况', '知识问答', '活动列表'], showBack: true, generateTab: true },
+    'vote-activity-list': { title: '投票活动列表', tabTitle: '投票活动列表', parentPath: 'workbench', breadcrumb: ['活动管理', '投票', '活动列表'], showBack: true, generateTab: true },
+    'vote-activity-data': { title: '投票数据概况', tabTitle: '投票数据概况', parentPath: 'workbench', breadcrumb: ['活动管理', '投票', '数据概况'], showBack: true, generateTab: true },
+    'offline-activity-data': { title: '活动报名数据概况', tabTitle: '活动报名数据概况', parentPath: 'workbench', breadcrumb: ['活动管理', '活动报名', '数据概况'], showBack: true, generateTab: true },
     dashboard: { title: '运营驾驶舱', tabTitle: '运营驾驶舱', parentPath: null, breadcrumb: ['运营管理', '运营驾驶舱'], showBack: false, generateTab: true },
     'activity-stat-placeholder': { title: '数据统计', tabTitle: '数据统计', parentPath: 'workbench', breadcrumb: ['活动管理', '数据统计'], showBack: false, generateTab: true },
     'activity-manage': { title: '活动管理', tabTitle: () => `活动管理-${currentManageActivity.name}`, parentPath: 'activity-list', breadcrumb: ['活动管理', currentManageActivity.name, '活动概览'], showBack: true, generateTab: true },
@@ -201,10 +204,11 @@ const PAGE_META = {
     'level-user-detail': { title: '关卡记录', tabTitle: '关卡记录', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '关卡记录'], showBack: true, generateTab: true },
     'level-answer-detail': { title: '过关详情', tabTitle: '过关详情', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '过关详情'], showBack: true, generateTab: true },
     'answer-detail': { title: '答卷详情', tabTitle: '答卷详情', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '答卷详情'], showBack: true, generateTab: true },
-    'unit-data': { title: '单位数据情况', tabTitle: '单位数据情况', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况'], showBack: true, generateTab: true },
+    'unit-data': { title: '单位数据情况', tabTitle: '单位数据情况', parentPath: currentManageActivity.type === '活动报名' ? 'offline-signin-stats' : 'exam-records', breadcrumb: currentManageActivity.type === '活动报名' ? ['活动管理', currentManageActivity.name, '数据统计', '单位数据情况'] : ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况'], showBack: true, generateTab: true },
     'unit-exam-detail': { title: '单位考试明细', tabTitle: '单位考试明细', parentPath: 'unit-data', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况', '单位考试明细'], showBack: true, generateTab: true },
     'unit-daily-detail': { title: '单位每日答题明细', tabTitle: '单位每日答题明细', parentPath: 'unit-data', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况', '单位每日答题明细'], showBack: true, generateTab: true },
     'unit-level-detail': { title: '单位闯关明细', tabTitle: '单位闯关明细', parentPath: 'unit-data', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '单位数据情况', '单位闯关明细'], showBack: true, generateTab: true },
+    'offline-unit-detail': { title: '单位报名明细', tabTitle: '单位报名明细', parentPath: 'unit-data', breadcrumb: ['活动管理', currentManageActivity.name, '数据统计', '单位数据情况', '单位报名明细'], showBack: true, generateTab: true },
     'submission-list': { title: '投稿情况', tabTitle: '投稿情况', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '投稿情况'], showBack: true, generateTab: true },
     'question-bank': { title: '题库管理', tabTitle: '题库管理', parentPath: 'workbench', breadcrumb: ['活动管理', '题库管理'], showBack: true, generateTab: true },
     'paper-mgmt': { title: '试卷管理', tabTitle: '试卷管理', parentPath: 'workbench', breadcrumb: ['活动管理', '试卷管理'], showBack: true, generateTab: true },
@@ -251,14 +255,11 @@ const PAGE_META = {
 const SIDEBAR_ACTIVITY = [
     { page: 'workbench', icon: '🌐', label: '活动概况' },
     { page: 'activity-list', icon: '🌐', label: '活动列表' },
-    { label: '征集类', icon: '🌐', key: 'collection' },
-    { label: '任务打卡', icon: '🌐', key: 'task' },
-    { label: '知识问答', icon: '🌐', key: 'quiz', activityPage: 'quiz-activity-list' },
-    { label: '活动报名', icon: '🌐', key: 'offline' },
-    { label: '投票', icon: '🌐', key: 'vote' },
-    { label: '外语闯关', icon: '🌐', key: 'language' },
-    { label: '会议微网站', icon: '🌐', key: 'meeting' },
-    { label: '超链接图文', icon: '🌐', key: 'link' },
+    { label: '征集类', icon: '🌐', key: 'collection', defaultPage: 'activity-list' },
+    { label: '任务打卡', icon: '🌐', key: 'task', defaultPage: 'activity-list' },
+    { label: '知识问答', icon: '🌐', key: 'quiz', defaultPage: 'quiz-activity-list' },
+    { label: '活动报名', icon: '🌐', key: 'offline', defaultPage: 'activity-list' },
+    { label: '投票', icon: '🌐', key: 'vote', defaultPage: 'vote-activity-list' },
     { page: 'activity-stat-placeholder', icon: '🌐', label: '数据统计' }
 ];
 
@@ -283,13 +284,11 @@ const ACTIVITY_SIDEBAR_MODULES_BY_TYPE = {
     ],
     offline: [
         { label: '活动列表', page: 'activity-list' },
-        { label: '签到管理' },
-        { label: '数据概况', page: 'activity-data' }
+        { label: '数据概况', page: 'offline-activity-data' }
     ],
     vote: [
-        { label: '活动列表', page: 'activity-list' },
-        { label: '投票管理' },
-        { label: '结果统计' }
+        { label: '活动列表', page: 'vote-activity-list' },
+        { label: '数据概况', page: 'vote-activity-data' }
     ],
     language: [
         { label: '活动列表', page: 'activity-list' },
@@ -306,6 +305,27 @@ const ACTIVITY_SIDEBAR_MODULES_BY_TYPE = {
         { label: '数据概况', page: 'activity-data' }
     ]
 };
+
+const QUIZ_PLATFORM_PAGE_IDS = new Set([
+    'quiz-activity-list',
+    'question-bank',
+    'paper-mgmt',
+    'paper-review-teachers-all',
+    'paper-review-all',
+    'paper-review-quick-my-tasks',
+    'paper-review-quick-question-list',
+    'paper-review-quick-attempt-list',
+    'paper-review-quick-student-list',
+    'paper-review-quick-question-marking',
+    'paper-review-quick-marking'
+]);
+const VOTE_PLATFORM_PAGE_IDS = new Set([
+    'vote-activity-list',
+    'vote-activity-data'
+]);
+const OFFLINE_PLATFORM_PAGE_IDS = new Set([
+    'offline-activity-data'
+]);
 
 // Activity Manage Mode sidebar follows the grouped tree used inside a single activity.
 const SIDEBAR_ACTIVITY_MANAGE = [
@@ -364,7 +384,6 @@ const SIDEBAR_OFFLINE_ACTIVITY_MANAGE = [
         page: 'offline-signin-stats',
         label: '数据统计',
         children: [
-            { page: 'offline-signin-stats', label: '用户签到情况' },
             { page: 'unit-data', label: '单位数据情况' }
         ]
     },
@@ -400,6 +419,7 @@ const SECTION_PAGE_MAP = {
     'practice-create':    'activity',
     'practice-records':   'activity',
     'activity-data':      'activity',
+    'offline-activity-data': 'activity',
     'activity-stat-placeholder': 'activity',
     'offline-activity-create': 'activity',
     'dashboard':          'operation',
@@ -433,6 +453,7 @@ const SECTION_PAGE_MAP = {
     'unit-exam-detail':  'activity',
     'unit-daily-detail': 'activity',
     'unit-level-detail': 'activity',
+    'offline-unit-detail': 'activity',
     'activity-dynamic':  'activity',
     'recommend-resources': 'activity',
     'more-functions':   'activity',
@@ -443,7 +464,7 @@ const SECTION_PAGE_MAP = {
 
 const MANAGE_NAV_PAGE_IDS = new Set([...SIDEBAR_ACTIVITY_MANAGE, ...SIDEBAR_OFFLINE_ACTIVITY_MANAGE].flatMap(m => [m.page, ...(m.children || []).map(child => child.page)]));
 const MANAGE_PAGE_IDS = new Set(MANAGE_NAV_PAGE_IDS);
-['paper-review-student-list', 'paper-review-question-list', 'paper-review-attempt-list', 'paper-review-marking', 'paper-review-question-marking', 'paper-review-detail', 'paper-review-teachers', 'paper-review-assign-question', 'paper-review-my-tasks', 'practice-create', 'submission-list', 'leaderboard', 'daily-user-detail', 'exam-session-detail', 'level-user-detail', 'level-answer-detail', 'answer-detail', 'unit-exam-detail', 'unit-daily-detail', 'unit-level-detail'].forEach(id => MANAGE_PAGE_IDS.add(id));
+['paper-review-student-list', 'paper-review-question-list', 'paper-review-attempt-list', 'paper-review-marking', 'paper-review-question-marking', 'paper-review-detail', 'paper-review-teachers', 'paper-review-assign-question', 'paper-review-my-tasks', 'practice-create', 'submission-list', 'leaderboard', 'daily-user-detail', 'exam-session-detail', 'level-user-detail', 'level-answer-detail', 'answer-detail', 'unit-exam-detail', 'unit-daily-detail', 'unit-level-detail', 'offline-unit-detail'].forEach(id => MANAGE_PAGE_IDS.add(id));
 const ACTIVITY_PAGE_IDS = new Set(SIDEBAR_ACTIVITY.map(m => m.page).filter(Boolean));
 const OPERATION_PAGE_IDS = new Set(SIDEBAR_OPERATION.map(m => m.page).filter(Boolean));
 const SIDEBAR_NAV_PAGE_IDS = new Set([...ACTIVITY_PAGE_IDS, ...OPERATION_PAGE_IDS, ...MANAGE_NAV_PAGE_IDS]);
@@ -524,31 +545,36 @@ function renderSidebar() {
 }
 
 function renderActivitySidebar(menuItems) {
-    const quizPages = new Set(['quiz-activity-list', 'question-bank', 'paper-mgmt', 'paper-review-teachers-all', 'paper-review-all', 'paper-review-quick-my-tasks', 'paper-review-quick-question-list', 'paper-review-quick-attempt-list', 'paper-review-quick-student-list', 'paper-review-quick-question-marking', 'paper-review-quick-marking']);
-    const activeModule = quizPages.has(currentPage) ? 'quiz'
+    const activeModule = QUIZ_PLATFORM_PAGE_IDS.has(currentPage) ? 'quiz'
+        : VOTE_PLATFORM_PAGE_IDS.has(currentPage) ? 'vote'
+        : OFFLINE_PLATFORM_PAGE_IDS.has(currentPage) ? 'offline'
         : currentPage === 'workbench' ? 'workbench'
-        : currentPage === 'activity-list' && currentPageSource?.params?.activityType ? currentPageSource.params.activityType
-        : currentPageSource?.params?.activityType || currentPageParams?.activityType || null;
+        : currentPageParams?.activityType
+            || (currentPage === 'activity-list' && currentPageSource?.params?.activityType ? currentPageSource.params.activityType : null)
+            || null;
     const renderActivityTool = item => {
         const isActiveType = activeModule === item.key;
         const isOpen = isActivitySidebarGroupOpen(item.key, isActiveType);
         const modules = ACTIVITY_SIDEBAR_MODULES_BY_TYPE[item.key] || [];
         return `
         <div class="activity-tool-group ${isActiveType ? 'active' : ''} ${isOpen ? 'open' : ''}">
-            <div class="activity-tool-title" onclick="toggleActivitySidebarGroup('${item.key}', event)" role="button" aria-expanded="${isOpen}">
+            <div class="activity-tool-title" onclick="openActivitySidebarDefault('${item.key}', '${item.label}', '${item.defaultPage || ''}', event)" role="button" aria-expanded="${isOpen}">
                 <span class="activity-tool-icon">${item.icon}</span>
                 <span>${item.label}</span>
-                <b>⌃</b>
+                <b onclick="event.stopPropagation();toggleActivitySidebarGroup('${item.key}', event)">⌃</b>
             </div>
             <div class="activity-tool-children">
                 ${modules.map(module => {
                     const isActive = isActiveType && (
                         currentPage === module.page ||
+                        (module.page === 'activity-data' && currentPage === 'activity-data' && currentPageParams?.activityType === item.key) ||
+                        (module.page === 'vote-activity-data' && currentPage === 'vote-activity-data') ||
                         (module.page === 'paper-review-quick-my-tasks' && currentPage.startsWith('paper-review-quick-')) ||
                         (module.module && currentPage === 'activity-module-placeholder' && currentPageParams?.module === module.module)
                     );
                     const page = module.page || 'activity-module-placeholder';
-                    return `<div class="activity-side-child ${isActive ? 'active' : ''}" onclick="navigateActivitySidebarModule('${page}', '${item.key}', '${item.label}', '${module.module || module.label}')">${module.label}</div>`;
+                    const clickAction = `navigateActivitySidebarModule('${page}', '${item.key}', '${item.label}', '${module.module || module.label}')`;
+                    return `<div class="activity-side-child ${isActive ? 'active' : ''}" data-page="${page}" onclick="${clickAction}">${module.label}</div>`;
                 }).join('')}
             </div>
         </div>`;
@@ -578,8 +604,53 @@ function toggleActivitySidebarGroup(key, event) {
     renderSidebar();
 }
 
+function openActivitySidebarDefault(activityType, activityLabel, defaultPage, event) {
+    event?.stopPropagation();
+    activitySidebarOpenState = {
+        ...activitySidebarOpenState,
+        [activityType]: true
+    };
+    if (activityType === 'quiz') {
+        openQuizActivityList(event);
+        return;
+    }
+    const firstModule = ACTIVITY_SIDEBAR_MODULES_BY_TYPE[activityType]?.[0];
+    const page = defaultPage || firstModule?.page || 'activity-module-placeholder';
+    const moduleName = firstModule?.module || firstModule?.label || activityLabel;
+    if (!page) {
+        renderSidebar();
+        return;
+    }
+    navigateActivitySidebarModule(page, activityType, activityLabel, moduleName);
+}
+
+function openQuizActivityList(event) {
+    event?.stopPropagation();
+    activitySidebarOpenState = {
+        ...activitySidebarOpenState,
+        quiz: true
+    };
+    navigateTo('quiz-activity-list', {
+        params: {
+            activityType: 'quiz',
+            activityLabel: '知识问答',
+            module: '活动列表'
+        },
+        source: null
+    });
+}
+
+function resolveActivitySidebarTarget(page, activityType, moduleName) {
+    if (moduleName === '活动列表') {
+        if (activityType === 'quiz') return 'quiz-activity-list';
+        if (activityType === 'offline') return 'activity-list';
+    }
+    return page;
+}
+
 function navigateActivitySidebarModule(page, activityType, activityLabel, moduleName) {
-    navigateTo(page, {
+    const targetPage = resolveActivitySidebarTarget(page, activityType, moduleName);
+    navigateTo(targetPage, {
         params: {
             activityType,
             activityLabel,
@@ -648,8 +719,6 @@ function toggleManageSidebarGroup(pageId, event) {
 registerPage('activity-dynamic', () => renderPublicFeatureEmptyPage());
 registerPage('recommend-resources', () => renderPublicFeatureEmptyPage());
 registerPage('more-functions', () => renderMoreFunctionsPage());
-registerPage('offline-checkin-staff', () => renderPlanningEmptyPage('签到工作人员', '签到工作人员模块正在规划中，后续可在这里维护活动现场核验人员。'));
-registerPage('offline-signin-stats', () => renderPlanningEmptyPage('用户签到情况', '用户签到情况模块正在规划中，后续可在这里查看报名用户的签到数据。'));
 registerPage('activity-feedback', () => renderPlanningEmptyPage('活动反馈', '活动反馈功能暂未实现，后续可在这里统一管理用户反馈。'));
 registerPage('activity-stat-placeholder', () => renderPlanningEmptyPage('数据统计', '数据统计模块待研发中，后续将在这里统一展示活动数据分析、趋势概览与指标看板。'));
 registerPage('activity-module-placeholder', () => {
@@ -949,6 +1018,7 @@ function shouldHideSecondaryMenuReturnBar(pageId = currentPage) {
         'paper-review-teachers-all',
         'paper-review-quick-my-tasks',
         'activity-data',
+        'offline-activity-data',
         'activity-module-placeholder'
     ].includes(pageId);
 }
@@ -978,18 +1048,18 @@ function navigateTo(pageId, options = {}) {
         pageId = 'activity-overview';
     }
 
+    if (pageId === 'activity-list' && params.activityType === 'quiz') {
+        pageId = 'quiz-activity-list';
+    }
+
     // Platform-level quiz pages from the Activity workbench.
     // It must not inherit the current activity manage sidebar.
     if (
-        pageId === 'quiz-activity-list' ||
-        pageId === 'question-bank' ||
-        pageId === 'paper-mgmt' ||
-        pageId === 'paper-review-all' ||
-        pageId === 'paper-review-teachers-all' ||
-        pageId.startsWith('paper-review-quick-')
+        QUIZ_PLATFORM_PAGE_IDS.has(pageId)
     ) {
         isInManageMode = false;
         topNavSection = 'activity';
+        source = null;
     }
 
     if (!Pages[pageId]) return;
@@ -1072,6 +1142,97 @@ registerPage('resource-mgmt', () => renderPlaceholderPage('资源管理', 'resou
 registerPage('data-mgmt', () => renderPlaceholderPage('数据管理', 'data', '数据管理模块正在开发中，敬请期待。'));
 registerPage('system-mgmt', () => renderPlaceholderPage('系统管理', 'system', '系统管理模块正在开发中，敬请期待。'));
 registerPage('activity-data', () => renderActivityDataPage());
+registerPage('offline-activity-data', () => renderOfflineActivityDataPage());
+registerPage('vote-activity-list', () => renderVoteActivityListPage());
+registerPage('vote-activity-data', () => renderVoteActivityDataPage());
+
+function renderVoteActivityListPage() {
+    const rows = [
+        ['年度最受欢迎阅读推广活动评选', '进行中', '2026-06-01 至 2026-06-30', '12,856', '作品投票'],
+        ['校园朗读者人气榜', '未开始', '2026-07-05 至 2026-07-20', '0', '人物评选'],
+        ['城市书房主题海报票选', '已结束', '2026-05-08 至 2026-05-22', '8,412', '主题投票']
+    ];
+
+    return pageHeader('🗳️ 投票活动列表', '活动管理 / 投票 / 活动列表') + `
+    <section class="card" style="margin-bottom:var(--spacing-md)">
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--spacing-md);align-items:end">
+            <label><span style="display:block;color:var(--text-secondary);font-size:var(--font-size-xs);margin-bottom:var(--spacing-xxs)">活动名称</span><input class="form-control" placeholder="请输入投票活动名称"></label>
+            <label><span style="display:block;color:var(--text-secondary);font-size:var(--font-size-xs);margin-bottom:var(--spacing-xxs)">活动状态</span><select class="form-control"><option>全部状态</option><option>未开始</option><option>进行中</option><option>已结束</option></select></label>
+            <label><span style="display:block;color:var(--text-secondary);font-size:var(--font-size-xs);margin-bottom:var(--spacing-xxs)">投票类型</span><select class="form-control"><option>全部类型</option><option>作品投票</option><option>人物评选</option><option>主题投票</option></select></label>
+            <div style="display:flex;gap:var(--spacing-sm)">
+                <button class="btn btn-primary">查询</button>
+                <button class="btn btn-outline">重置</button>
+            </div>
+        </div>
+    </section>
+    <section class="card">
+        <div class="activity-card-head">
+            <div>
+                <h3>投票活动</h3>
+                <p>独立管理投票类活动的基础信息、投票类型与参与数据。</p>
+            </div>
+            <button class="btn btn-primary">新建投票活动</button>
+        </div>
+        ${tableWrap(
+            ['活动名称', '状态', '活动时间', '累计票数', '投票类型', '操作'],
+            rows.map(row => `
+                <tr>
+                    <td><strong>${row[0]}</strong></td>
+                    <td><span class="badge ${row[1] === '进行中' ? 'badge-green' : row[1] === '未开始' ? 'badge-blue' : 'badge-gray'}">${row[1]}</span></td>
+                    <td>${row[2]}</td>
+                    <td>${row[3]}</td>
+                    <td>${row[4]}</td>
+                    <td><button class="btn btn-ghost btn-sm">进入管理</button></td>
+                </tr>
+            `).join(''),
+            { total: rows.length }
+        )}
+    </section>`;
+}
+
+function renderVoteActivityDataPage() {
+    return pageHeader('📊 投票数据概况', '活动管理 / 投票 / 数据概况') + `
+    <section class="quiz-data-page">
+        <div class="quiz-data-metric-grid">
+            ${renderQuizDataMetric('投票活动数', '18', '进行中 6 / 已结束 9', '规模', 'blue')}
+            ${renderQuizDataMetric('累计投票数', '42,618', '较上期 +9.6%', '参与', 'cyan')}
+            ${renderQuizDataMetric('参与用户数', '15,904', '人均投票 2.7 次', '用户', 'green')}
+            ${renderQuizDataMetric('候选项总数', '286', '平均每活动 15.9 项', '内容', 'purple')}
+        </div>
+        <section class="card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>投票趋势</h3>
+                    <p>展示投票类活动的每日投票量和参与人数变化。</p>
+                </div>
+            </div>
+            ${renderVoteTrendChart()}
+            <div class="quiz-data-chart-legend">
+                <span><i style="background:#00BCD4"></i>投票数</span>
+                <span><i style="background:#52C41A"></i>参与人数</span>
+            </div>
+        </section>
+    </section>`;
+}
+
+function renderVoteTrendChart() {
+    const days = ['6/9', '6/10', '6/11', '6/12', '6/13', '6/14', '6/15'];
+    const votes = [4200, 4860, 4520, 5380, 6120, 6840, 7350];
+    const users = [1560, 1720, 1680, 1980, 2260, 2480, 2690];
+    const max = Math.max(...votes);
+    return `
+    <div class="quiz-trend-chart">
+        ${days.map((day, index) => `
+            <div class="quiz-trend-day">
+                <div class="quiz-trend-bars">
+                    <i style="height:${Math.round(votes[index] / max * 100)}%;background:#00BCD4"></i>
+                    <i style="height:${Math.round(users[index] / max * 100)}%;background:#52C41A"></i>
+                </div>
+                <span>${day}</span>
+            </div>
+        `).join('')}
+    </div>`;
+}
 
 function renderPlaceholderPage(title, section, desc) {
     const icons = { home: '🏠', resource: '📁', data: '📈', system: '⚙️' };
@@ -1195,6 +1356,215 @@ function toggleMoreFunctionsOrgSettings(isOpen) {
     const auditRow = document.getElementById('moreFunctionsAuditRow');
     if (status) status.textContent = isOpen ? '已开启' : '已关闭';
     if (auditRow) auditRow.hidden = !isOpen;
+}
+
+function renderOfflineActivityDataPage() {
+    return pageHeader('📊 活动报名数据概况', '活动管理 / 活动报名 / 数据概况') + `
+    <section class="quiz-data-page">
+        <div class="quiz-data-toolbar card">
+            <label><span>时间范围</span><select class="form-control"><option>近 30 天</option><option>近 7 天</option><option>本月</option><option>全部时间</option></select></label>
+            <label><span>活动状态</span><select class="form-control"><option>全部状态</option><option>报名中</option><option>预告中</option><option>已结束</option><option>未发布</option></select></label>
+            <label><span>举办方式</span><select class="form-control"><option>全部方式</option><option>线上活动</option><option>线下活动</option><option>线上+线下</option></select></label>
+            <label><span>活动名称/地区</span><input class="form-control" placeholder="请输入活动名称、城市或地点"></label>
+            <div class="quiz-data-toolbar-actions">
+                <button class="btn btn-primary">查询</button>
+                <button class="btn btn-outline">重置</button>
+                <button class="btn btn-outline">导出</button>
+            </div>
+        </div>
+
+        <div class="quiz-data-metric-grid">
+            ${renderQuizDataMetric('报名活动数', '9', '报名中 4 / 已结束 3', '规模', 'blue')}
+            ${renderQuizDataMetric('提交报名人数', '2,468', '较上期 +18.6%', '报名', 'cyan')}
+            ${renderQuizDataMetric('审核通过率', '87.6%', '通过 2,162 / 提交 2,468', '审核', 'green')}
+            ${renderQuizDataMetric('名额占用率', '73.2%', '已占用 2,162 / 总名额 2,954', '名额', 'purple')}
+            ${renderQuizDataMetric('签到率', '82.4%', '签到 1,782 / 通过 2,162', '到场', 'orange')}
+            ${renderQuizDataMetric('待处理审核', '126', '3 个活动存在积压', '待办', 'red')}
+        </div>
+
+        <div class="quiz-data-grid primary">
+            <section class="card quiz-data-chart-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>报名与到场趋势</h3>
+                        <p>按日查看活动报名的提交、审核通过和现场签到变化</p>
+                    </div>
+                    <div class="activity-segment"><button class="active">报名</button><button>审核通过</button><button>签到</button></div>
+                </div>
+                ${renderOfflineDataTrendChart()}
+                <div class="quiz-data-chart-legend">
+                    <span><i style="background:#2F54EB"></i>提交报名</span>
+                    <span><i style="background:#52C41A"></i>审核通过</span>
+                    <span><i style="background:#FAAD14"></i>签到人数</span>
+                </div>
+            </section>
+
+            <section class="card quiz-data-chart-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>报名转化漏斗</h3>
+                        <p>定位从查看活动到报名成功、签到和反馈的流失环节</p>
+                    </div>
+                </div>
+                ${renderOfflineDataFunnel()}
+            </section>
+        </div>
+
+        <div class="quiz-data-grid secondary">
+            <section class="card quiz-data-alert-card">
+                <div class="activity-card-head compact">
+                    <div>
+                        <h3>运营提醒</h3>
+                        <p>按审核积压、名额紧张、签到配置和报名截止自动标记</p>
+                    </div>
+                </div>
+                <div class="activity-todo-list">
+                    ${renderQuizDataAlert('high', '126 条报名待审核', '建议优先处理“非遗手作体验课”和“城市阅读季 · 讲座沙龙”。')}
+                    ${renderQuizDataAlert('medium', '2 个场次名额占用超过 90%', '可考虑追加场次、调整名额或开启候补。')}
+                    ${renderQuizDataAlert('medium', '3 个活动将在 48 小时内截止报名', '建议推送最后报名提醒并检查报名表必填字段。')}
+                    ${renderQuizDataAlert('low', '1 个线下活动未开启签到', '请确认是否需要配置工作人员扫码、自助扫码或一键签到。')}
+                </div>
+            </section>
+
+            <section class="card quiz-data-rank-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>组织单位与场次表现</h3>
+                        <p>同时查看报名贡献单位和名额紧张场次</p>
+                    </div>
+                </div>
+                <div class="quiz-data-rank-grid">
+                    ${renderOfflineRankList('报名人数 TOP 单位', OFFLINE_DATA_ORGS, 'signups')}
+                    ${renderOfflineRankList('名额占用预警', OFFLINE_DATA_SESSIONS, 'capacity')}
+                </div>
+            </section>
+        </div>
+
+        <section class="card quiz-data-table-card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>活动报名数据明细</h3>
+                    <p>覆盖报名表提交、审核、场次名额、签到签退和评价反馈等活动报名字段</p>
+                </div>
+            </div>
+            ${tableWrap(
+                ['活动名称', '状态', '举办方式', '报名人数', '审核通过', '待审核', '名额占用', '签到率', '签退率', '反馈数', '异常标记', '操作'],
+                OFFLINE_DATA_ACTIVITIES.map(renderOfflineDataTableRow).join(''),
+                { total: OFFLINE_DATA_ACTIVITIES.length }
+            )}
+        </section>
+    </section>`;
+}
+
+const OFFLINE_DATA_ACTIVITIES = [
+    { name: '城市阅读季 · 讲座沙龙', status: '报名中', hostMode: '线下活动', signups: 486, approved: 438, pending: 32, capacity: 520, checkin: 82.6, checkout: 76.8, feedback: 186, risk: '待审核偏多' },
+    { name: '非遗手作体验课', status: '报名中', hostMode: '线下活动', signups: 268, approved: 241, pending: 58, capacity: 260, checkin: 88.4, checkout: 81.2, feedback: 128, risk: '名额紧张' },
+    { name: '图书馆夜读会', status: '未发布', hostMode: '线下活动', signups: 0, approved: 0, pending: 0, capacity: 120, checkin: 0, checkout: 0, feedback: 0, risk: '待发布' },
+    { name: '亲子共读工作坊', status: '报名中', hostMode: '线上+线下', signups: 356, approved: 316, pending: 18, capacity: 420, checkin: 79.1, checkout: 72.4, feedback: 95, risk: '正常' },
+    { name: '古籍修复公开课', status: '已结束', hostMode: '线下活动', signups: 424, approved: 389, pending: 0, capacity: 460, checkin: 91.5, checkout: 86.3, feedback: 212, risk: '表现优秀' },
+    { name: '数字阅读线上分享会', status: '已结束', hostMode: '线上活动', signups: 612, approved: 548, pending: 0, capacity: 800, checkin: 76.2, checkout: 70.4, feedback: 164, risk: '签到偏低' },
+    { name: '文化志愿者招募说明会', status: '预告中', hostMode: '线上+线下', signups: 322, approved: 230, pending: 18, capacity: 374, checkin: 0, checkout: 0, feedback: 0, risk: '报名预热' }
+];
+
+const OFFLINE_DATA_ORGS = [
+    { name: '阅途文化集团', value: 486, note: '通过 438 人' },
+    { name: '广州图书馆', value: 356, note: '通过 316 人' },
+    { name: '广东财经大学图书馆', value: 322, note: '通过 230 人' },
+    { name: '少儿阅读中心', value: 268, note: '通过 241 人' },
+    { name: '城西分馆', value: 214, note: '通过 186 人' }
+];
+
+const OFFLINE_DATA_SESSIONS = [
+    { name: '非遗手作体验课 · 场次一', value: 92.7, note: '241 / 260 人' },
+    { name: '城市阅读季 · 下午场', value: 88.5, note: '230 / 260 人' },
+    { name: '古籍修复公开课 · 主会场', value: 84.6, note: '389 / 460 人' },
+    { name: '亲子共读工作坊 · 周末场', value: 75.2, note: '316 / 420 人' },
+    { name: '数字阅读线上分享会', value: 68.5, note: '548 / 800 人' }
+];
+
+function renderOfflineDataTrendChart() {
+    const days = ['6/09', '6/10', '6/11', '6/12', '6/13', '6/14', '6/15'];
+    const signups = [188, 236, 284, 342, 386, 452, 528];
+    const approved = [152, 198, 236, 286, 318, 386, 462];
+    const checkins = [86, 126, 148, 184, 216, 268, 326];
+    const max = Math.max(...signups);
+    const bars = days.map((day, index) => `
+        <div class="quiz-trend-day">
+            <div class="quiz-trend-bars">
+                <i style="height:${Math.round(signups[index] / max * 100)}%;background:#2F54EB"></i>
+                <i style="height:${Math.round(approved[index] / max * 100)}%;background:#52C41A"></i>
+                <i style="height:${Math.round(checkins[index] / max * 100)}%;background:#FAAD14"></i>
+            </div>
+            <span>${day}</span>
+        </div>`).join('');
+    return `<div class="quiz-trend-chart">${bars}</div>`;
+}
+
+function renderOfflineDataFunnel() {
+    const steps = [
+        { label: '浏览活动详情', value: '12,580', pct: 100, color: '#2F54EB' },
+        { label: '提交报名表', value: '2,468', pct: 100, color: '#13C2C2' },
+        { label: '审核通过/报名成功', value: '2,162', pct: 88, color: '#52C41A' },
+        { label: '完成签到', value: '1,782', pct: 72, color: '#FAAD14' },
+        { label: '完成签退/评价', value: '1,376', pct: 56, color: '#722ED1' }
+    ];
+    return `
+    <div class="activity-funnel quiz-data-funnel">
+        ${steps.map(step => `
+            <div class="activity-funnel-step">
+                <div class="activity-funnel-top"><span>${step.label}</span><strong>${step.value}</strong></div>
+                <div class="activity-funnel-track"><div style="width:${step.pct}%;background:${step.color}"></div></div>
+                <div class="activity-funnel-pct">${step.pct}%</div>
+            </div>
+        `).join('')}
+    </div>`;
+}
+
+function renderOfflineRankList(title, rows, metric) {
+    const max = Math.max(...rows.map(row => row.value), 1);
+    return `
+    <div class="quiz-rank-list">
+        <h4>${title}</h4>
+        ${rows.map((row, index) => {
+            const isCapacity = metric === 'capacity';
+            const valueText = isCapacity ? `${row.value}%` : `${row.value} 人`;
+            const tone = isCapacity && row.value >= 90 ? '#F5222D' : isCapacity && row.value >= 80 ? '#FAAD14' : '#2F54EB';
+            return `
+            <div class="quiz-rank-row">
+                <span>${index + 1}</span>
+                <div>
+                    <strong>${row.name}</strong>
+                    <small style="display:block;color:var(--text-tertiary);margin-top:2px">${row.note}</small>
+                    <i><b style="width:${Math.max(8, Math.round(row.value / max * 100))}%;background:${tone}"></b></i>
+                </div>
+                <em>${valueText}</em>
+            </div>`;
+        }).join('')}
+    </div>`;
+}
+
+function renderOfflineDataTableRow(row) {
+    const statusCls = row.status === '报名中' ? 'badge-green' : row.status === '已结束' ? 'badge-gray' : row.status === '预告中' ? 'badge-blue' : 'badge-yellow';
+    const capacityRate = row.capacity ? Math.round(row.approved / row.capacity * 1000) / 10 : 0;
+    const riskCls = row.risk.includes('紧张') || row.risk.includes('偏低') || row.risk.includes('偏多') ? 'badge-yellow'
+        : row.risk === '表现优秀' ? 'badge-green'
+        : row.risk === '待发布' ? 'badge-gray'
+        : 'badge-blue';
+    return `
+    <tr>
+        <td><strong>${row.name}</strong></td>
+        <td><span class="badge ${statusCls}">${row.status}</span></td>
+        <td><span class="badge badge-blue">${row.hostMode}</span></td>
+        <td>${row.signups}</td>
+        <td>${row.approved}</td>
+        <td>${row.pending}</td>
+        <td><span class="activity-rate ${capacityRate >= 90 ? 'risk' : capacityRate >= 80 ? 'warn' : 'good'}">${capacityRate}%</span></td>
+        <td><span class="activity-rate ${row.checkin < 70 && row.status === '已结束' ? 'risk' : row.checkin < 80 && row.checkin > 0 ? 'warn' : 'good'}">${row.checkin ? `${row.checkin}%` : '-'}</span></td>
+        <td>${row.checkout ? `${row.checkout}%` : '-'}</td>
+        <td>${row.feedback}</td>
+        <td><span class="badge ${riskCls}">${row.risk}</span></td>
+        <td><button class="btn btn-ghost btn-sm">查看</button></td>
+    </tr>`;
 }
 
 function renderActivityDataPage() {

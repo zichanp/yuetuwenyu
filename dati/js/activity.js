@@ -8,22 +8,21 @@ registerPage('activity-list', () => {
 
     <!-- Filter Bar -->
     <div class="card" style="padding:var(--spacing-lg) var(--spacing-xl);margin-bottom:var(--spacing-lg)">
-        <div class="form-row-4" style="margin-bottom:var(--spacing-md)">
+        <div class="form-row-4">
             <div class="form-group"><label>活动名称</label><input class="form-control" placeholder="请输入活动名称"></div>
-            <div class="form-group"><label>活动工具</label><select class="form-control"><option>${isOfflineList ? '活动报名' : '全部工具'}</option><option>知识问答</option><option>任务打卡</option><option>征集类</option></select></div>
             <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>${isOfflineList ? '讲座沙龙' : '在线考试'}</option><option>${isOfflineList ? '培训会议' : '每日答题'}</option><option>${isOfflineList ? '展览导览' : '趣味闯关'}</option></select></div>
             <div class="form-group"><label>活动状态</label><select class="form-control"><option>全部状态</option><option>未发布</option><option>预告中</option><option>进行中</option><option>已结束</option><option>已下架</option></select></div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:var(--spacing-sm)">
-            <button class="btn btn-primary">🔍 搜索</button>
-            <button class="btn btn-ghost">重置</button>
+            <div style="display:flex;align-items:flex-end;justify-content:flex-end;gap:var(--spacing-sm)">
+                <button class="btn btn-primary">🔍 搜索</button>
+                <button class="btn btn-ghost">重置</button>
+            </div>
         </div>
     </div>
 
     <!-- Action Bar -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--spacing-lg)">
         ${isOfflineList
-            ? `<button class="btn btn-primary" onclick="navigateTo('offline-activity-create')">+ 发布活动</button>`
+            ? `<button class="btn btn-primary" onclick="navigateTo('offline-activity-create')">+ 创建活动报名</button>`
             : renderGlobalActivityCreateDropdown()
         }
     </div>
@@ -259,6 +258,8 @@ function renderQuizActivityList() {
 }
 
 function quizCard(c) {
+    const activityTime = formatDateTimeRangeSecond(c.time);
+    const creatorText = formatCreatorWithTimeSecond(c.creator);
     const statusClass = c.status === '进行中'
         ? 'ongoing'
         : c.status === '预告中'
@@ -268,11 +269,9 @@ function quizCard(c) {
                 : 'unpublished';
     const primaryAction = c.unpublished
         ? `<button class="btn btn-primary btn-sm" onclick="openExamPublishConfirm()">发布</button>`
-        : `<button class="btn btn-primary btn-sm" onclick="navigateTo('activity-manage')">进入管理</button>`;
+        : `<button class="btn btn-primary btn-sm" onclick="enterQuizActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.mode || '')}')">进入管理</button>`;
     const secondaryAction = `<button class="btn btn-outline btn-sm" onclick="navigateTo('quiz-activity-create', { params: { mode: 'edit' } })">编辑活动</button>`;
 
-    const activityTime = formatDateTimeRangeSecond(c.time);
-    const creatorText = formatCreatorWithTimeSecond(c.creator);
     return `
     <div class="quiz-list-item">
         <div class="quiz-list-thumb" style="background:${c.grad}"></div>

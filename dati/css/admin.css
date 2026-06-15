@@ -5358,220 +5358,40 @@ tr:last-child td {
   gap: 18px;
 }
 
-.offline-registration-overview {
-  display: grid;
-  gap: 14px;
-  padding: 26px 28px 24px;
-}
-
-.offline-registration-overview-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.offline-registration-overview-head h2 {
-  margin: 0 0 6px;
-  color: var(--text-primary);
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.offline-registration-overview-head p {
-  margin: 0;
-  color: var(--text-tertiary);
-  font-size: 13px;
-}
-
-.offline-registration-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.offline-registration-progress {
-  display: grid;
-  gap: 9px;
-  padding: 10px 0 0;
-}
-
-.offline-registration-progress-top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.offline-registration-progress-top strong {
-  color: var(--text-primary);
-  font-size: 34px;
-  line-height: 1;
-  font-weight: 800;
-}
-
-.offline-registration-progress-top small {
-  margin-left: 6px;
-  color: var(--text-tertiary);
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.offline-registration-progress-top span,
-.offline-registration-progress-meta {
-  color: var(--text-tertiary);
-  font-size: 14px;
-}
-
-.offline-registration-progress-track {
-  display: flex;
-  height: 10px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #e5e7eb;
-}
-
-.offline-registration-progress-track i {
-  display: block;
-  height: 100%;
-  min-width: 3px;
-}
-
-.offline-registration-progress-track i:first-child {
-  border-top-left-radius: 999px;
-  border-bottom-left-radius: 999px;
-}
-
-.offline-registration-progress-track i.joined {
-  background: #2f7d6d;
-}
-
-.offline-registration-progress-track i.pending {
-  background: #d68a1f;
-}
-
-.offline-registration-progress-track i.waitlisted {
-  background: #6f7f95;
-}
-
-.offline-registration-progress-track i.rejected {
-  background: #c85c67;
-}
-
-.offline-registration-progress-meta {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-.offline-registration-progress-meta span {
-  position: relative;
-  padding-left: 12px;
-}
-
-.offline-registration-progress-meta span::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-placeholder);
-  transform: translateY(-50%);
-}
-
-.offline-registration-progress-meta .joined {
-  color: #2f7d6d;
-  font-weight: 700;
-}
-
-.offline-registration-progress-meta .joined::before {
-  background: #2f7d6d;
-}
-
-.offline-registration-progress-meta .pending {
-  color: #b36b12;
-  font-weight: 700;
-}
-
-.offline-registration-progress-meta .pending::before {
-  background: #d68a1f;
-}
-
-.offline-registration-progress-meta .waitlisted {
-  color: #5f6f85;
-  font-weight: 700;
-}
-
-.offline-registration-progress-meta .waitlisted::before {
-  background: #6f7f95;
-}
-
-.offline-registration-progress-meta .rejected {
-  color: #a94450;
-  font-weight: 700;
-}
-
-.offline-registration-progress-meta .rejected::before {
-  background: #c85c67;
-}
-
-.offline-registration-progress-meta .checked::before {
-  background: #4f9d69;
-}
-
-.offline-registration-progress-meta .checked {
-  color: #3f8557;
-  font-weight: 700;
-}
-
 .offline-registration-card {
-  padding-top: 22px;
+  display: grid;
+  gap: 32px;
+  padding: 36px 42px 44px;
 }
 
-.offline-registration-filter {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(240px, 1fr));
-  gap: 14px 32px;
-  padding: 0 0 18px;
-  margin-bottom: 12px;
+.offline-registration-tabs-section {
+  width: 100%;
+}
+
+.offline-registration-group-tabs,
+.offline-registration-session-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+  margin: 0;
+  padding: 0;
   border-bottom: 1px solid var(--border-color-light);
 }
 
-.offline-registration-filter label {
+.offline-registration-session-tabs {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  color: var(--text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  grid-template-columns: repeat(auto-fit, minmax(234px, 1fr));
+  gap: 14px;
+  padding-bottom: 12px;
 }
 
-.offline-registration-filter .form-control {
-  width: 100%;
-  height: 36px;
-  color: var(--text-secondary);
-}
-
-.offline-registration-group-tabs {
-  display: flex;
-  gap: 42px;
-  margin: 0 0 12px;
-  border-bottom: 1px solid var(--border-color);
-  overflow-x: auto;
-}
-
-.offline-registration-group-tabs button {
+.offline-registration-group-tabs button,
+.offline-registration-session-tabs button {
   position: relative;
   display: inline-flex;
   align-items: center;
-  height: 44px;
-  padding: 0 0 12px;
+  height: 52px;
+  padding: 0 0 14px;
   border: 0;
   background: transparent;
   color: var(--text-primary);
@@ -5581,11 +5401,95 @@ tr:last-child td {
   cursor: pointer;
 }
 
-.offline-registration-group-tabs button.active {
+.offline-registration-session-tabs button {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: 112px;
+  padding: 16px 20px 18px;
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: 0 6px 18px rgba(31, 41, 55, 0.04);
+  font-size: 14px;
+  transition: var(--transition-fast);
+}
+
+.offline-registration-session-tabs button strong,
+.offline-registration-session-tabs button span,
+.offline-registration-session-tabs button em,
+.offline-registration-session-tabs button small {
+  display: block;
+}
+
+.offline-registration-session-tabs button strong {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.offline-registration-session-tabs button strong b {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.offline-registration-session-tabs button strong b.is-review-required {
+  color: var(--danger);
+}
+
+.offline-registration-session-tabs button strong b.is-review-free {
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.offline-registration-session-tabs button span {
+  margin-top: 10px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.offline-registration-session-tabs button em {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.offline-registration-session-tabs button small {
+  margin-top: 8px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.offline-registration-group-tabs button.active,
+.offline-registration-session-tabs button.active {
   color: #9b7447;
 }
 
-.offline-registration-group-tabs button.active::after {
+.offline-registration-session-tabs button.active {
+  border-color: rgba(185, 147, 95, 0.5);
+  background: #fffaf3;
+  box-shadow: 0 10px 24px rgba(185, 147, 95, 0.12);
+}
+
+.offline-registration-session-tabs button.active strong,
+.offline-registration-session-tabs button.active span,
+.offline-registration-session-tabs button.active em,
+.offline-registration-session-tabs button.active small {
+  color: #9b7447;
+}
+
+.offline-registration-group-tabs button.active::after,
+.offline-registration-session-tabs button.active::after {
   content: "";
   position: absolute;
   right: 0;
@@ -5595,200 +5499,905 @@ tr:last-child td {
   background: #b9935f;
 }
 
+.offline-registration-filter-panel {
+  padding: 24px 36px 22px;
+  background: #f5f5f5;
+}
+
+.offline-registration-filter {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px 36px;
+}
+
+.offline-registration-filter label {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 800;
+}
+
+.offline-registration-status-filter {
+  grid-column: auto;
+}
+
+.offline-registration-filter .form-control {
+  width: 100%;
+  height: 36px;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+}
+
+.offline-registration-filter .registration-actions {
+  grid-column: 3 / span 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+  align-self: center;
+}
+
+.offline-registration-filter .registration-actions .btn {
+  min-width: 108px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.offline-registration-list-section {
+  display: grid;
+  gap: 18px;
+}
+
+.offline-registration-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 6px;
+  border-top: 1px solid var(--border-color-light);
+}
+
+.offline-registration-list-head > strong {
+  padding-top: 18px;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.offline-registration-batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 18px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.offline-registration-batch-bar strong {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.offline-registration-batch-bar .btn {
+  min-width: 82px;
+  height: 32px;
+  justify-content: center;
+}
+
 .offline-registration-table {
-  min-width: 1680px;
+  min-width: 1760px;
+}
+
+.offline-registration-batchbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.offline-registration-batchbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.offline-registration-batchbar-actions .btn {
+  min-width: 96px;
+  height: 38px;
+  padding: 0 16px;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.offline-registration-table-wrap {
+  overflow-y: visible;
 }
 
 .offline-registration-table td {
   vertical-align: middle;
 }
 
-.offline-registration-table td:nth-child(2) strong,
-.offline-registration-table td:nth-child(2) span {
+.offline-registration-table td:nth-child(3) strong,
+.offline-registration-table td:nth-child(3) span {
   display: block;
 }
 
-.offline-registration-table td:nth-child(2) span {
+.offline-registration-table td:nth-child(3) span {
   margin-top: 2px;
   color: var(--text-tertiary);
   font-size: 12px;
 }
 
-.offline-registration-table td:nth-child(9) {
+.offline-registration-table .action-link + .action-link {
+  margin-left: 10px;
+}
+
+.offline-registration-popover-cell {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
   max-width: 220px;
-  color: var(--text-secondary);
-  white-space: nowrap;
+  color: var(--primary);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.offline-registration-popover-cell > span {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.offline-registration-popover {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: var(--z-tooltip);
+  display: none;
+  min-width: 240px;
+  max-width: 360px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-dropdown);
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: left;
+  transform: translateX(-50%);
+}
+
+.offline-registration-popover p {
+  margin: 0;
+  line-height: 1.8;
+  white-space: nowrap;
+}
+
+.offline-registration-popover-cell:hover .offline-registration-popover,
+.offline-registration-popover-cell:focus .offline-registration-popover,
+.offline-registration-popover-cell:focus-within .offline-registration-popover {
+  display: block;
+}
+
+.offline-registration-detail-trigger {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.offline-registration-detail-trigger:hover {
+  text-decoration: underline;
 }
 
 .offline-registration-audit-modal {
   display: grid;
-  gap: 18px;
+  min-height: 720px;
+  gap: 34px;
+  padding: 10px 0 88px;
+}
+
+.offline-registration-audit-shell {
+  width: 1140px;
+  max-width: 96vw;
+}
+
+.offline-registration-quota-shell {
+  width: 920px;
+  max-width: 92vw;
+}
+
+.offline-registration-quota-modal {
+  display: grid;
+  gap: 24px;
+}
+
+.offline-registration-quota-total {
+  color: var(--primary);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.offline-registration-audit-shell .modal-head {
+  min-height: 104px;
+  padding: 0 30px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.offline-registration-audit-shell .modal-head h3 {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.offline-registration-audit-shell .modal-body {
+  padding: 22px 30px 0;
+}
+
+.offline-registration-audit-shell .modal-foot {
+  min-height: 86px;
+  padding: 16px 28px;
 }
 
 .offline-registration-audit-person {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-  gap: 12px;
+  grid-template-columns: 84px minmax(0, 1fr) auto;
+  gap: 26px;
   align-items: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color-light);
+  padding: 0;
+}
+
+.offline-registration-audit-hero {
+  display: grid;
+  gap: 22px;
+  padding: 32px 34px;
+  border: 1px solid #e6edf8;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at top right, rgba(67, 112, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.04);
+}
+
+.offline-registration-audit-status {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.offline-registration-audit-status .badge {
+  justify-content: center;
+  min-width: 120px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 16px;
 }
 
 .offline-registration-avatar {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
-  background: #eff6ff;
-  color: var(--primary);
+  background: linear-gradient(180deg, #edf3ff 0%, #e3ebff 100%);
+  color: #3557df;
+  font-size: 26px;
   font-weight: 900;
 }
 
-.offline-registration-audit-person strong,
-.offline-registration-audit-person span {
-  display: block;
+.offline-registration-audit-person-body {
+  display: grid;
+  gap: 14px;
 }
 
 .offline-registration-audit-person strong {
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 26px;
+  font-weight: 900;
 }
 
-.offline-registration-audit-person span,
-.offline-registration-audit-summary {
-  color: var(--text-tertiary);
-  font-size: 13px;
-}
-
-.offline-registration-audit-person em {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #f3f4f6;
-  color: var(--text-secondary);
-  font-style: normal;
-  font-weight: 800;
-}
-
-.offline-registration-audit-summary {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 18px;
-  padding: 12px 14px;
-  border: 1px solid var(--border-color-light);
-  border-radius: 8px;
-  background: #fafafa;
-}
-
-.offline-registration-timeline {
-  display: grid;
-  gap: 0;
-  padding: 4px 0 0;
-}
-
-.offline-registration-timeline-item {
-  position: relative;
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 14px;
-  padding: 0 0 22px;
-}
-
-.offline-registration-timeline-item::before {
-  content: "";
-  position: absolute;
-  left: 13px;
-  top: 26px;
-  bottom: 0;
-  width: 2px;
-  background: #e5e7eb;
-}
-
-.offline-registration-timeline-item:last-child {
-  padding-bottom: 0;
-}
-
-.offline-registration-timeline-item:last-child::before {
-  display: none;
-}
-
-.offline-registration-timeline-item i {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #f3f4f6;
-}
-
-.offline-registration-timeline-item i::after {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--text-placeholder);
-}
-
-.offline-registration-timeline-item.audit i {
-  background: #fff7ed;
-}
-
-.offline-registration-timeline-item.audit i::after {
-  background: #f97316;
-}
-
-.offline-registration-timeline-item.checkin i {
-  background: #ecfdf5;
-}
-
-.offline-registration-timeline-item.checkin i::after {
-  background: var(--success);
-}
-
-.offline-registration-timeline-item strong,
-.offline-registration-timeline-item p,
-.offline-registration-timeline-item span {
-  display: block;
-}
-
-.offline-registration-timeline-item strong {
-  color: var(--text-primary);
-  font-size: 15px;
-}
-
-.offline-registration-timeline-item p {
-  margin: 4px 0;
-  color: var(--text-secondary);
-  font-size: 13px;
+.offline-registration-audit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  color: #64748b;
+  font-size: 14px;
   line-height: 1.6;
 }
 
-.offline-registration-timeline-item span {
-  color: var(--text-tertiary);
+.offline-registration-audit-phone {
+  color: #667085;
+}
+
+.offline-registration-audit-meta-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.offline-registration-audit-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.offline-registration-audit-summary-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.offline-registration-audit-summary-card > div {
+  display: grid;
+  gap: 10px;
+  min-height: 112px;
+  padding: 26px 28px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid #dfe8f5;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85);
+}
+
+.offline-registration-audit-summary-card span {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.offline-registration-audit-summary-card strong {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.5;
+}
+
+.offline-registration-audit-summary-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 6px;
+}
+
+.offline-registration-audit-summary-meta p,
+.offline-registration-audit-summary-meta label,
+.offline-registration-audit-summary-meta b {
+  display: block;
+  margin: 0;
+}
+
+.offline-registration-audit-summary-meta p {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #f8fbff;
+  border: 1px solid #e7effa;
+}
+
+.offline-registration-audit-summary-meta label {
+  color: #94a3b8;
   font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.offline-registration-audit-summary-meta b {
+  margin-top: 8px;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.offline-registration-audit-title {
+  margin: 4px 0 0 6px;
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.offline-registration-records {
+  display: grid;
+  gap: 18px;
+  padding: 0 6px 12px;
+}
+
+.offline-registration-record-item {
+  padding: 26px 28px;
+  border: 1px solid #e8eef8;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.03);
+}
+
+.offline-registration-record-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.offline-registration-record-main strong,
+.offline-registration-record-main span,
+.offline-registration-record-item p,
+.offline-registration-record-time {
+  display: block;
+}
+
+.offline-registration-record-main strong {
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.offline-registration-record-main span {
+  flex-shrink: 0;
+  color: #64748b;
+  font-size: 14px;
+  text-align: right;
+  padding-top: 1px;
+}
+
+.offline-registration-record-time {
+  margin-top: 14px;
+  color: #8aa0c2;
+  font-size: 14px;
+}
+
+.offline-registration-record-item p {
+  margin-top: 18px;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.offline-registration-reject-shell {
+  width: 1040px;
+  max-width: 94vw;
+}
+
+.offline-registration-reject-shell .modal-head {
+  min-height: 92px;
+  padding: 0 28px;
+}
+
+.offline-registration-reject-shell .modal-head h3 {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.offline-registration-reject-shell .modal-body {
+  padding: 34px 52px 28px;
+}
+
+.offline-registration-reject-shell .modal-foot {
+  padding: 20px 56px 34px;
+  background: #fff;
+  border-top: 0;
+}
+
+.offline-registration-reject-shell .modal-foot .btn {
+  min-width: 152px;
+  height: 54px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.offline-registration-reject-shell .modal-foot .btn-ghost {
+  background: #f3f4f6;
+  color: #2f2f2f;
+}
+
+.offline-registration-reject-shell .modal-foot .btn-primary {
+  background: #c49b5a;
+  border-color: #c49b5a;
+}
+
+.offline-registration-reject-modal {
+  display: grid;
+  gap: 24px;
+}
+
+.offline-registration-reject-intro {
+  color: #8c8c8c;
+  font-size: 18px;
+  line-height: 1.7;
+  font-weight: 700;
+}
+
+.offline-registration-reject-box {
+  display: grid;
+  gap: 22px;
+  min-height: 220px;
+  padding: 24px 20px 18px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.offline-registration-reject-textarea {
+  min-height: 86px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  resize: none;
+  color: #8c8c8c;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.offline-registration-reject-textarea::placeholder {
+  color: #a1a1aa;
+}
+
+.offline-registration-reject-textarea:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.offline-registration-reject-upload-list {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.offline-registration-reject-thumb,
+.offline-registration-reject-upload-empty {
+  width: 88px;
+  height: 88px;
+  border-radius: 6px;
+}
+
+.offline-registration-reject-thumb {
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.offline-registration-reject-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.offline-registration-reject-upload-empty {
+  border: 1px dashed #d4d4d8;
+  background: #fafafa;
+  color: #8c8c8c;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.offline-registration-approve-shell {
+  width: 760px;
+  max-width: 92vw;
+}
+
+.offline-registration-approve-shell .modal-head {
+  min-height: 92px;
+  padding: 0 28px;
+}
+
+.offline-registration-approve-shell .modal-head h3 {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.offline-registration-approve-shell .modal-body {
+  padding: 36px 40px 28px;
+}
+
+.offline-registration-approve-shell .modal-foot {
+  padding: 20px 40px 32px;
+  background: #fff;
+  border-top: 0;
+}
+
+.offline-registration-approve-shell .modal-foot .btn {
+  min-width: 140px;
+  height: 52px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.offline-registration-approve-shell .modal-foot .btn-ghost {
+  background: #f3f4f6;
+  color: #2f2f2f;
+}
+
+.offline-registration-approve-modal {
+  display: grid;
+  gap: 22px;
+}
+
+.offline-registration-approve-intro {
+  color: #8c8c8c;
+  font-size: 18px;
+  line-height: 1.7;
+  font-weight: 700;
+}
+
+.offline-registration-approve-card {
+  display: grid;
+  gap: 10px;
+  padding: 22px 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.offline-registration-approve-card strong {
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.offline-registration-approve-card span {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.offline-status-modal {
+  display: grid;
+  gap: 18px;
+}
+
+.offline-status-modal-person {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.offline-status-modal-person strong,
+.offline-status-modal-person span {
+  display: block;
+}
+
+.offline-status-modal-person strong {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.offline-status-modal-person span {
+  margin-top: 4px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.offline-status-modal-field {
+  display: grid;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.offline-status-modal-field .form-control {
+  height: 44px;
+  width: 100%;
+}
+
+.offline-status-session-list {
+  display: grid;
+  gap: 12px;
+}
+
+.offline-status-session-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--radius-md);
+  background: #fafafa;
+}
+
+.offline-status-session-item strong,
+.offline-status-session-item span {
+  display: block;
+}
+
+.offline-status-session-item strong {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.offline-status-session-item span {
+  margin-top: 5px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.offline-status-session-item .form-control {
+  height: 38px;
+}
+
+.offline-status-modal-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.offline-status-modal-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.offline-registration-confirm-modal,
+.offline-registration-import-modal {
+  display: grid;
+  gap: 14px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+}
+
+.offline-registration-confirm-modal p,
+.offline-registration-import-modal p {
+  margin: 0;
+}
+
+.offline-registration-confirm-modal strong {
+  color: var(--text-primary);
+  font-weight: 900;
+}
+
+.offline-registration-confirm-modal div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.offline-registration-confirm-modal div span {
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.offline-registration-confirm-modal > span,
+.offline-registration-confirm-modal em {
+  color: var(--text-tertiary);
+  font-style: normal;
+}
+
+.offline-registration-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 @media (max-width: 1280px) {
   .offline-registration-filter {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .offline-registration-filter label,
+  .offline-registration-filter .registration-actions {
+    grid-column: span 1;
+  }
+
+  .offline-registration-filter .registration-actions {
+    grid-column: span 2;
+  }
 }
 
 @media (max-width: 760px) {
-  .offline-registration-overview-head,
-  .offline-registration-actions,
-  .offline-registration-progress-top {
+  .offline-registration-card {
+    padding: 24px 18px;
+  }
+
+  .offline-registration-audit-hero {
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+
+  .offline-registration-audit-person {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .offline-registration-audit-status {
+    justify-content: flex-start;
+  }
+
+  .offline-registration-audit-summary-card {
+    grid-template-columns: 1fr;
+  }
+
+  .offline-registration-audit-summary-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .offline-registration-record-item {
+    padding: 20px 18px;
+  }
+
+  .offline-registration-record-main {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .offline-registration-record-main span {
+    text-align: left;
+  }
+
+  .offline-signup-preview-tabs {
+    flex-wrap: wrap;
+  }
+
+  .offline-signup-settings-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .offline-signup-settings-body {
+    padding: 20px 18px;
+  }
+
+  .offline-signup-settings-body.single-mode .offline-setting-row,
+  .offline-signup-settings-body.multi-mode .offline-setting-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .offline-registration-filter {
+    grid-template-columns: 1fr;
+  }
+
+  .offline-registration-filter label,
+  .offline-registration-filter .registration-actions {
+    grid-template-columns: 1fr;
+    grid-column: 1;
+  }
+
+  .offline-registration-list-head,
+  .offline-registration-batch-bar,
+  .offline-registration-batchbar {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .offline-registration-filter,
-  .offline-registration-audit-summary {
-    grid-template-columns: 1fr;
+  .offline-registration-batchbar-actions {
+    width: 100%;
+  }
+
+  .offline-registration-batchbar-actions .btn,
+  .offline-registration-filter .registration-actions .btn {
+    width: 100%;
   }
 }
 
@@ -22841,6 +23450,168 @@ body.manage-mode .attempt-bottom-bar {
   font-size: 17px;
   font-weight: 900;
 }
+.offline-title-note {
+  margin-left: 8px;
+  color: #ff5c5c;
+  font-size: 12px;
+  font-weight: 500;
+}
+.offline-signup-preview-tabs {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+}
+.offline-signup-preview-tabs button {
+  min-width: 144px;
+  height: 42px;
+  border: 1px solid #d5dceb;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #667085;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  transition: .22s ease;
+}
+.offline-signup-preview-tabs button.active {
+  border-color: rgba(37, 99, 235, 0.32);
+  background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(59,130,246,0.02));
+  color: #2563eb;
+  box-shadow: 0 10px 26px rgba(37,99,235,0.12);
+}
+.offline-signup-preview-tabs span {
+  color: #98a2b3;
+  font-size: 12px;
+}
+.offline-signup-settings-panel {
+  overflow: hidden;
+  border-color: #e3e8f2;
+  background:
+    radial-gradient(circle at top left, rgba(37,99,235,0.08), transparent 26%),
+    linear-gradient(180deg, #fcfdff 0%, #ffffff 100%);
+}
+.offline-signup-settings-shell {
+  display: grid;
+  gap: 22px;
+}
+.offline-signup-settings-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 24px;
+  align-items: start;
+}
+.offline-signup-settings-copy {
+  display: grid;
+  gap: 10px;
+}
+.offline-signup-settings-kicker {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.offline-signup-settings-panel .offline-setting-panel-head {
+  display: block;
+}
+.offline-signup-settings-panel .offline-setting-panel-head h3 {
+  margin-bottom: 10px;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+}
+.offline-signup-settings-panel .offline-setting-panel-head p {
+  max-width: 560px;
+  color: #667085;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.offline-signup-settings-aside {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border: 1px solid rgba(214, 223, 239, 0.9);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.9);
+}
+.offline-signup-settings-aside strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+}
+.offline-signup-settings-aside span {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.offline-signup-settings-body {
+  min-height: 360px;
+  padding: 6px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.offline-signup-settings-grid {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  justify-items: start;
+  min-height: 0;
+}
+.offline-signup-settings-body.single-mode .offline-signup-settings-grid {
+  max-width: 706px;
+}
+.offline-signup-settings-body.multi-mode .offline-signup-settings-grid {
+  max-width: 980px;
+}
+.offline-signup-settings-body .offline-signup-setting-list,
+.offline-signup-settings-grid .offline-setting-row {
+  background: transparent;
+}
+.offline-signup-settings-grid .offline-setting-row {
+  display: grid;
+  align-items: center;
+  min-height: 64px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid #e9edf5;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.88);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+}
+.offline-signup-settings-body.single-mode .offline-setting-row {
+  grid-template-columns: minmax(260px, 1fr) 236px;
+}
+.offline-signup-settings-body.multi-mode .offline-setting-row {
+  grid-template-columns: minmax(320px, 1fr) 236px;
+}
+.offline-signup-settings-grid .offline-setting-row > div:first-child {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.offline-signup-settings-grid .offline-setting-row strong {
+  color: #334155;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.offline-signup-settings-body.single-mode .offline-signup-single-label {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+}
+.offline-signup-settings-body.single-mode .offline-signup-single-label strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.offline-signup-settings-grid .offline-help-dot {
+  background: #667085;
+}
 .offline-setting-panel-head p {
   margin: 0;
   color: #8c8c8c;
@@ -23168,6 +23939,22 @@ body.manage-mode .attempt-bottom-bar {
   color: #595959;
   font-size: 15px;
   white-space: nowrap;
+}
+.offline-signup-setting-list.single-mode {
+  max-width: 520px;
+  min-height: 180px;
+  align-content: end;
+}
+.offline-signup-setting-list.single-mode .offline-setting-row {
+  grid-template-columns: 210px 236px;
+}
+.offline-signup-setting-list.multi-mode {
+  max-width: 920px;
+  min-height: 200px;
+  align-content: end;
+}
+.offline-signup-setting-list.multi-mode .offline-setting-row {
+  grid-template-columns: 240px 236px;
 }
 .offline-setting-row.emphasized {
   border-color: #d9c7ad;
@@ -23538,7 +24325,8 @@ body.manage-mode .attempt-bottom-bar {
   grid-template-columns: 184px minmax(0, 1fr);
   gap: 24px;
   padding: 14px 0;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: start;
+  border-bottom: none;
 }
 .offline-session-subsection {
   grid-column: 1 / -1;
@@ -23590,6 +24378,19 @@ body.manage-mode .attempt-bottom-bar {
   font-size: 14px;
   font-weight: 400;
 }
+.offline-session-signup-stop-rule {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  color: #595959;
+  font-size: 14px;
+  font-weight: 600;
+}
+.offline-session-stop-before-input {
+  width: 160px;
+}
 .offline-session-capacity-input,
 .offline-session-quantity-input,
 .offline-session-max-input,
@@ -23598,25 +24399,30 @@ body.manage-mode .attempt-bottom-bar {
 }
 .offline-session-capacity-input,
 .offline-session-quantity-input,
-.offline-session-max-input {
+.offline-session-max-input,
+.offline-session-stop-before-input {
   display: inline-grid;
   grid-template-columns: minmax(96px, 1fr) 46px;
-  width: 176px;
   height: 40px;
   overflow: hidden;
   border: 1px solid #d9d9d9;
   border-radius: 6px;
   background: #fff;
 }
+.offline-session-stop-before-input {
+  grid-template-columns: minmax(88px, 1fr) 52px;
+}
 .offline-session-capacity-input:focus-within,
 .offline-session-quantity-input:focus-within,
-.offline-session-max-input:focus-within {
+.offline-session-max-input:focus-within,
+.offline-session-stop-before-input:focus-within {
   border-color: #2f54eb;
   box-shadow: 0 0 0 2px rgba(47, 84, 235, .12);
 }
 .offline-session-capacity-input input,
 .offline-session-quantity-input input,
-.offline-session-max-input input {
+.offline-session-max-input input,
+.offline-session-stop-before-input input {
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -23631,7 +24437,8 @@ body.manage-mode .attempt-bottom-bar {
 }
 .offline-session-capacity-input .unit,
 .offline-session-quantity-input .unit,
-.offline-session-max-input .unit {
+.offline-session-max-input .unit,
+.offline-session-stop-before-input .unit {
   display: grid;
   place-items: center;
   min-width: 0;
@@ -23644,13 +24451,13 @@ body.manage-mode .attempt-bottom-bar {
 }
 .offline-session-capacity-config {
   display: grid;
-  gap: 0;
+  gap: 12px;
   max-width: 760px;
 }
 .offline-capacity-mode-row {
   display: flex;
   align-items: center;
-  min-height: 34px;
+  min-height: 40px;
 }
 .offline-global-signup-quantity .offline-capacity-mode-row {
   gap: 28px;
@@ -23670,12 +24477,12 @@ body.manage-mode .attempt-bottom-bar {
 .offline-capacity-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  min-height: 58px;
+  justify-content: flex-start;
+  gap: 16px;
+  min-height: 40px;
 }
 .offline-capacity-row + .offline-capacity-row {
-  border-top: 1px solid #f0f0f0;
+  border-top: none;
 }
 .offline-capacity-row > div:first-child {
   display: grid;
@@ -23685,6 +24492,7 @@ body.manage-mode .attempt-bottom-bar {
   color: #595959;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
 }
 .offline-capacity-row span {
   color: #8c8c8c;
@@ -23875,26 +24683,44 @@ body.manage-mode .attempt-bottom-bar {
 }
 .offline-attendance-config {
   display: grid;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid #ededed;
-  border-radius: 6px;
-  background: #fff;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 .offline-attendance-config.hidden {
   display: none;
 }
+.offline-checkout-config {
+  padding: 0;
+}
 .offline-attendance-card {
   display: grid;
   gap: 14px;
-  padding: 18px;
-  border: 1px solid #e8e8e8;
-  border-radius: 6px;
-  background: #fff;
+  padding: 22px 24px;
+  border: 1px solid #e6ebf2;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
 }
 .offline-attendance-card-muted {
   background: #fffdf9;
   border-color: #eadfce;
+}
+.offline-attendance-card-compact {
+  gap: 12px;
+  padding: 22px 24px;
+  border-color: #eceff5;
+  background: #fcfdff;
+}
+.offline-checkout-card {
+  gap: 28px;
+  padding: 22px 24px 20px;
+  border-color: #e4eaf3;
+  border-radius: 16px;
+  background: #fbfcff;
 }
 .offline-attendance-card-head {
   display: flex;
@@ -23902,12 +24728,28 @@ body.manage-mode .attempt-bottom-bar {
   justify-content: space-between;
   gap: 16px;
 }
+.offline-attendance-simple-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.offline-checkout-card .offline-attendance-simple-head {
+  align-items: flex-start;
+}
 .offline-attendance-card-head p {
   margin: 5px 0 0;
   color: #8c8c8c;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.6;
+}
+.offline-attendance-simple-head p {
+  margin: 4px 0 0;
+  color: #8c8c8c;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
 }
 .offline-attendance-title {
   color: #1f1f1f;
@@ -23936,6 +24778,80 @@ body.manage-mode .attempt-bottom-bar {
 }
 .offline-attendance-field.compact {
   max-width: 360px;
+}
+.offline-attendance-field-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: none;
+}
+.offline-attendance-field-inline > span {
+  flex-shrink: 0;
+}
+.offline-checkout-field {
+  justify-content: flex-start;
+  gap: 28px;
+  max-width: 520px;
+}
+.offline-checkout-field > span {
+  min-width: 116px;
+  color: #3f3f46;
+}
+.offline-checkout-field .offline-attendance-inline {
+  gap: 14px;
+  flex-wrap: nowrap;
+}
+.offline-setting-panel-head p strong {
+  color: #6b7280;
+  font-weight: 700;
+}
+.offline-checkout-code-modal {
+  display: grid;
+  gap: 16px;
+}
+.offline-checkout-code-intro {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.offline-checkout-code-list {
+  display: grid;
+  gap: 12px;
+}
+.offline-checkout-code-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid #e7ebf3;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.92));
+}
+.offline-checkout-code-meta {
+  display: grid;
+  gap: 4px;
+}
+.offline-checkout-code-meta strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 800;
+}
+.offline-checkout-code-meta span {
+  color: #64748b;
+  font-size: 12px;
+}
+.offline-checkout-code-value {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f4f7ff;
+  color: #2563eb;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
 }
 .offline-attendance-row {
   display: grid;
@@ -23971,6 +24887,9 @@ body.manage-mode .attempt-bottom-bar {
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
+}
+.offline-attendance-options {
+  gap: 12px;
 }
 .offline-number-stepper {
   display: grid;
@@ -24036,11 +24955,11 @@ body.manage-mode .attempt-bottom-bar {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 34px;
-  padding: 6px 10px;
-  border: 1px solid #edf0f5;
-  border-radius: 6px;
-  background: #fff;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #e7ebf3;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.88);
   color: #595959;
   font-size: 14px;
   font-weight: 700;

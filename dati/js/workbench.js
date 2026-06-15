@@ -58,9 +58,8 @@ const ACTIVITY_TYPES = [
         key: 'vote', title: '投票', desc: '作品投票、人物评选、主题投票活动',
         color: '#00BCD4', created: 15, running: 3, layout: 'col',
         links: [
-            { label: '活动列表', page: 'activity-list' },
-            { label: '投票管理' },
-            { label: '结果统计' }
+            { label: '活动列表', page: 'vote-activity-list' },
+            { label: '数据概况', page: 'vote-activity-data' }
         ]
     },
     {

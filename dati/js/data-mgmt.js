@@ -9,8 +9,14 @@ registerPage('registration', () => {
     return `
     ${pageHeader('报名情况', '活动管理 / [当前活动] / 报名情况')}
     <section class="card registration-card">
+        <div class="registration-tabs">
+            <button class="active">小学组</button>
+            <button>初中组</button>
+            <button>高中组</button>
+            <button>教师组</button>
+        </div>
         <div class="registration-filter">
-            <label><span>用户编号</span><input class="form-control" placeholder="请输入用户编号"></label>
+            <label><span>文遇号</span><input class="form-control" placeholder="请输入文遇号"></label>
             <label><span>答题者</span><input class="form-control" placeholder="请输入答题者姓名"></label>
             <label><span>手机号码</span><input class="form-control" placeholder="请输入手机号码"></label>
             <label><span>答题状态</span>
@@ -32,17 +38,11 @@ registerPage('registration', () => {
                 </div>
             </div>
         </div>
-        <div class="registration-tabs">
-            <button class="active">小学组</button>
-            <button>初中组</button>
-            <button>高中组</button>
-            <button>教师组</button>
-        </div>
         <div class="registration-table-wrap">
             <table class="registration-table">
                 <thead>
                     <tr>
-                        <th>序号</th><th>用户编号</th><th>所属组别</th><th>答题者</th><th>手机号码</th><th>选送单位</th><th>报名报表字段</th><th>报名时间</th><th>答题状态</th>
+                        <th>序号</th><th>文遇号</th><th>所属组别</th><th>答题者</th><th>手机号码</th><th>选送单位</th><th>报名报表字段</th><th>报名时间</th><th>答题状态</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -67,204 +67,524 @@ registerPage('registration', () => {
 });
 
 const REGISTRATION_ROWS = [
-    { userNo: 'U001', group: '小学组', name: '张三', phone: '138****1234', org: '上海市图书馆', registeredAt: '2026-06-10 10:10', answerStatus: '未答题' },
-    { userNo: 'U002', group: '小学组', name: '李四', phone: '139****5678', org: '复旦大学图书馆', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
-    { userNo: 'U003', group: '初中组', name: '王五', phone: '136****9012', org: '长宁区图书馆', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
-    { userNo: 'U004', group: '高中组', name: '赵六', phone: '137****3456', org: '华东政法大学图书馆', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
-    { userNo: 'U005', group: '小学组', name: '孙七', phone: '135****7890', org: '高中部选送单位', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
-    { userNo: 'U006', group: '初中组', name: '周八', phone: '134****2345', org: '徐汇区文化馆', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
-    { userNo: 'U007', group: '高中组', name: '吴九', phone: '133****6789', org: '教师发展中心', registeredAt: '2026-06-10 10:10', answerStatus: '未答题' }
+    { userNo: '10001', group: '小学组', name: '张三', phone: '138****1234', org: '上海市图书馆', registeredAt: '2026-06-10 10:10', answerStatus: '未答题' },
+    { userNo: '10002', group: '小学组', name: '李四', phone: '139****5678', org: '复旦大学图书馆', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
+    { userNo: '10003', group: '初中组', name: '王五', phone: '136****9012', org: '长宁区图书馆', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
+    { userNo: '10004', group: '高中组', name: '赵六', phone: '137****3456', org: '华东政法大学图书馆', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
+    { userNo: '10005', group: '小学组', name: '孙七', phone: '135****7890', org: '高中部选送单位', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
+    { userNo: '10006', group: '初中组', name: '周八', phone: '134****2345', org: '徐汇区文化馆', registeredAt: '2026-06-10 10:10', answerStatus: '答题中' },
+    { userNo: '10007', group: '高中组', name: '吴九', phone: '133****6789', org: '教师发展中心', registeredAt: '2026-06-10 10:10', answerStatus: '未答题' }
 ];
 
-const OFFLINE_REGISTRATION_REVIEW_ENABLED = true;
-const OFFLINE_REGISTRATION_CAPACITY = 12;
-let currentOfflineRegistrationGroupId = 'reader';
+let currentOfflineRegistrationGroupId = 'group1';
+let currentOfflineRegistrationSessionId = 'session-0626';
+let currentOfflineRegistrationFilters = getDefaultOfflineRegistrationFilters();
+let currentOfflineSigninStatsFilters = getDefaultOfflineSigninStatsFilters();
+let currentOfflineUnitDataFilters = getDefaultOfflineUnitDataFilters();
+let currentOfflineCheckinStaffFilters = getDefaultOfflineCheckinStaffFilters();
 const OFFLINE_REGISTRATION_ROWS = [
-    { id: 'offline-signup-001', signupNo: 'BM20260626001', userNo: 'U001', groupId: 'reader', name: '林悦', phone: '138****1234', group: '普通读者', session: '6月26日 14:00 讲座沙龙', quantity: 1, org: '广州市图书馆', formSummary: '年龄：32；同行：0人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '未签到', registeredAt: '2026-06-20 10:10:00', auditTrail: [
+    { id: 'offline-signup-001', signupNo: 'BM20260626001', userNo: 'U001', wenyuNo: '123456', groupId: 'reader', name: '林悦', phone: '138****1234', group: '普通读者', sessionId: 'session-0626', session: '6月26日 14:00 讲座沙龙', quantity: 1, org: '广州市图书馆', formSummary: '年龄：32；同行：0人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '未签到', registeredAt: '2026-06-20 10:10:00', auditTrail: [
         { type: 'submit', title: '提交报名', desc: '用户提交活动报名信息', time: '2026-06-20 10:10:00', operator: '林悦' },
         { type: 'audit', title: '待审核 → 已通过', desc: '管理员审核通过，报名成功', time: '2026-06-20 10:16:00', operator: '管理员 周贺贺' },
         { type: 'notice', title: '已发送：报名确认', desc: '站内信与短信通知已发送', time: '2026-06-20 10:16:30', operator: '系统' }
     ] },
-    { id: 'offline-signup-002', signupNo: 'BM20260626002', userNo: 'U002', groupId: 'reader', name: '陈安', phone: '139****5678', group: '普通读者', session: '6月26日 14:00 讲座沙龙', quantity: 2, org: '越秀区文化馆', formSummary: '年龄：28；同行：1人', signupStatus: '待审核', auditStatus: '待审核', checkinStatus: '未签到', registeredAt: '2026-06-20 10:18:00', auditTrail: [
+    { id: 'offline-signup-001b', signupNo: 'BM20260626001', userNo: 'U001', wenyuNo: '123456', groupId: 'reader', name: '林悦', phone: '138****1234', group: '普通读者', sessionId: 'session-0627', session: '6月27日 10:00 亲子共读', quantity: 1, org: '广州市图书馆', formSummary: '年龄：32；同行：0人', signupStatus: '待审核', auditStatus: '待审核', checkinStatus: '未签到', registeredAt: '2026-06-20 10:10:00', auditTrail: [
+        { type: 'submit', title: '提交报名', desc: '用户追加报名亲子共读场次', time: '2026-06-20 10:12:00', operator: '林悦' },
+        { type: 'audit', title: '已进入审核队列', desc: '该场次开启报名审核，需管理员通过后才算报名成功', time: '2026-06-20 10:18:00', operator: '系统' }
+    ] },
+    { id: 'offline-signup-001c', signupNo: 'BM20260626001', userNo: 'U001', wenyuNo: '123456', groupId: 'reader', name: '林悦', phone: '138****1234', group: '普通读者', sessionId: 'session-0628', session: '6月28日 15:30 志愿服务', quantity: 2, org: '广州市图书馆', formSummary: '年龄：32；同行：1人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '未签到', registeredAt: '2026-06-20 10:10:00', auditTrail: [
+        { type: 'submit', title: '提交报名', desc: '用户追加报名志愿服务场次', time: '2026-06-20 10:14:00', operator: '林悦' },
+        { type: 'audit', title: '待审核 → 已通过', desc: '管理员审核通过', time: '2026-06-20 10:19:00', operator: '管理员 周贺贺' }
+    ] },
+    { id: 'offline-signup-002', signupNo: 'BM20260626002', userNo: 'U002', wenyuNo: '234567', groupId: 'reader', name: '陈安', phone: '139****5678', group: '普通读者', sessionId: 'session-0626', session: '6月26日 14:00 讲座沙龙', quantity: 2, org: '越秀区文化馆', formSummary: '年龄：28；同行：1人', signupStatus: '待审核', auditStatus: '待审核', checkinStatus: '未签到', registeredAt: '2026-06-20 10:18:00', auditTrail: [
         { type: 'submit', title: '提交报名', desc: '用户提交活动报名信息，等待管理员审核', time: '2026-06-20 10:18:00', operator: '陈安' },
         { type: 'audit', title: '已进入审核队列', desc: '当前报名需审核后才算报名成功', time: '2026-06-20 10:18:03', operator: '系统' }
     ] },
-    { id: 'offline-signup-003', signupNo: 'BM20260626003', userNo: 'U003', groupId: 'family', name: '黄嘉', phone: '136****9012', group: '亲子家庭', session: '6月26日 14:00 讲座沙龙', quantity: 3, org: '天河区图书馆', formSummary: '儿童年龄：8岁；同行：2人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '已签到', registeredAt: '2026-06-20 10:25:00', auditTrail: [
+    { id: 'offline-signup-003', signupNo: 'BM20260626003', userNo: 'U003', wenyuNo: '345678', groupId: 'family', name: '黄嘉', phone: '136****9012', group: '亲子家庭', sessionId: 'session-0627', session: '6月27日 10:00 亲子共读', quantity: 3, org: '天河区图书馆', formSummary: '儿童年龄：8岁；同行：2人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '已签到', registeredAt: '2026-06-20 10:25:00', auditTrail: [
         { type: 'submit', title: '提交报名', desc: '用户提交亲子家庭报名信息', time: '2026-06-20 10:25:00', operator: '黄嘉' },
         { type: 'audit', title: '待审核 → 已通过', desc: '符合活动参与要求', time: '2026-06-20 10:31:00', operator: '管理员 林月' },
         { type: 'checkin', title: '现场签到成功', desc: '工作人员扫码核验完成签到', time: '2026-06-26 13:42:10', operator: '签到员 叶青' }
     ] },
-    { id: 'offline-signup-004', signupNo: 'BM20260626004', userNo: 'U004', groupId: 'reader', name: '周宁', phone: '137****3456', group: '普通读者', session: '6月26日 14:00 讲座沙龙', quantity: 1, org: '广东财经大学图书馆', formSummary: '年龄：41；同行：0人', signupStatus: '未通过', auditStatus: '已拒绝', checkinStatus: '-', registeredAt: '2026-06-20 10:40:00', auditTrail: [
+    { id: 'offline-signup-003b', signupNo: 'BM20260626003', userNo: 'U003', wenyuNo: '345678', groupId: 'family', name: '黄嘉', phone: '136****9012', group: '亲子家庭', sessionId: 'session-0626', session: '6月26日 14:00 讲座沙龙', quantity: 2, org: '天河区图书馆', formSummary: '儿童年龄：8岁；同行：1人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '未签到', registeredAt: '2026-06-20 10:25:00', auditTrail: [
+        { type: 'submit', title: '提交报名', desc: '用户追加报名讲座沙龙场次', time: '2026-06-20 10:27:00', operator: '黄嘉' },
+        { type: 'audit', title: '待审核 → 已通过', desc: '符合活动参与要求', time: '2026-06-20 10:33:00', operator: '管理员 林月' }
+    ] },
+    { id: 'offline-signup-003c', signupNo: 'BM20260626003', userNo: 'U003', wenyuNo: '345678', groupId: 'family', name: '黄嘉', phone: '136****9012', group: '亲子家庭', sessionId: 'session-0628', session: '6月28日 15:30 志愿服务', quantity: 1, org: '天河区图书馆', formSummary: '儿童年龄：8岁；同行：0人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '未签到', registeredAt: '2026-06-20 10:25:00', auditTrail: [
+        { type: 'submit', title: '提交报名', desc: '用户追加报名志愿服务场次', time: '2026-06-20 10:29:00', operator: '黄嘉' },
+        { type: 'audit', title: '待审核 → 已通过', desc: '符合活动参与要求', time: '2026-06-20 10:34:00', operator: '管理员 林月' }
+    ] },
+    { id: 'offline-signup-004', signupNo: 'BM20260626004', userNo: 'U004', wenyuNo: '456789', groupId: 'reader', name: '周宁', phone: '137****3456', group: '普通读者', sessionId: 'session-0626', session: '6月26日 14:00 讲座沙龙', quantity: 1, org: '广东财经大学图书馆', formSummary: '年龄：41；同行：0人', signupStatus: '未通过', auditStatus: '已拒绝', checkinStatus: '-', registeredAt: '2026-06-20 10:40:00', auditTrail: [
         { type: 'submit', title: '提交报名', desc: '用户提交活动报名信息', time: '2026-06-20 10:40:00', operator: '周宁' },
         { type: 'audit', title: '待审核 → 未通过', desc: '报名信息不完整，已拒绝本次报名', time: '2026-06-20 11:05:00', operator: '管理员 周贺贺' },
         { type: 'notice', title: '已发送：报名被拒绝', desc: '通知用户补充信息后重新提交', time: '2026-06-20 11:05:30', operator: '系统' }
     ] },
-    { id: 'offline-signup-005', signupNo: 'BM20260626005', userNo: 'U005', groupId: 'family', name: '许青', phone: '135****7890', group: '亲子家庭', session: '6月26日 14:00 讲座沙龙', quantity: 2, org: '海珠区少年宫', formSummary: '儿童年龄：10岁；同行：1人', signupStatus: '候补', auditStatus: '已通过', checkinStatus: '未签到', registeredAt: '2026-06-20 11:12:00', auditTrail: [
+    { id: 'offline-signup-005', signupNo: 'BM20260626005', userNo: 'U005', wenyuNo: '567890', groupId: 'family', name: '许青', phone: '135****7890', group: '亲子家庭', sessionId: 'session-0627', session: '6月27日 10:00 亲子共读', quantity: 2, org: '海珠区少年宫', formSummary: '儿童年龄：10岁；同行：1人', signupStatus: '候补', auditStatus: '已通过', checkinStatus: '未签到', registeredAt: '2026-06-20 11:12:00', auditTrail: [
         { type: 'submit', title: '提交报名', desc: '用户提交报名时当前名额已满', time: '2026-06-20 11:12:00', operator: '许青' },
         { type: 'audit', title: '待审核 → 已通过', desc: '审核通过，进入候补名单', time: '2026-06-20 11:20:00', operator: '管理员 林月' }
     ] },
-    { id: 'offline-signup-006', signupNo: 'BM20260626006', userNo: 'U006', groupId: 'volunteer', name: '赵明', phone: '134****2345', group: '志愿者', session: '6月26日 14:00 讲座沙龙', quantity: 1, org: '徐汇区文化馆', formSummary: '服务经验：有', signupStatus: '已取消', auditStatus: '已通过', checkinStatus: '-', registeredAt: '2026-06-20 11:28:00', auditTrail: [
+    { id: 'offline-signup-006', signupNo: 'BM20260626006', userNo: 'U006', wenyuNo: '678901', groupId: 'volunteer', name: '赵明', phone: '134****2345', group: '志愿者', sessionId: 'session-0628', session: '6月28日 15:30 志愿服务', quantity: 1, org: '徐汇区文化馆', formSummary: '服务经验：有', signupStatus: '已取消', auditStatus: '已通过', checkinStatus: '-', registeredAt: '2026-06-20 11:28:00', auditTrail: [
         { type: 'submit', title: '提交报名', desc: '用户提交志愿者报名信息', time: '2026-06-20 11:28:00', operator: '赵明' },
         { type: 'audit', title: '待审核 → 已通过', desc: '审核通过', time: '2026-06-20 11:36:00', operator: '管理员 周贺贺' },
         { type: 'cancel', title: '用户取消报名', desc: '用户在报名截止前主动取消', time: '2026-06-21 09:12:00', operator: '赵明' }
     ] }
 ];
+const OFFLINE_REGISTRATION_SESSIONS = [
+    { id: 'session-0626', title: '讲座沙龙', time: '6月26日 14:00-16:00', duration: '2小时', status: '已结束', reviewRequired: false, capacityText: '有效报名 4/60 · 剩余 56' },
+    { id: 'session-0627', title: '亲子共读', time: '6月27日 10:00-11:30', duration: '1.5小时', status: '进行中', reviewRequired: true, capacityText: '已通过 4/60 · 待审核 3' },
+    { id: 'session-0628', title: '志愿服务', time: '6月28日 15:30-17:30', duration: '2小时', status: '未开始', reviewRequired: false, capacityText: '有效报名 5/80 · 剩余 75' }
+];
+
+function getDefaultOfflineRegistrationFilters() {
+    return {
+        signupStatus: '全部状态',
+        auditStatus: '全部状态',
+        checkinStatus: '全部状态',
+        checkoutStatus: '全部状态',
+        wenyuNo: '',
+        participantName: '',
+        name: '',
+        participantPhone: '',
+        registrantPhone: '',
+        org: '',
+        registeredAt: ''
+    };
+}
+
+function getDefaultOfflineSigninStatsFilters() {
+    return {
+        groupId: 'all',
+        sessionId: 'all',
+        signupStatus: '全部状态',
+        checkinStatus: '全部状态',
+        org: ''
+    };
+}
+
+function getDefaultOfflineUnitDataFilters() {
+    return {
+        groupId: getOfflineUnitDataDefaultGroupId(),
+        sessionId: 'all',
+        org: ''
+    };
+}
+
+function getOfflineRegistrationLatestAuditEvent(row, matcher) {
+    const trail = Array.isArray(row?.auditTrail) ? row.auditTrail : [];
+    const matched = trail.filter(item => matcher(item));
+    if (!matched.length) return null;
+    return matched.sort((a, b) => new Date(String(b.time || '').replace(/-/g, '/')) - new Date(String(a.time || '').replace(/-/g, '/')))[0];
+}
+
+function getOfflineRegistrationLatestCheckinEvent(row) {
+    return getOfflineRegistrationLatestAuditEvent(row, item => ['checkin', 'undo-checkin'].includes(item.type));
+}
+
+function getOfflineRegistrationLatestCheckoutEvent(row) {
+    return getOfflineRegistrationLatestAuditEvent(row, item => ['checkout', 'undo-checkout'].includes(item.type));
+}
+
+function hasOfflineRegistrationActiveCheckin(row) {
+    if (row.checkinStatus === '已签到') return true;
+    const latestEvent = getOfflineRegistrationLatestCheckinEvent(row);
+    return latestEvent ? latestEvent.type === 'checkin' : false;
+}
+
+function hasOfflineRegistrationCheckout(row) {
+    const latestEvent = getOfflineRegistrationLatestCheckoutEvent(row);
+    return latestEvent ? latestEvent.type === 'checkout' : false;
+}
+
+function getOfflineRegistrationMoreActions(row) {
+    const checkedIn = hasOfflineRegistrationActiveCheckin(row);
+    const checkedOut = hasOfflineRegistrationCheckout(row);
+    if (!checkedIn) {
+        return [{ action: 'checkin', label: '补签到' }];
+    }
+    if (!checkedOut) {
+        return [
+            { action: 'checkout', label: '补签退' },
+            { action: 'undo-checkin', label: '撤销签到', danger: true }
+        ];
+    }
+    return [{ action: 'undo-checkout', label: '撤销签退', danger: true }];
+}
+
+function getOfflineUnitDataDefaultGroupId() {
+    return getOfflineRegistrationGroupTabs().slice(1)[0]?.id || '';
+}
+
+function getDefaultOfflineCheckinStaffFilters() {
+    return {
+        name: '',
+        phone: ''
+    };
+}
+
+function refreshOfflinePage(pageId = currentPage) {
+    navigateTo(pageId, {
+        params: currentPageParams,
+        source: currentPageSource,
+        refresh: true,
+        reuseTabKey: activeTabKey
+    });
+}
 
 function renderOfflineRegistrationPage() {
     const rows = OFFLINE_REGISTRATION_ROWS;
-    const groupTabs = getOfflineRegistrationGroupTabs(rows);
+    const groupTabs = getOfflineRegistrationGroupTabs();
+    const sessionTabs = getOfflineRegistrationSessionTabs();
     if (!groupTabs.some(tab => tab.id === currentOfflineRegistrationGroupId)) {
         currentOfflineRegistrationGroupId = groupTabs[0]?.id || 'all';
     }
-    const filteredRows = rows.filter(row => row.groupId === currentOfflineRegistrationGroupId);
-    const progressStats = getOfflineRegistrationProgressStats(rows);
-    const progressSegments = getOfflineRegistrationProgressSegments(progressStats);
-    const exportLabel = groupTabs.length > 1 ? '导出当前组别' : '导出';
+    if (!sessionTabs.some(tab => tab.id === currentOfflineRegistrationSessionId)) {
+        currentOfflineRegistrationSessionId = sessionTabs[0]?.id || OFFLINE_REGISTRATION_SESSIONS[0]?.id || '';
+    }
+    const filteredRows = rows.filter(row => {
+        const matchGroup = currentOfflineRegistrationGroupId === 'group1' || row.groupId === currentOfflineRegistrationGroupId;
+        const matchSession = row.sessionId === currentOfflineRegistrationSessionId;
+        return matchGroup && matchSession;
+    });
+    const currentSessionMeta = getOfflineRegistrationSessionMeta(currentOfflineRegistrationSessionId);
+    const isReviewFreeSession = currentSessionMeta.reviewRequired === false;
+    const showAuditStatus = shouldShowOfflineRegistrationAuditColumn(currentSessionMeta);
+    const displayRows = filteredRows.filter(row => matchesOfflineRegistrationFilters(row, isReviewFreeSession));
+    const exportLabel = groupTabs.length > 1 ? '导出当前场次' : '导出';
+    const listTitle = getOfflineRegistrationListTitle(groupTabs, sessionTabs);
     return `
     <div class="offline-registration-page">
-        <section class="card offline-registration-overview">
-            <div class="offline-registration-overview-head">
-                <div>
-                    <h2>概况</h2>
-                    <p>展示当前活动有效报名进度，取消报名不纳入进度统计。</p>
-                </div>
-                <div class="offline-registration-actions">
-                    ${OFFLINE_REGISTRATION_REVIEW_ENABLED ? '<button class="btn btn-outline btn-sm">批量审核</button>' : ''}
-                    <button class="btn btn-outline btn-sm">发送签到提醒</button>
-                    <button class="btn btn-primary btn-sm">${exportLabel}</button>
-                </div>
-            </div>
-            <div class="offline-registration-progress">
-                <div class="offline-registration-progress-top">
-                    <strong>${progressStats.joined}<small>参加</small></strong>
-                </div>
-                <div class="offline-registration-progress-track">
-                    ${progressSegments.filter(item => item.value > 0).map(item => `
-                        <i class="${item.key}" style="width:${Math.min(100, Math.round(item.value / OFFLINE_REGISTRATION_CAPACITY * 1000) / 10)}%" title="${item.label} ${item.value} 人"></i>
-                    `).join('')}
-                </div>
-                <div class="offline-registration-progress-meta">
-                    ${renderOfflineRegistrationProgressMeta(progressStats)}
-                </div>
-            </div>
-        </section>
-
         <section class="card registration-card offline-registration-card">
-            <div class="offline-registration-filter">
-                <label><span>报名编号</span><input class="form-control" placeholder="请输入报名编号"></label>
-                <label><span>报名人</span><input class="form-control" placeholder="请输入姓名"></label>
-                <label><span>手机号码</span><input class="form-control" placeholder="请输入手机号码"></label>
-                <label><span>报名状态</span><select class="form-control"><option>全部状态</option><option>已报名</option><option>待审核</option><option>候补</option><option>未通过</option><option>已取消</option></select></label>
-                <label><span>审核状态</span><select class="form-control"><option>全部审核状态</option><option>待审核</option><option>已通过</option><option>已拒绝</option></select></label>
-                <label><span>签到状态</span><select class="form-control"><option>全部签到状态</option><option>未签到</option><option>已签到</option></select></label>
-                <label><span>报名场次</span><select class="form-control"><option>全部场次</option><option>6月26日 14:00 讲座沙龙</option></select></label>
-                <label><span>组织单位</span><input class="form-control" placeholder="请输入组织单位"></label>
-                <label><span>报名时间</span><input class="form-control" placeholder="开始时间 - 结束时间"></label>
-                <div class="registration-actions">
-                    <button class="btn btn-primary">查询</button>
-                    <button class="btn btn-outline">重置</button>
-                    <button class="btn btn-outline">${exportLabel}</button>
+            <div class="offline-registration-tabs-section">
+                <div class="offline-registration-group-tabs">
+                    ${groupTabs.map(tab => renderOfflineRegistrationGroupTab(tab, tab.id === currentOfflineRegistrationGroupId)).join('')}
                 </div>
             </div>
-            <div class="offline-registration-group-tabs">
-                ${groupTabs.map(tab => renderOfflineRegistrationGroupTab(tab, tab.id === currentOfflineRegistrationGroupId)).join('')}
+            <div class="offline-registration-tabs-section">
+                <div class="offline-registration-session-tabs">
+                    ${sessionTabs.map(tab => renderOfflineRegistrationSessionTab(tab, tab.id === currentOfflineRegistrationSessionId)).join('')}
+                </div>
             </div>
-            <div class="registration-table-wrap">
-                <table class="registration-table offline-registration-table">
-                    <thead>
-                        <tr>
-                            <th>序号</th>
-                            <th>报名编号</th>
-                            <th>报名人</th>
-                            <th>手机号码</th>
-                            <th>所属组别</th>
-                            <th>报名场次</th>
-                            <th>报名名额</th>
-                            <th>组织单位</th>
-                            <th>报名表字段</th>
-                            <th>报名状态</th>
-                            <th>审核状态</th>
-                            <th>签到状态</th>
-                            <th>报名时间</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filteredRows.map((row, index) => `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td><strong>${row.signupNo}</strong><span>${row.userNo}</span></td>
-                                <td>${escapeHtml(row.name)}</td>
-                                <td>${row.phone}</td>
-                                <td>${registrationGroupBadge(row.group)}</td>
-                                <td>${escapeHtml(row.session)}</td>
-                                <td>${row.quantity} 人</td>
-                                <td>${escapeHtml(row.org)}</td>
-                                <td>${escapeHtml(row.formSummary)}</td>
-                                <td>${offlineRegistrationStatusBadge(row.signupStatus)}</td>
-                                <td>${offlineAuditStatusBadge(row.auditStatus)}</td>
-                                <td>${offlineCheckinStatusBadge(row.checkinStatus)}</td>
-                                <td>${formatDateTimeSecond(row.registeredAt)}</td>
-                                <td>
-                                    <span class="action-link" onclick="openOfflineRegistrationAudit('${row.id}')">审核记录</span>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+            <div class="offline-registration-filter-panel">
+                <div class="offline-registration-filter">
+                    <label class="offline-registration-status-filter"><span>报名状态</span><select id="offlineRegistrationSignupStatus" class="form-control"><option ${currentOfflineRegistrationFilters.signupStatus === '全部状态' ? 'selected' : ''}>全部</option><option ${currentOfflineRegistrationFilters.signupStatus === '已报名' ? 'selected' : ''}>已报名</option><option ${currentOfflineRegistrationFilters.signupStatus === '已取消' ? 'selected' : ''}>已取消</option></select></label>
+                    <label><span>审核状态</span><select id="offlineRegistrationAuditStatus" class="form-control"><option ${currentOfflineRegistrationFilters.auditStatus === '全部状态' ? 'selected' : ''}>全部状态</option><option ${currentOfflineRegistrationFilters.auditStatus === '待审核' ? 'selected' : ''}>待审核</option><option ${currentOfflineRegistrationFilters.auditStatus === '已通过' ? 'selected' : ''}>已通过</option><option ${currentOfflineRegistrationFilters.auditStatus === '已驳回' ? 'selected' : ''}>已驳回</option></select></label>
+                    <label><span>签到状态</span><select id="offlineRegistrationCheckinStatus" class="form-control"><option ${currentOfflineRegistrationFilters.checkinStatus === '全部状态' ? 'selected' : ''}>全部状态</option><option ${currentOfflineRegistrationFilters.checkinStatus === '已签到' ? 'selected' : ''}>已签到</option><option ${currentOfflineRegistrationFilters.checkinStatus === '未签到' ? 'selected' : ''}>未签到</option></select></label>
+                    <label><span>签退状态</span><select id="offlineRegistrationCheckoutStatus" class="form-control"><option ${currentOfflineRegistrationFilters.checkoutStatus === '全部状态' ? 'selected' : ''}>全部状态</option><option ${currentOfflineRegistrationFilters.checkoutStatus === '已签退' ? 'selected' : ''}>已签退</option><option ${currentOfflineRegistrationFilters.checkoutStatus === '未签退' ? 'selected' : ''}>未签退</option></select></label>
+                    <label><span>文遇号</span><input id="offlineRegistrationWenyuNo" class="form-control" placeholder="请输入报名编号" value="${escapeHtml(currentOfflineRegistrationFilters.wenyuNo)}"></label>
+                    <label><span>参与人</span><input id="offlineRegistrationParticipantName" class="form-control" placeholder="请输入参与人姓名" value="${escapeHtml(currentOfflineRegistrationFilters.participantName)}"></label>
+                    <label><span>报名人</span><input id="offlineRegistrationName" class="form-control" placeholder="请输入报名人姓名" value="${escapeHtml(currentOfflineRegistrationFilters.name)}"></label>
+                    <label><span>报名人手机号</span><input id="offlineRegistrationRegistrantPhone" class="form-control" placeholder="请输入报名人手机号" value="${escapeHtml(currentOfflineRegistrationFilters.registrantPhone)}"></label>
+                    <label><span>参与人手机号</span><input id="offlineRegistrationParticipantPhone" class="form-control" placeholder="请输入参与人手机号" value="${escapeHtml(currentOfflineRegistrationFilters.participantPhone)}"></label>
+                    <label><span>选送单位</span><input id="offlineRegistrationOrg" class="form-control" placeholder="请输入选送单位" value="${escapeHtml(currentOfflineRegistrationFilters.org)}"></label>
+                    <label><span>报名时间</span><input id="offlineRegistrationRegisteredAt" class="form-control" placeholder="开始时间 - 结束时间" value="${escapeHtml(currentOfflineRegistrationFilters.registeredAt)}"></label>
+                    <div class="registration-actions">
+                        <button class="btn btn-primary" onclick="applyOfflineRegistrationFilters()">查询</button>
+                        <button class="btn btn-outline" onclick="resetOfflineRegistrationFilters()">重置</button>
+                        <button class="btn btn-outline" onclick="notifyOfflineRegistration('${exportLabel}任务已创建')">${exportLabel}</button>
+                    </div>
+                </div>
             </div>
-            ${renderStandardPagination(filteredRows.length)}
+            <div class="offline-registration-list-section">
+                <div class="offline-registration-list-head">
+                    <strong>${escapeHtml(listTitle)}</strong>
+                </div>
+                <div class="offline-registration-batchbar">
+                    <div class="text-muted">
+                        已选 <strong id="offlineRegistrationSelectedCount">0</strong> 人
+                    </div>
+                    <div class="offline-registration-batchbar-actions">
+                        ${isReviewFreeSession ? '' : '<button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationBatchAction(\'approve\')">通过</button>'}
+                        ${isReviewFreeSession ? '' : '<button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationBatchAction(\'reject\')">驳回</button>'}
+                        <button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationImportModal()">导入名单</button>
+                        <button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationBatchAction('cancel')">取消报名</button>
+                        <button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationBatchAction('block')">拉黑</button>
+                    </div>
+                </div>
+                <div class="registration-table-wrap offline-registration-table-wrap">
+                    <table class="registration-table offline-registration-table">
+                        <thead>
+                            ${renderOfflineRegistrationDetailHead(showAuditStatus)}
+                        </thead>
+                        <tbody>
+                            ${displayRows.map((row, index) => renderOfflineRegistrationDetailRow(row, index, isReviewFreeSession, showAuditStatus)).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${renderStandardPagination(displayRows.length)}
+            </div>
         </section>
     </div>`;
 }
 
-function getOfflineRegistrationGroupTabs(rows) {
-    const groups = Array.from(new Map(rows.map(row => [row.groupId, row.group])).entries());
-    return groups.map(([id, label]) => ({ id, label }));
-}
-
-function getOfflineRegistrationProgressStats(rows) {
-    return {
-        joined: sumOfflineRegistrationQuantity(rows, row => row.signupStatus === '已报名'),
-        pending: sumOfflineRegistrationQuantity(rows, row => row.auditStatus === '待审核'),
-        checked: sumOfflineRegistrationQuantity(rows, row => row.checkinStatus === '已签到'),
-        waitlisted: sumOfflineRegistrationQuantity(rows, row => row.signupStatus === '候补'),
-        rejected: sumOfflineRegistrationQuantity(rows, row => row.signupStatus === '未通过')
-    };
-}
-
-function getOfflineRegistrationProgressSegments(stats) {
+function getOfflineRegistrationGroupTabs() {
     return [
-        { key: 'joined', label: '参加', value: stats.joined },
-        { key: 'pending', label: '待审核', value: stats.pending },
-        { key: 'waitlisted', label: '候补', value: stats.waitlisted },
-        { key: 'rejected', label: '不参加', value: stats.rejected }
+        { id: 'group1', label: '组别一' },
+        { id: 'reader', label: '普通读者' },
+        { id: 'family', label: '亲子家庭' },
+        { id: 'volunteer', label: '志愿者' }
     ];
-}
-
-function renderOfflineRegistrationProgressMeta(stats) {
-    return [
-        { key: 'pending', label: '待审核', value: stats.pending },
-        { key: 'checked', label: '已签到', value: stats.checked }
-    ].filter(item => item.value > 0).map(item => `<span class="${item.key}">${item.value} 人${item.label}</span>`).join('');
-}
-
-function sumOfflineRegistrationQuantity(rows, predicate) {
-    return rows.filter(predicate).reduce((sum, row) => sum + Number(row.quantity || 1), 0);
 }
 
 function renderOfflineRegistrationGroupTab(tab, active = false) {
     return `<button class="${active ? 'active' : ''}" onclick="switchOfflineRegistrationGroup('${tab.id}')">${escapeHtml(tab.label)}</button>`;
 }
 
-function offlineRegistrationStatusBadge(status) {
-    const clsMap = { '已报名': 'badge-green', '待审核': 'badge-yellow', '候补': 'badge-blue', '未通过': 'badge-red', '已取消': 'badge-gray' };
+function getOfflineRegistrationSessionTabs() {
+    return OFFLINE_REGISTRATION_SESSIONS.map(session => ({
+        id: session.id,
+        title: session.title,
+        time: session.time,
+        duration: session.duration,
+        capacity: session.capacityText,
+        reviewRequired: session.reviewRequired,
+        reviewStatus: session.reviewRequired ? '需审核' : ''
+    }));
+}
+
+function renderOfflineRegistrationSessionTab(tab, active = false) {
+    const timeText = `${tab.time} · ${tab.duration}`;
+    return `
+    <button class="${active ? 'active' : ''}" onclick="switchOfflineRegistrationSession('${tab.id}')">
+        <strong>${escapeHtml(tab.title)}${tab.reviewStatus ? `<b class="${tab.reviewRequired ? 'is-review-required' : 'is-review-free'}">${escapeHtml(tab.reviewStatus)}</b>` : ''}</strong>
+        <span>${escapeHtml(timeText)}</span>
+        <small>${escapeHtml(tab.capacity)}</small>
+    </button>`;
+}
+
+function getOfflineRegistrationSessionMeta(sessionId) {
+    return OFFLINE_REGISTRATION_SESSIONS.find(session => session.id === sessionId) || {};
+}
+
+function getOfflineRegistrationListTitle(groupTabs, sessionTabs) {
+    const currentGroupLabel = groupTabs.find(tab => tab.id === currentOfflineRegistrationGroupId)?.label || '全部组别';
+    const currentSessionLabel = sessionTabs.find(tab => tab.id === currentOfflineRegistrationSessionId)?.title || '';
+    return `报名人员列表｜${currentGroupLabel} - ${currentSessionLabel}`;
+}
+
+function getOfflineRegistrationSummaryRows(rows) {
+    const grouped = new Map();
+    rows.forEach(row => {
+        const key = row.wenyuNo;
+        const sessionMeta = getOfflineRegistrationSessionMeta(row.sessionId);
+        const sessionStatus = getOfflineRegistrationCurrentStatus(row);
+        const existing = grouped.get(key);
+        if (!existing) {
+            grouped.set(key, {
+                ...row,
+                ids: [row.id],
+                sessionDetails: [{ session: row.session, quantity: Number(row.quantity || 1), status: sessionStatus, reviewRequired: sessionMeta.reviewRequired }],
+                sessionCount: 1,
+                totalQuantity: Number(row.quantity || 1),
+                checkedQuantity: hasOfflineRegistrationActiveCheckin(row) ? Number(row.quantity || 1) : 0
+            });
+            return;
+        }
+        existing.ids.push(row.id);
+        existing.sessionDetails.push({ session: row.session, quantity: Number(row.quantity || 1), status: sessionStatus, reviewRequired: sessionMeta.reviewRequired });
+        existing.sessionCount += 1;
+        existing.totalQuantity += Number(row.quantity || 1);
+        existing.checkedQuantity += hasOfflineRegistrationActiveCheckin(row) ? Number(row.quantity || 1) : 0;
+        if (existing.auditStatus !== '待审核' && row.auditStatus === '待审核') existing.auditStatus = '待审核';
+        if (existing.signupStatus !== '已取消' && row.signupStatus === '已取消') existing.signupStatus = '已取消';
+    });
+    return Array.from(grouped.values());
+}
+
+function renderOfflineRegistrationSummaryHead() {
+    return `
+    <tr>
+        <th><input id="offlineRegistrationSelectAll" type="checkbox" aria-label="全选报名人员" onchange="toggleOfflineRegistrationSelectAll(this)"></th>
+        <th>序号</th>
+        <th>文遇号</th>
+        <th>报名人</th>
+        <th>手机号码</th>
+        <th>所属组别</th>
+        <th>选送单位</th>
+        <th>报名场次数</th>
+        <th>占用名额</th>
+        <th>报名时间</th>
+    </tr>`;
+}
+
+function renderOfflineRegistrationSessionSummary(row) {
+    const details = row.sessionDetails || [];
+    const summary = `${details.length || row.sessionCount || 0} 场`;
+    return `
+    <span class="offline-registration-popover-cell" tabindex="0">
+        <span>${escapeHtml(summary)}</span>
+        <div class="offline-registration-popover">
+            ${details.map(item => `<p>${escapeHtml(item.session)}：${item.quantity} 人</p>`).join('')}
+        </div>
+    </span>`;
+}
+
+function renderOfflineRegistrationQuotaSummary(row) {
+    return `
+    <button class="offline-registration-detail-trigger" type="button" onclick="openOfflineRegistrationQuotaModal('${row.wenyuNo}')">
+        ${row.totalQuantity} 人
+    </button>`;
+}
+
+function shouldShowOfflineRegistrationAuditColumn(sessionMeta) {
+    return Boolean(sessionMeta?.reviewRequired && sessionMeta?.status === '进行中');
+}
+
+function renderOfflineRegistrationDetailHead(showAuditStatus = false) {
+    return `
+    <tr>
+        <th><input id="offlineRegistrationSelectAll" type="checkbox" aria-label="全选报名人员" onchange="toggleOfflineRegistrationSelectAll(this)"></th>
+        <th>序号</th>
+        <th>参与人</th>
+        <th>参与人手机号</th>
+        <th>所属组别</th>
+        <th>所属场次</th>
+        <th>选送单位</th>
+        <th>报名表字段</th>
+        <th>报名状态</th>
+        ${showAuditStatus ? '<th>审核状态</th>' : ''}
+        <th>签到状态</th>
+        <th>签到时间</th>
+        <th>签退状态</th>
+        <th>签退时间</th>
+        <th>报名人</th>
+        <th>报名人手机号</th>
+        <th>报名时间</th>
+        <th>操作</th>
+    </tr>`;
+}
+
+function renderOfflineRegistrationReadonlyDetailHead(showAuditStatus = false) {
+    return `
+    <tr>
+        <th>序号</th>
+        <th>参与人</th>
+        <th>参与人手机号</th>
+        <th>所属组别</th>
+        <th>所属场次</th>
+        <th>选送单位</th>
+        <th>报名表字段</th>
+        <th>报名状态</th>
+        ${showAuditStatus ? '<th>审核状态</th>' : ''}
+        <th>签到状态</th>
+        <th>签到时间</th>
+        <th>签退状态</th>
+        <th>签退时间</th>
+        <th>报名人</th>
+        <th>报名人手机号</th>
+        <th>报名时间</th>
+        <th>操作</th>
+    </tr>`;
+}
+
+function renderOfflineRegistrationSummaryRow(row, index) {
+    return `
+    <tr>
+        <td><input class="offline-registration-row-check" type="checkbox" data-id="${row.id}" aria-label="选择${escapeHtml(row.name)}" onchange="updateOfflineRegistrationSelectionState()"></td>
+        <td>${index + 1}</td>
+        <td><strong>${row.wenyuNo}</strong></td>
+        <td>${escapeHtml(row.name)}</td>
+        <td>${row.phone}</td>
+        <td>${registrationGroupBadge(row.group)}</td>
+        <td>${escapeHtml(row.org)}</td>
+        <td>${renderOfflineRegistrationSessionSummary(row)}</td>
+        <td>${renderOfflineRegistrationQuotaSummary(row)}</td>
+        <td>${formatDateTimeSecond(row.registeredAt)}</td>
+    </tr>`;
+}
+
+function renderOfflineRegistrationDetailRow(row, index, isReviewFreeSession = false, showAuditStatus = false) {
+    const sessionMeta = getOfflineRegistrationSessionMeta(row.sessionId);
+    const currentStatus = getOfflineRegistrationCurrentStatus(row);
+    const signupStatusHtml = isReviewFreeSession
+        ? offlineRegistrationStatusBadge(getOfflineRegistrationReviewFreeStatus(row))
+        : offlineRegistrationStatusBadge(row);
+    const checkinLog = getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkin');
+    const checkoutLog = hasOfflineRegistrationCheckout(row)
+        ? getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkout')
+        : null;
+    const auditStatusText = row.auditStatus === '已拒绝' ? '已驳回' : row.auditStatus;
+    const checkoutStatusHtml = checkoutLog
+        ? '<span class="badge badge-green">已签退</span>'
+        : '<span class="text-muted">-</span>';
+    const moreActions = getOfflineRegistrationMoreActions(row);
+    return `
+    <tr>
+        <td><input class="offline-registration-row-check" type="checkbox" data-id="${row.id}" aria-label="选择${escapeHtml(row.name)}" onchange="updateOfflineRegistrationSelectionState()"></td>
+        <td>${index + 1}</td>
+        <td><strong>${escapeHtml(row.name)}</strong></td>
+        <td>${row.phone}</td>
+        <td>${registrationGroupBadge(row.group)}</td>
+        <td>${escapeHtml(sessionMeta.title || row.session)}</td>
+        <td>${escapeHtml(row.org)}</td>
+        <td>${escapeHtml(row.formSummary || '-')}</td>
+        <td>${signupStatusHtml}</td>
+        ${showAuditStatus ? `<td>${offlineRegistrationStatusBadge(auditStatusText)}</td>` : ''}
+        <td>${offlineCheckinStatusBadge(hasOfflineRegistrationActiveCheckin(row) ? '已签到' : '未签到')}</td>
+        <td>${checkinLog ? formatDateTimeSecond(checkinLog.time) : '-'}</td>
+        <td>${checkoutStatusHtml}</td>
+        <td>${checkoutLog ? formatDateTimeSecond(checkoutLog.time) : '-'}</td>
+        <td>${escapeHtml(row.name)}</td>
+        <td>${row.phone}</td>
+        <td>${formatDateTimeSecond(row.registeredAt)}</td>
+        <td>
+            ${sessionMeta.reviewRequired && currentStatus === '待审核' ? `<span class="action-link" onclick="updateOfflineRegistrationRowStatus('${row.id}', '已通过')">通过</span><span class="action-link danger" onclick="openOfflineRegistrationRejectModal('${row.id}')">驳回</span>` : ''}
+            <span class="action-link" onclick="openOfflineRegistrationAudit('${row.id}')">查看详情</span>
+            ${moreActions.length ? `<span class="action-link" onclick="openOfflineRegistrationMore('${row.id}', event)">…</span>` : ''}
+        </td>
+    </tr>`;
+}
+
+function renderOfflineRegistrationReadonlyDetailRow(row, index, isReviewFreeSession = false, showAuditStatus = false) {
+    const sessionMeta = getOfflineRegistrationSessionMeta(row.sessionId);
+    const signupStatusHtml = isReviewFreeSession
+        ? offlineRegistrationStatusBadge(getOfflineRegistrationReviewFreeStatus(row))
+        : offlineRegistrationStatusBadge(row);
+    const checkinLog = getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkin');
+    const checkoutLog = hasOfflineRegistrationCheckout(row)
+        ? getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkout')
+        : null;
+    const auditStatusText = row.auditStatus === '已拒绝' ? '已驳回' : row.auditStatus;
+    const checkoutStatusHtml = checkoutLog
+        ? '<span class="badge badge-green">已签退</span>'
+        : '<span class="text-muted">-</span>';
+    const moreActions = getOfflineRegistrationMoreActions(row);
+    return `
+    <tr>
+        <td>${index + 1}</td>
+        <td><strong>${escapeHtml(row.name)}</strong></td>
+        <td>${row.phone}</td>
+        <td>${registrationGroupBadge(row.group)}</td>
+        <td>${escapeHtml(sessionMeta.title || row.session)}</td>
+        <td>${escapeHtml(row.org)}</td>
+        <td>${escapeHtml(row.formSummary || '-')}</td>
+        <td>${signupStatusHtml}</td>
+        ${showAuditStatus ? `<td>${offlineRegistrationStatusBadge(auditStatusText)}</td>` : ''}
+        <td>${offlineCheckinStatusBadge(hasOfflineRegistrationActiveCheckin(row) ? '已签到' : '未签到')}</td>
+        <td>${checkinLog ? formatDateTimeSecond(checkinLog.time) : '-'}</td>
+        <td>${checkoutStatusHtml}</td>
+        <td>${checkoutLog ? formatDateTimeSecond(checkoutLog.time) : '-'}</td>
+        <td>${escapeHtml(row.name)}</td>
+        <td>${row.phone}</td>
+        <td>${formatDateTimeSecond(row.registeredAt)}</td>
+        <td><span class="action-link" onclick="openOfflineRegistrationAudit('${row.id}')">查看详情</span>${moreActions.length ? `<span class="action-link" onclick="openOfflineRegistrationMore('${row.id}', event)">…</span>` : ''}</td>
+    </tr>`;
+}
+
+function offlineRegistrationStatusBadge(rowOrStatus) {
+    const status = typeof rowOrStatus === 'string' ? rowOrStatus : getOfflineRegistrationDisplayStatus(rowOrStatus);
+    const clsMap = { '已通过': 'badge-green', '待审核': 'badge-yellow', '已拒绝': 'badge-red', '已取消': 'badge-gray', '已签到': 'badge-green', '部分待审核': 'badge-yellow', '部分通过': 'badge-blue', '部分取消': 'badge-gray' };
     return `<span class="badge ${clsMap[status] || 'badge-gray'}">${status}</span>`;
 }
 
-function offlineAuditStatusBadge(status) {
-    const clsMap = { '已通过': 'badge-green', '待审核': 'badge-yellow', '已拒绝': 'badge-red' };
-    return `<span class="badge ${clsMap[status] || 'badge-gray'}">${status}</span>`;
+function getOfflineRegistrationDisplayStatus(row) {
+    if (row.sessionDetails?.length) {
+        const statuses = row.sessionDetails.map(item => item.status);
+        if (statuses.includes('待审核')) return '部分待审核';
+        if (statuses.includes('已拒绝')) return '部分通过';
+        if (statuses.includes('已取消')) return '部分取消';
+        if (statuses.every(status => status === '已签到')) return '已签到';
+        return '已通过';
+    }
+    return row.signupStatus === '已取消' ? '已取消' : row.auditStatus;
 }
 
 function offlineCheckinStatusBadge(status) {
@@ -273,44 +593,725 @@ function offlineCheckinStatusBadge(status) {
     return `<span class="badge ${clsMap[status] || 'badge-gray'}">${status}</span>`;
 }
 
+function matchesOfflineRegistrationFilters(row, isReviewFreeSession = false) {
+    const {
+        signupStatus,
+        auditStatus,
+        checkinStatus,
+        checkoutStatus,
+        wenyuNo,
+        participantName,
+        name,
+        participantPhone,
+        registrantPhone,
+        org,
+        registeredAt
+    } = currentOfflineRegistrationFilters;
+    const normalizedSignupStatus = getOfflineRegistrationReviewFreeStatus(row);
+    const normalizedAuditStatus = isReviewFreeSession ? '无需审核' : getOfflineRegistrationFilterStatus(row);
+    const normalizedCheckinStatus = hasOfflineRegistrationActiveCheckin(row) ? '已签到' : '未签到';
+    const normalizedCheckoutStatus = hasOfflineRegistrationCheckout(row) ? '已签退' : '未签退';
+    const matchSignupStatus = (signupStatus === '全部状态' || signupStatus === '全部') || normalizedSignupStatus === signupStatus;
+    const matchAuditStatus = auditStatus === '全部状态' || normalizedAuditStatus === auditStatus;
+    const matchCheckinStatus = checkinStatus === '全部状态' || normalizedCheckinStatus === checkinStatus;
+    const matchCheckoutStatus = checkoutStatus === '全部状态' || normalizedCheckoutStatus === checkoutStatus;
+    const matchWenyuNo = !wenyuNo || String(row.wenyuNo).includes(wenyuNo.trim());
+    const matchParticipantName = !participantName || String(row.name).includes(participantName.trim());
+    const matchName = !name || String(row.name).includes(name.trim());
+    const matchParticipantPhone = !participantPhone || String(row.phone).includes(participantPhone.trim());
+    const matchRegistrantPhone = !registrantPhone || String(row.phone).includes(registrantPhone.trim());
+    const matchOrg = !org || String(row.org).includes(org.trim());
+    const matchRegisteredAt = !registeredAt || String(row.registeredAt).includes(registeredAt.trim());
+    return matchSignupStatus && matchAuditStatus && matchCheckinStatus && matchCheckoutStatus && matchWenyuNo && matchParticipantName && matchName && matchParticipantPhone && matchRegistrantPhone && matchOrg && matchRegisteredAt;
+}
+
+function getOfflineRegistrationFilterStatus(row) {
+    const status = getOfflineRegistrationCurrentStatus(row);
+    if (status === '已拒绝') return '已驳回';
+    return status;
+}
+
+function getOfflineRegistrationReviewFreeStatus(row) {
+    return row.signupStatus === '已取消' ? '已取消' : '已报名';
+}
+
+function applyOfflineRegistrationFilters() {
+    currentOfflineRegistrationFilters = {
+        signupStatus: document.getElementById('offlineRegistrationSignupStatus')?.value || '全部状态',
+        auditStatus: document.getElementById('offlineRegistrationAuditStatus')?.value || '全部状态',
+        checkinStatus: document.getElementById('offlineRegistrationCheckinStatus')?.value || '全部状态',
+        checkoutStatus: document.getElementById('offlineRegistrationCheckoutStatus')?.value || '全部状态',
+        wenyuNo: document.getElementById('offlineRegistrationWenyuNo')?.value || '',
+        participantName: document.getElementById('offlineRegistrationParticipantName')?.value || '',
+        name: document.getElementById('offlineRegistrationName')?.value || '',
+        participantPhone: document.getElementById('offlineRegistrationParticipantPhone')?.value || '',
+        registrantPhone: document.getElementById('offlineRegistrationRegistrantPhone')?.value || '',
+        org: document.getElementById('offlineRegistrationOrg')?.value || '',
+        registeredAt: document.getElementById('offlineRegistrationRegisteredAt')?.value || ''
+    };
+    navigateTo(currentPage, {
+        params: currentPageParams,
+        source: currentPageSource,
+        refresh: true,
+        reuseTabKey: activeTabKey
+    });
+    notifyOfflineRegistration('已按筛选条件查询');
+}
+
+function resetOfflineRegistrationFilters() {
+    currentOfflineRegistrationFilters = getDefaultOfflineRegistrationFilters();
+    navigateTo(currentPage, {
+        params: currentPageParams,
+        source: currentPageSource,
+        refresh: true,
+        reuseTabKey: activeTabKey
+    });
+    notifyOfflineRegistration('筛选条件已重置');
+}
+
+function updateOfflineRegistrationRowStatus(rowId, nextStatus) {
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    if (!row) return;
+    if (nextStatus === '已通过') {
+        if (row.auditStatus === '待审核') {
+            openOfflineRegistrationApproveModal(rowId);
+            return;
+        }
+        row.auditStatus = '已通过';
+        row.signupStatus = '已报名';
+        row.auditTrail.push({
+            type: 'audit',
+            title: '待审核 → 已通过',
+            desc: '管理员在列表中直接审核通过',
+            time: '2026-06-27 10:20:00',
+            operator: '管理员'
+        });
+        notifyOfflineRegistration(`已通过 ${row.name} 的报名`);
+    } else if (nextStatus === '已拒绝') {
+        openOfflineRegistrationRejectModal(rowId);
+        return;
+    } else {
+        return;
+    }
+    refreshOfflinePage();
+}
+
+function openOfflineRegistrationApproveModal(rowId) {
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    if (!row) return;
+    openModal('通过报名', `
+        <div class="offline-registration-approve-modal">
+            <p class="offline-registration-approve-intro">确认通过该参与人员的报名申请吗？</p>
+            <div class="offline-registration-approve-card">
+                <strong>${escapeHtml(row.name)}</strong>
+                <span>${row.phone} · ${escapeHtml(row.group)} · ${escapeHtml(row.session)}</span>
+            </div>
+        </div>
+    `, () => {
+        row.auditStatus = '已通过';
+        row.signupStatus = '已报名';
+        row.auditTrail.push({
+            type: 'audit',
+            title: '待审核 → 已通过',
+            desc: '管理员在弹窗中确认通过报名',
+            time: '2026-06-27 10:20:00',
+            operator: '管理员'
+        });
+        notifyOfflineRegistration(`已通过 ${row.name} 的报名`);
+        refreshOfflinePage();
+    }, {
+        modalClass: 'offline-registration-approve-shell',
+        confirmText: '确认通过',
+        cancelText: '取消'
+    });
+}
+
+function openOfflineRegistrationRejectModal(rowId) {
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    if (!row) return;
+    openModal('驳回报名', `
+        <div class="offline-registration-reject-modal">
+            <p class="offline-registration-reject-intro">请填写驳回原因，此理由将通知报名者。驳回后该用户可以重新提交报名申请。</p>
+            <div class="offline-registration-reject-box">
+                <textarea id="offlineRegistrationRejectReason" class="form-control offline-registration-reject-textarea" rows="4" placeholder="原因（选填，最多上传9图片）"></textarea>
+                <div class="offline-registration-reject-upload-list">
+                    <div class="offline-registration-reject-thumb">
+                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=200&q=80" alt="示例图片">
+                    </div>
+                    <button type="button" class="offline-registration-reject-upload-empty" onclick="notifyOfflineRegistration('演示环境暂不支持上传图片', 'warning')">+</button>
+                </div>
+            </div>
+        </div>
+    `, () => {
+        const reason = document.getElementById('offlineRegistrationRejectReason')?.value.trim() || '';
+        row.auditStatus = '已拒绝';
+        row.signupStatus = '未通过';
+        row.auditTrail.push({
+            type: 'audit',
+            title: '待审核 → 已拒绝',
+            desc: reason || '管理员驳回报名申请',
+            time: '2026-06-27 10:20:00',
+            operator: '管理员'
+        });
+        notifyOfflineRegistration(`已驳回 ${row.name} 的报名`);
+        refreshOfflinePage();
+    }, {
+        modalClass: 'offline-registration-reject-shell',
+        confirmText: '确认驳回',
+        cancelText: '取消'
+    });
+}
+
+function getOfflineRegistrationCurrentStatus(row) {
+    if (row.signupStatus === '已取消') return '已取消';
+    if (row.auditStatus === '待审核') return '待审核';
+    if (row.auditStatus === '已拒绝') return '已拒绝';
+    if (hasOfflineRegistrationActiveCheckin(row)) return '已签到';
+    return '已通过';
+}
+
+function getOfflineRegistrationStatusOptions(row) {
+    const currentStatus = getOfflineRegistrationCurrentStatus(row);
+    const sessionMeta = getOfflineRegistrationSessionMeta(row.sessionId);
+    if (!sessionMeta.reviewRequired) {
+        const options = currentStatus === '已取消' ? ['已取消', '已通过'] : ['已通过', '已签到', '未签到', '已取消'];
+        return options.includes(currentStatus) ? options : [currentStatus, ...options];
+    }
+    const transitionMap = {
+        '待审核': ['待审核', '已通过', '已拒绝', '已取消'],
+        '已通过': ['已通过', '已签到', '已取消'],
+        '已签到': ['已签到', '未签到', '已取消'],
+        '未签到': ['未签到', '已签到', '已取消'],
+        '已拒绝': ['已拒绝', '待审核', '已取消'],
+        '已取消': ['已取消', '待审核']
+    };
+    return transitionMap[currentStatus] || [currentStatus];
+}
+
+function notifyOfflineRegistration(message, type = 'success') {
+    if (typeof showToast === 'function') {
+        showToast(message, type);
+        return;
+    }
+    alert(message);
+}
+
+function getOfflineRegistrationSelectedRows() {
+    return Array.from(document.querySelectorAll('.offline-registration-row-check:checked'))
+        .map(checkbox => OFFLINE_REGISTRATION_ROWS.find(row => row.id === checkbox.dataset.id))
+        .filter(Boolean);
+}
+
+function toggleOfflineRegistrationSelectAll(checkbox) {
+    document.querySelectorAll('.offline-registration-row-check').forEach(item => {
+        item.checked = checkbox.checked;
+    });
+    updateOfflineRegistrationSelectionState();
+}
+
+function updateOfflineRegistrationSelectionState() {
+    const checkboxes = Array.from(document.querySelectorAll('.offline-registration-row-check'));
+    const checkedCount = checkboxes.filter(item => item.checked).length;
+    const countEl = document.getElementById('offlineRegistrationSelectedCount');
+    const selectAll = document.getElementById('offlineRegistrationSelectAll');
+    if (countEl) countEl.textContent = checkedCount;
+    if (selectAll) {
+        selectAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+        selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+    }
+}
+
+function clearOfflineRegistrationSelection() {
+    document.querySelectorAll('.offline-registration-row-check').forEach(item => {
+        item.checked = false;
+    });
+    const selectAll = document.getElementById('offlineRegistrationSelectAll');
+    if (selectAll) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+    }
+    updateOfflineRegistrationSelectionState();
+}
+
+function toggleOfflineRegistrationCheckin(rowId, checked) {
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    if (!row) return;
+    if (checked) {
+        row.checkinStatus = '已签到';
+        row.auditTrail.push({
+            type: 'checkin',
+            title: '管理员补签',
+            desc: '当前状态为未签到，管理员操作补签到后记录为管理员补签',
+            time: '2026-06-27 14:15:00',
+            operator: '管理员'
+        });
+        notifyOfflineRegistration(`已为 ${row.name} 手动签到`);
+    } else {
+        row.checkinStatus = '未签到';
+        row.auditTrail.push({
+            type: 'undo-checkin',
+            title: '撤销签到',
+            desc: '当前状态为已签到，管理员撤销签到后恢复未签到，关联签退已同步处理',
+            time: '2026-06-27 14:18:00',
+            operator: '管理员'
+        });
+        if (hasOfflineRegistrationCheckout(row)) {
+            row.auditTrail.push({
+                type: 'undo-checkout',
+                title: '撤销签退',
+                desc: '因撤销签到，系统同步撤销关联签退记录，恢复为未签到',
+                time: '2026-06-27 14:18:01',
+                operator: '系统'
+            });
+        }
+        notifyOfflineRegistration(`已取消 ${row.name} 的签到`);
+    }
+    refreshOfflinePage();
+}
+
+function toggleOfflineRegistrationCheckout(rowId, checked) {
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    if (!row) return;
+    if (checked) {
+        row.auditTrail.push({
+            type: 'checkout',
+            title: '管理员补退',
+            desc: '当前状态为已签到、未签退，管理员操作补签退后记录为管理员补退',
+            time: '2026-06-27 16:05:00',
+            operator: '管理员'
+        });
+        notifyOfflineRegistration(`已为 ${row.name} 补签退`);
+    } else {
+        row.auditTrail.push({
+            type: 'undo-checkout',
+            title: '撤销签退',
+            desc: '当前状态为已签退，管理员撤销签退后恢复为已签到、未签退',
+            time: '2026-06-27 16:08:00',
+            operator: '管理员'
+        });
+        notifyOfflineRegistration(`已撤销 ${row.name} 的签退`);
+    }
+    refreshOfflinePage();
+}
+
+function openOfflineRegistrationMore(rowId, event) {
+    event?.stopPropagation();
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    if (!row) return;
+    const actions = getOfflineRegistrationMoreActions(row);
+    closeOfflineRegistrationMore();
+
+    const menu = document.createElement('div');
+    menu.className = 'more-menu offline-registration-more-menu';
+    menu.id = 'offlineRegistrationMoreMenu';
+    menu.innerHTML = actions.map(item => `
+        <div class="more-menu-item ${item.danger ? 'more-menu-danger' : ''}" onclick="event.stopPropagation();openOfflineRegistrationAttendanceConfirm('${rowId}', '${item.action}')">${escapeHtml(item.label)}</div>
+    `).join('');
+    document.body.appendChild(menu);
+
+    const rect = event?.currentTarget?.getBoundingClientRect() || event?.target?.getBoundingClientRect();
+    if (rect) {
+        menu.style.top = `${rect.bottom + 4}px`;
+        menu.style.right = `${window.innerWidth - rect.right}px`;
+    }
+
+    setTimeout(() => {
+        document.addEventListener('click', closeOfflineRegistrationMore, { once: true });
+    }, 10);
+}
+
+function closeOfflineRegistrationMore() {
+    const menu = document.getElementById('offlineRegistrationMoreMenu');
+    if (menu) menu.remove();
+}
+
+function getOfflineRegistrationAttendanceActionConfig(action) {
+    const map = {
+        checkin: { title: '补签到', confirmText: '确认补签到', result: '已补签到' },
+        'undo-checkin': { title: '撤销签到', confirmText: '确认撤销签到', result: '已撤销签到', danger: true },
+        checkout: { title: '补签退', confirmText: '确认补签退', result: '已补签退' },
+        'undo-checkout': { title: '撤销签退', confirmText: '确认撤销签退', result: '已撤销签退', danger: true }
+    };
+    return map[action] || null;
+}
+
+function openOfflineRegistrationAttendanceConfirm(rowId, action) {
+    closeOfflineRegistrationMore();
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    const config = getOfflineRegistrationAttendanceActionConfig(action);
+    if (!row || !config) return;
+    openModal(config.title, `
+        <div class="offline-attendance-admin-modal">
+            <p>确认对 <strong>${escapeHtml(row.name)}</strong> 执行「${config.title}」操作吗？</p>
+            <p class="text-muted">提交后系统会记录操作人和操作时间，并同步写入操作记录。</p>
+            <label class="offline-status-modal-field">
+                <span>操作原因</span>
+                <textarea id="offlineAttendanceActionReason" class="form-control" rows="4" placeholder="请填写本次操作原因"></textarea>
+            </label>
+        </div>
+    `, () => {
+        const reason = document.getElementById('offlineAttendanceActionReason')?.value.trim();
+        if (!reason) {
+            notifyOfflineRegistration('请填写操作原因', 'warning');
+            return false;
+        }
+        applyOfflineRegistrationAttendanceAction(row, action, reason);
+        notifyOfflineRegistration(`${escapeHtml(row.name)}${config.result}`);
+        refreshOfflinePage();
+    }, { confirmText: config.confirmText, danger: config.danger, modalClass: 'modal-md' });
+}
+
+function applyOfflineRegistrationAttendanceAction(row, action, reason) {
+    const time = '2026-06-27 16:10:00';
+    if (action === 'checkin') {
+        row.checkinStatus = '已签到';
+        row.auditTrail.push({
+            type: 'checkin',
+            title: '管理员补签',
+            desc: `操作原因：${reason}`,
+            time,
+            operator: '管理员'
+        });
+        return;
+    }
+    if (action === 'undo-checkin') {
+        row.checkinStatus = '未签到';
+        row.auditTrail.push({
+            type: 'undo-checkin',
+            title: '撤销签到',
+            desc: `操作原因：${reason}；关联签退同步处理`,
+            time,
+            operator: '管理员'
+        });
+        if (hasOfflineRegistrationCheckout(row)) {
+            row.auditTrail.push({
+                type: 'undo-checkout',
+                title: '撤销签退',
+                desc: '因撤销签到，系统同步撤销关联签退记录',
+                time: '2026-06-27 16:10:01',
+                operator: '系统'
+            });
+        }
+        return;
+    }
+    if (action === 'checkout') {
+        row.auditTrail.push({
+            type: 'checkout',
+            title: '管理员补退',
+            desc: `操作原因：${reason}`,
+            time,
+            operator: '管理员'
+        });
+        return;
+    }
+    if (action === 'undo-checkout') {
+        row.auditTrail.push({
+            type: 'undo-checkout',
+            title: '撤销签退',
+            desc: `操作原因：${reason}`,
+            time,
+            operator: '管理员'
+        });
+    }
+}
+
+function openOfflineRegistrationBatchAction(action) {
+    const selectedRows = getOfflineRegistrationSelectedRows();
+    if (!selectedRows.length) {
+        notifyOfflineRegistration('请先选择报名人员', 'warning');
+        return;
+    }
+    const actionMap = {
+        approve: { title: '确认批量通过', confirmText: '确认通过', result: '已批量通过', status: '已通过' },
+        reject: { title: '确认批量驳回', confirmText: '确认驳回', result: '已批量驳回', status: '已拒绝', danger: true },
+        cancel: { title: '确认取消报名', confirmText: '确认取消', result: '已取消报名', status: '已取消', danger: true },
+        block: { title: '确认拉黑人员', confirmText: '确认拉黑', result: '已加入黑名单', status: '拉黑', danger: true }
+    };
+    const config = actionMap[action];
+    if (!config) return;
+    openModal(config.title, `
+        <div class="offline-registration-confirm-modal">
+            <p>将对已选择的 <strong>${selectedRows.length}</strong> 名报名人员执行「${config.status}」操作。</p>
+            <div>${selectedRows.slice(0, 5).map(row => `<span>${escapeHtml(row.name)}（${row.wenyuNo}）</span>`).join('')}</div>
+            ${selectedRows.length > 5 ? `<em>等 ${selectedRows.length} 人</em>` : ''}
+        </div>
+    `, () => {
+        selectedRows.forEach(row => {
+            if (action === 'approve') {
+                row.auditStatus = '已通过';
+                row.signupStatus = '已报名';
+            } else if (action === 'reject') {
+                row.auditStatus = '已拒绝';
+                row.signupStatus = '未通过';
+            } else if (action === 'cancel') {
+                row.signupStatus = '已取消';
+                row.checkinStatus = '-';
+            } else if (action === 'block') {
+                row.status = '已拉黑';
+            }
+        });
+        notifyOfflineRegistration(`${config.result} ${selectedRows.length} 人`);
+        clearOfflineRegistrationSelection();
+        refreshOfflinePage();
+    }, { confirmText: config.confirmText, danger: config.danger });
+}
+
+function openOfflineRegistrationImportModal() {
+    openModal('导入名单', `
+        <div class="offline-registration-import-modal">
+            <p>请按模板整理报名人员信息后上传，系统将校验文遇号、手机号和报名场次。</p>
+            <div class="offline-registration-import-actions">
+                <button class="btn btn-outline btn-sm" type="button" onclick="notifyOfflineRegistration('导入模板已开始下载')">下载导入模板</button>
+                <button class="btn btn-outline btn-sm" type="button" onclick="notifyOfflineRegistration('请选择本地名单文件')">选择文件</button>
+            </div>
+            <label class="offline-status-modal-check">
+                <input type="checkbox">
+                <span>导入后自动设为待审核</span>
+            </label>
+        </div>
+    `, () => {
+        notifyOfflineRegistration('名单导入任务已创建');
+    }, { confirmText: '开始导入', modalClass: 'modal-md' });
+}
+
+function openOfflineRegistrationRowAction(rowId, action) {
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    if (!row) return;
+    const actionMap = {
+        cancel: { title: '确认取消报名', confirmText: '确认取消', result: '已取消报名', status: '已取消', danger: true },
+        block: { title: '确认拉黑人员', confirmText: '确认拉黑', result: '已加入黑名单', status: '拉黑', danger: true }
+    };
+    const config = actionMap[action];
+    if (!config) return;
+    openModal(config.title, `
+        <div class="offline-registration-confirm-modal">
+            <p>确认将 <strong>${escapeHtml(row.name)}</strong>（${row.wenyuNo}）${config.status}吗？</p>
+            <span>${row.phone} · ${escapeHtml(row.group)} · ${escapeHtml(row.session)}</span>
+        </div>
+    `, () => {
+        if (action === 'cancel') {
+            row.signupStatus = '已取消';
+            row.checkinStatus = '-';
+        }
+        if (action === 'block') {
+            row.status = '已拉黑';
+        }
+        notifyOfflineRegistration(`${escapeHtml(row.name)}${config.result}`);
+        refreshOfflinePage();
+    }, { confirmText: config.confirmText, danger: config.danger });
+}
+
 function openOfflineRegistrationAudit(rowId) {
     const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
     if (!row) return;
-    openModal('报名人员审核记录', `
+    const recordItems = getOfflineRegistrationTimeline(row);
+    const detailStatus = getOfflineUnitDetailStatuses(row);
+    const metaItems = [
+        row.group ? `<span class="offline-registration-audit-meta-chip">${escapeHtml(row.group)}</span>` : '',
+        row.org ? `<span class="offline-registration-audit-meta-chip">${escapeHtml(row.org)}</span>` : ''
+    ].filter(Boolean).join('');
+    openModal('参与人员操作记录', `
         <div class="offline-registration-audit-modal">
-            <div class="offline-registration-audit-person">
-                <div class="offline-registration-avatar">${escapeHtml(row.name).slice(0, 1)}</div>
-                <div>
-                    <strong>${escapeHtml(row.name)}</strong>
-                    <span>${row.phone} · ${escapeHtml(row.session)}</span>
-                </div>
-                <em>${row.signupStatus}</em>
-            </div>
-            <div class="offline-registration-audit-summary">
-                <span>报名编号：${row.signupNo}</span>
-                <span>报名名额：${row.quantity} 人</span>
-                <span>审核状态：${row.auditStatus}</span>
-                <span>签到状态：${row.checkinStatus}</span>
-            </div>
-            <div class="offline-registration-timeline">
-                ${row.auditTrail.map(item => `
-                    <div class="offline-registration-timeline-item ${item.type}">
-                        <i></i>
-                        <div>
-                            <strong>${escapeHtml(item.title)}</strong>
-                            <p>${escapeHtml(item.desc)}</p>
-                            <span>${formatDateTimeSecond(item.time)} · ${escapeHtml(item.operator)}</span>
+            <div class="offline-registration-audit-hero">
+                <div class="offline-registration-audit-person">
+                    <div class="offline-registration-avatar">${escapeHtml(row.name).slice(0, 1)}</div>
+                    <div class="offline-registration-audit-person-body">
+                        <strong>${escapeHtml(row.name)}</strong>
+                        <div class="offline-registration-audit-meta">
+                            <span class="offline-registration-audit-phone">${row.phone || '-'}</span>
+                            <span class="offline-registration-audit-meta-link">查看</span>
+                            ${metaItems}
                         </div>
+                    </div>
+                    <div class="offline-registration-audit-status">
+                        ${offlineRegistrationStatusBadge(detailStatus.signupStatus)}
+                    </div>
+                </div>
+                <div class="offline-registration-audit-summary-card">
+                    <div class="primary">
+                        <span>报名场次</span>
+                        <strong>${escapeHtml(row.session)}</strong>
+                        <div class="offline-registration-audit-summary-meta">
+                            <p><label>报名人</label><b>${escapeHtml(row.name || '-')}</b></p>
+                            <p><label>报名人手机号</label><b>${escapeHtml(row.phone || '-')}</b></p>
+                            <p><label>签到状态</label><b>${detailStatus.checkinStatus}</b></p>
+                            <p><label>签退状态</label><b>${detailStatus.checkoutStatus}</b></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3 class="offline-registration-audit-title">操作记录</h3>
+            <div class="offline-registration-records">
+                ${recordItems.map(item => `
+                    <div class="offline-registration-record-item ${item.type}">
+                        <div class="offline-registration-record-main">
+                            <strong>${escapeHtml(item.title)}</strong>
+                            <span>${escapeHtml(item.operatorLabel)}</span>
+                        </div>
+                        <div class="offline-registration-record-time">${escapeHtml(item.timeLabel)}</div>
+                        ${item.desc ? `<p>${escapeHtml(item.desc)}</p>` : ''}
                     </div>
                 `).join('')}
             </div>
         </div>
-    `, null, { modalClass: 'modal-lg', hideCancel: true, confirmText: '关闭' });
+    `, null, { modalClass: 'modal-lg offline-registration-audit-shell', hideCancel: true, confirmText: '关闭' });
+}
+
+function openOfflineRegistrationQuotaModal(wenyuNo) {
+    const relatedRows = OFFLINE_REGISTRATION_ROWS.filter(item => item.wenyuNo === wenyuNo);
+    const summaryRow = getOfflineRegistrationSummaryRows(relatedRows)[0];
+    if (!summaryRow) return;
+    openModal('占用名额明细', `
+        <div class="offline-registration-quota-modal">
+            <div class="offline-registration-audit-person">
+                <div class="offline-registration-avatar">${escapeHtml(summaryRow.name).slice(0, 1)}</div>
+                <div>
+                    <strong>${escapeHtml(summaryRow.name)}</strong>
+                    <span>${summaryRow.wenyuNo} · ${summaryRow.phone} · ${escapeHtml(summaryRow.group)}</span>
+                </div>
+                <strong class="offline-registration-quota-total">共占用 ${summaryRow.totalQuantity} 个名额</strong>
+            </div>
+            <div class="registration-table-wrap offline-registration-table-wrap">
+                <table class="registration-table offline-registration-table">
+                    <thead>
+                        <tr><th>场次名称</th><th>举办时间</th><th>占用名额</th></tr>
+                    </thead>
+                    <tbody>
+                        ${relatedRows.map(item => {
+                            const sessionMeta = getOfflineRegistrationSessionMeta(item.sessionId);
+                            return `
+                            <tr>
+                                <td>${escapeHtml(sessionMeta.title || item.session)}</td>
+                                <td>${escapeHtml(sessionMeta.time || item.session)}</td>
+                                <td>${Number(item.quantity || 1)} 人</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `, null, { modalClass: 'modal-lg offline-registration-quota-shell', hideCancel: true, confirmText: '关闭' });
+}
+
+function getOfflineRegistrationTimeline(row) {
+    const trail = Array.isArray(row.auditTrail) ? row.auditTrail : [];
+    const items = trail.map(item => ({
+        ...item,
+        timestamp: item.time,
+        timeLabel: formatDateTimeSecond(item.time),
+        operatorLabel: `操作人：${item.operator || '系统'}`
+    }));
+    if (hasOfflineRegistrationActiveCheckin(row) && !trail.some(item => item.type === 'checkin')) {
+        items.push({
+            type: 'checkin',
+            title: '已签到',
+            desc: '现场工作人员已完成签到核验',
+            timestamp: '2026-06-26 14:23:00',
+            timeLabel: '2026-06-26 14:23:00',
+            operatorLabel: `操作人：${row.name}`
+        });
+    } else if (!hasOfflineRegistrationActiveCheckin(row)) {
+        items.push({
+            type: 'pending',
+            title: '未签到',
+            desc: '暂无签到记录',
+            timestamp: '',
+            timeLabel: '暂无时间记录',
+            operatorLabel: '操作人：系统'
+        });
+    }
+    return items.sort((a, b) => {
+        if (!a.timestamp) return -1;
+        if (!b.timestamp) return 1;
+        return new Date(b.timestamp.replace(/-/g, '/')) - new Date(a.timestamp.replace(/-/g, '/'));
+    });
+}
+
+function openOfflineRegistrationStatusModal(rowId) {
+    const row = OFFLINE_REGISTRATION_ROWS.find(item => item.id === rowId);
+    if (!row) return;
+    const currentStatus = getOfflineRegistrationCurrentStatus(row);
+    const statusOptions = getOfflineRegistrationStatusOptions(row);
+    openModal('更改报名状态', `
+        <div class="offline-status-modal">
+            <div class="offline-status-modal-person">
+                <div class="offline-registration-avatar">${escapeHtml(row.name).slice(0, 1)}</div>
+                <div>
+                    <strong>${escapeHtml(row.name)}</strong>
+                    <span>${row.wenyuNo} · ${row.phone} · ${escapeHtml(row.group)}</span>
+                </div>
+                ${offlineRegistrationStatusBadge(row)}
+            </div>
+            <label class="offline-status-modal-field">
+                <span>状态</span>
+                <select class="form-control">
+                    ${statusOptions.map(status => `<option ${status === currentStatus ? 'selected' : ''}>${status}</option>`).join('')}
+                </select>
+            </label>
+            <label class="offline-status-modal-check">
+                <input type="checkbox">
+                <span>通知参加者 ${fieldHelpIcon('勾选后，系统将向报名者发送站内信，告知本次状态变更。')}</span>
+            </label>
+        </div>
+    `, () => {
+        notifyOfflineRegistration('状态已更新');
+    }, { modalClass: 'modal-md offline-status-modal-shell', confirmText: '更新状态' });
+}
+
+function openOfflineRegistrationSummaryStatusModal(row) {
+    const relatedRows = OFFLINE_REGISTRATION_ROWS.filter(item => item.wenyuNo === row.wenyuNo);
+    openModal('更改报名状态', `
+        <div class="offline-status-modal">
+            <div class="offline-status-modal-person">
+                <div class="offline-registration-avatar">${escapeHtml(row.name).slice(0, 1)}</div>
+                <div>
+                    <strong>${escapeHtml(row.name)}</strong>
+                    <span>${row.wenyuNo} · ${row.phone} · ${escapeHtml(row.group)}</span>
+                </div>
+                ${offlineRegistrationStatusBadge(getOfflineRegistrationSummaryRows(relatedRows)[0])}
+            </div>
+            <div class="offline-status-session-list">
+                ${relatedRows.map(item => {
+                    const sessionMeta = getOfflineRegistrationSessionMeta(item.sessionId);
+                    const currentStatus = getOfflineRegistrationCurrentStatus(item);
+                    const statusOptions = getOfflineRegistrationStatusOptions(item);
+                    return `
+                    <div class="offline-status-session-item">
+                        <div>
+                            <strong>${escapeHtml(sessionMeta.title || item.session)}</strong>
+                            <span>${sessionMeta.reviewRequired ? '需审核' : '无需审核'} · 当前：${escapeHtml(currentStatus)}</span>
+                        </div>
+                        <select class="form-control">
+                            ${statusOptions.map(status => `<option ${status === currentStatus ? 'selected' : ''}>${status}</option>`).join('')}
+                        </select>
+                    </div>`;
+                }).join('')}
+            </div>
+            <label class="offline-status-modal-check">
+                <input type="checkbox">
+                <span>通知参加者 ${fieldHelpIcon('勾选后，系统将向报名者发送站内信，告知本次状态变更。')}</span>
+            </label>
+        </div>
+    `, () => {
+        notifyOfflineRegistration('状态已更新');
+    }, { modalClass: 'modal-lg offline-status-modal-shell', confirmText: '更新状态' });
 }
 
 function switchOfflineRegistrationGroup(groupId) {
     if (!groupId || groupId === currentOfflineRegistrationGroupId) return;
     currentOfflineRegistrationGroupId = groupId;
+    navigateTo(currentPage, {
+        params: currentPageParams,
+        source: currentPageSource,
+        refresh: true,
+        fromTabSwitch: true,
+        reuseTabKey: activeTabKey
+    });
+}
+
+function switchOfflineRegistrationSession(sessionId) {
+    if (!sessionId || sessionId === currentOfflineRegistrationSessionId) return;
+    currentOfflineRegistrationSessionId = sessionId;
     navigateTo(currentPage, {
         params: currentPageParams,
         source: currentPageSource,
@@ -511,14 +1512,14 @@ const DAILY_RECORD_ROWS = [
 const DAILY_UNPARTICIPATED_USER_NAMES = new Set(['孙七', '吴九', '冯十二']);
 
 const DAILY_REGISTERED_USERS = [
-    { userNo: 'U0001', groupId: 'primary', group: '小学组', name: '张三', phone: '138****1234', org: '上海市图书馆' },
-    { userNo: 'U0002', groupId: 'primary', group: '小学组', name: '李四', phone: '139****5678', org: '复旦大学图书馆' },
-    { userNo: 'U0003', groupId: 'middle', group: '初中组', name: '王五', phone: '136****9012', org: '长宁区图书馆' },
-    { userNo: 'U0004', groupId: 'middle', group: '初中组', name: '周八', phone: '134****2345', org: '徐汇区文化馆' },
-    { userNo: 'U0005', groupId: 'high', group: '高中组', name: '孙七', phone: '135****7890', org: '高中部选送单位' },
-    { userNo: 'U0006', groupId: 'primary', group: '小学组', name: '陈一', phone: '132****4567', org: '浦东新区图书馆' },
-    { userNo: 'U0007', groupId: 'teacher', group: '教师组', name: '吴九', phone: '133****6789', org: '教师发展中心' },
-    { userNo: 'U0008', groupId: 'middle', group: '初中组', name: '冯十二', phone: '138****6677', org: '杨浦区文化馆' }
+    { userNo: '10001', groupId: 'primary', group: '小学组', name: '张三', phone: '138****1234', org: '上海市图书馆' },
+    { userNo: '10002', groupId: 'primary', group: '小学组', name: '李四', phone: '139****5678', org: '复旦大学图书馆' },
+    { userNo: '10003', groupId: 'middle', group: '初中组', name: '王五', phone: '136****9012', org: '长宁区图书馆' },
+    { userNo: '10004', groupId: 'middle', group: '初中组', name: '周八', phone: '134****2345', org: '徐汇区文化馆' },
+    { userNo: '10005', groupId: 'high', group: '高中组', name: '孙七', phone: '135****7890', org: '高中部选送单位' },
+    { userNo: '10006', groupId: 'primary', group: '小学组', name: '陈一', phone: '132****4567', org: '浦东新区图书馆' },
+    { userNo: '10007', groupId: 'teacher', group: '教师组', name: '吴九', phone: '133****6789', org: '教师发展中心' },
+    { userNo: '10008', groupId: 'middle', group: '初中组', name: '冯十二', phone: '138****6677', org: '杨浦区文化馆' }
 ];
 
 const DAILY_ATTEMPT_RECORDS = [
@@ -2033,7 +3034,7 @@ function getDailyOverviewRows() {
     DAILY_RECORD_ROWS.forEach((row, index) => {
         const isUnparticipatedUser = DAILY_UNPARTICIPATED_USER_NAMES.has(row.name);
         const current = unique.get(row.name) || {
-            userNo: `U${String(index + 1).padStart(4, '0')}`,
+            userNo: `${10001 + index}`,
             name: row.name,
             phone: row.phone,
             group: row.group,
@@ -2232,7 +3233,7 @@ function getDailyRowsForDate(date) {
         const score = index === 6 ? '-' : Math.max(52, 94 - index * 6 + (Number(date.slice(-2)) % 5));
         return {
             ...row,
-            userNo: `U${date.slice(-2)}${String(index + 1).padStart(3, '0')}`,
+            userNo: `${Number(date.slice(-2))}${String(index + 1).padStart(3, '0')}`,
             dailyScore: score,
             attempts: index === 6 ? '0/1' : '1/1',
             accuracy: typeof score === 'number' ? `${score}%` : '-',
@@ -2830,6 +3831,9 @@ function openExamRecord(name, phone, org, status, examName, score, total, pass, 
 
 // ===== 单位数据 =====
 registerPage('unit-data', () => {
+    if (currentManageActivity.type === '活动报名') {
+        return renderOfflineUnitDataPage();
+    }
     return `
     ${pageHeader('🏢 单位数据情况', '活动管理 / [当前活动] / 单位数据情况')}
     <div class="unit-data-page">
@@ -3586,4 +4590,635 @@ function openUnitLevelAnswerDetail(unitName) {
             </table>
         </div>
     `, null, { confirmText: '关闭', hideCancel: true, modalClass: 'modal-wide' });
+}
+
+registerPage('offline-signin-stats', () => renderOfflineSigninStatsPage());
+registerPage('offline-checkin-staff', () => renderOfflineCheckinStaffPage());
+registerPage('offline-unit-detail', () => {
+    const { unitName } = currentPageParams || {};
+    return renderOfflineUnitDetailPage(unitName || '');
+});
+
+const OFFLINE_CHECKIN_STAFF_ROWS = [
+    { id: 'staff-001', name: '叶青', phone: '138****2001', org: '上海市图书馆', groups: ['普通读者', '亲子家庭'], sessions: ['讲座沙龙', '亲子共读'], permissions: ['扫码签到', '取消签到', '查看详情'], scansToday: 28, lastActiveAt: '2026-06-26 13:42:10', status: '启用' },
+    { id: 'staff-002', name: '周宁', phone: '139****2018', org: '广州少年宫', groups: ['亲子家庭'], sessions: ['亲子共读'], permissions: ['扫码签到', '查看详情'], scansToday: 13, lastActiveAt: '2026-06-26 12:51:00', status: '启用' },
+    { id: 'staff-003', name: '林月', phone: '136****6678', org: '阅途文化集团', groups: ['普通读者', '志愿者'], sessions: ['讲座沙龙', '志愿服务'], permissions: ['扫码签到', '取消签到', '手动签到', '查看详情'], scansToday: 31, lastActiveAt: '2026-06-26 14:03:25', status: '启用' },
+    { id: 'staff-004', name: '赵敏', phone: '137****7789', org: '浦东文化馆', groups: ['志愿者'], sessions: ['志愿服务'], permissions: ['扫码签到'], scansToday: 0, lastActiveAt: '-', status: '停用' }
+];
+
+const OFFLINE_CHECKIN_STAFF_LOGS = [
+    { staffId: 'staff-001', time: '2026-06-26 13:42:10', user: '黄嘉', session: '亲子共读', group: '亲子家庭', action: '扫码签到', result: '成功', note: '工作人员扫码核验完成' },
+    { staffId: 'staff-001', time: '2026-06-26 13:55:00', user: '林悦', session: '讲座沙龙', group: '普通读者', action: '查看详情', result: '成功', note: '核验到场信息' },
+    { staffId: 'staff-003', time: '2026-06-26 14:03:25', user: '赵明', session: '志愿服务', group: '志愿者', action: '取消签到', result: '成功', note: '纠正误签到记录' }
+];
+
+function renderOfflineSigninStatsPage() {
+    const rows = getOfflineSigninStatsRows();
+    const summary = getOfflineSigninSummary(rows);
+    return `
+    <div class="offline-signin-stats-page">
+        <section class="card quiz-data-toolbar">
+            <label><span>组别</span><select id="offlineSigninStatsGroup" class="form-control"><option value="all" ${currentOfflineSigninStatsFilters.groupId === 'all' ? 'selected' : ''}>全部组别</option>${getOfflineRegistrationGroupTabs().slice(1).map(tab => `<option value="${tab.id}" ${currentOfflineSigninStatsFilters.groupId === tab.id ? 'selected' : ''}>${tab.label}</option>`).join('')}</select></label>
+            <label><span>场次</span><select id="offlineSigninStatsSession" class="form-control"><option value="all" ${currentOfflineSigninStatsFilters.sessionId === 'all' ? 'selected' : ''}>全部场次</option>${OFFLINE_REGISTRATION_SESSIONS.map(session => `<option value="${session.id}" ${currentOfflineSigninStatsFilters.sessionId === session.id ? 'selected' : ''}>${session.title}</option>`).join('')}</select></label>
+            <label><span>报名状态</span><select id="offlineSigninStatsSignupStatus" class="form-control"><option ${currentOfflineSigninStatsFilters.signupStatus === '全部状态' ? 'selected' : ''}>全部状态</option><option ${currentOfflineSigninStatsFilters.signupStatus === '已报名' ? 'selected' : ''}>已报名</option><option ${currentOfflineSigninStatsFilters.signupStatus === '待审核' ? 'selected' : ''}>待审核</option><option ${currentOfflineSigninStatsFilters.signupStatus === '已取消' ? 'selected' : ''}>已取消</option></select></label>
+            <label><span>签到状态</span><select id="offlineSigninStatsCheckinStatus" class="form-control"><option ${currentOfflineSigninStatsFilters.checkinStatus === '全部状态' ? 'selected' : ''}>全部状态</option><option ${currentOfflineSigninStatsFilters.checkinStatus === '已签到' ? 'selected' : ''}>已签到</option><option ${currentOfflineSigninStatsFilters.checkinStatus === '未签到' ? 'selected' : ''}>未签到</option></select></label>
+            <label><span>选送单位</span><input id="offlineSigninStatsOrg" class="form-control" placeholder="请输入选送单位" value="${escapeHtml(currentOfflineSigninStatsFilters.org)}"></label>
+            <div class="quiz-data-toolbar-actions">
+                <button class="btn btn-primary btn-sm" onclick="applyOfflineSigninStatsFilters()">查询</button>
+                <button class="btn btn-outline btn-sm" onclick="resetOfflineSigninStatsFilters()">重置</button>
+                <button class="btn btn-outline btn-sm" onclick="notifyOfflineRegistration('用户签到情况导出任务已创建')">导出</button>
+            </div>
+        </section>
+
+        <div class="quiz-data-metric-grid offline-data-metric-grid">
+            ${renderQuizDataMetric('报名总人数', String(summary.totalQuantity), `记录 ${summary.recordCount} 条`, '报名', 'blue')}
+            ${renderQuizDataMetric('已签到人数', String(summary.checkedQuantity), `签到率 ${summary.checkinRate}%`, '到场', 'green')}
+            ${renderQuizDataMetric('未签到人数', String(summary.uncheckedQuantity), '可继续跟进提醒', '缺口', 'orange')}
+            ${renderQuizDataMetric('已取消人数', String(summary.cancelledQuantity), '释放名额统计', '变更', 'gray')}
+            ${renderQuizDataMetric('待审核人数', String(summary.pendingQuantity), '审核积压提醒', '审核', 'yellow')}
+            ${renderQuizDataMetric('参与单位数', String(summary.unitCount), `场次 ${OFFLINE_REGISTRATION_SESSIONS.length} 个`, '组织', 'purple')}
+        </div>
+
+        <div class="quiz-data-grid secondary">
+            <section class="card quiz-data-rank-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>场次签到表现</h3>
+                        <p>对比各场次报名、签到和待审核情况，便于发现现场风险</p>
+                    </div>
+                </div>
+                <div class="unit-data-table-wrap">
+                    ${renderOfflineSessionStatsTable()}
+                </div>
+            </section>
+
+            <section class="card quiz-data-alert-card">
+                <div class="activity-card-head compact">
+                    <div>
+                        <h3>运营提醒</h3>
+                        <p>优先定位报名转签到过程中的异常</p>
+                    </div>
+                </div>
+                <div class="activity-todo-list">
+                    ${renderQuizDataAlert('medium', `${summary.pendingQuantity} 人待审核`, '建议优先处理临近开场仍未审核的报名记录。')}
+                    ${renderQuizDataAlert('high', `${summary.uncheckedQuantity} 人未签到`, '建议结合场次和单位筛查未到场用户，决定是否补录或释放名额。')}
+                    ${renderQuizDataAlert('low', `${summary.unitCount} 个单位参与组织`, '可结合单位数据情况查看各组织单位到场转化效果。')}
+                </div>
+            </section>
+        </div>
+
+        <section class="card unit-data-table-card">
+            <div class="review-list-title">用户签到明细</div>
+            <div class="unit-data-table-wrap">
+                ${renderOfflineSigninUserTable(rows)}
+            </div>
+            ${renderStandardPagination(rows.length)}
+        </section>
+    </div>`;
+}
+
+function getOfflineSigninStatsRows() {
+    return OFFLINE_REGISTRATION_ROWS.filter(row => {
+        const filters = currentOfflineSigninStatsFilters;
+        const matchGroup = filters.groupId === 'all' || row.groupId === filters.groupId;
+        const matchSession = filters.sessionId === 'all' || row.sessionId === filters.sessionId;
+        const signupStatus = row.signupStatus === '已取消' ? '已取消' : row.auditStatus === '待审核' ? '待审核' : '已报名';
+        const checkinStatus = hasOfflineRegistrationActiveCheckin(row) ? '已签到' : '未签到';
+        const matchSignupStatus = filters.signupStatus === '全部状态' || signupStatus === filters.signupStatus;
+        const matchCheckinStatus = filters.checkinStatus === '全部状态' || checkinStatus === filters.checkinStatus;
+        const matchOrg = !filters.org.trim() || String(row.org).includes(filters.org.trim());
+        return matchGroup && matchSession && matchSignupStatus && matchCheckinStatus && matchOrg;
+    });
+}
+
+function applyOfflineSigninStatsFilters() {
+    currentOfflineSigninStatsFilters = {
+        groupId: document.getElementById('offlineSigninStatsGroup')?.value || 'all',
+        sessionId: document.getElementById('offlineSigninStatsSession')?.value || 'all',
+        signupStatus: document.getElementById('offlineSigninStatsSignupStatus')?.value || '全部状态',
+        checkinStatus: document.getElementById('offlineSigninStatsCheckinStatus')?.value || '全部状态',
+        org: document.getElementById('offlineSigninStatsOrg')?.value || ''
+    };
+    refreshOfflinePage('offline-signin-stats');
+    notifyOfflineRegistration('已按筛选条件查询');
+}
+
+function resetOfflineSigninStatsFilters() {
+    currentOfflineSigninStatsFilters = getDefaultOfflineSigninStatsFilters();
+    refreshOfflinePage('offline-signin-stats');
+    notifyOfflineRegistration('筛选条件已重置');
+}
+
+function getOfflineSigninSummary(rows) {
+    const totalQuantity = rows.reduce((sum, row) => sum + Number(row.quantity || 1), 0);
+    const checkedQuantity = rows.reduce((sum, row) => sum + (hasOfflineRegistrationActiveCheckin(row) ? Number(row.quantity || 1) : 0), 0);
+    const cancelledQuantity = rows.reduce((sum, row) => sum + (row.signupStatus === '已取消' ? Number(row.quantity || 1) : 0), 0);
+    const pendingQuantity = rows.reduce((sum, row) => sum + (row.auditStatus === '待审核' ? Number(row.quantity || 1) : 0), 0);
+    const effectiveBase = Math.max(totalQuantity - cancelledQuantity, 1);
+    return {
+        totalQuantity,
+        checkedQuantity,
+        uncheckedQuantity: Math.max(totalQuantity - checkedQuantity - cancelledQuantity, 0),
+        cancelledQuantity,
+        pendingQuantity,
+        recordCount: rows.length,
+        unitCount: new Set(rows.map(row => row.org)).size,
+        checkinRate: formatPercent(checkedQuantity, effectiveBase)
+    };
+}
+
+function renderOfflineSessionStatsTable() {
+    const rows = OFFLINE_REGISTRATION_SESSIONS.map(session => {
+        const sessionRows = OFFLINE_REGISTRATION_ROWS.filter(row => row.sessionId === session.id);
+        const totalQuantity = sessionRows.reduce((sum, row) => sum + Number(row.quantity || 1), 0);
+        const checkedQuantity = sessionRows.reduce((sum, row) => sum + (hasOfflineRegistrationActiveCheckin(row) ? Number(row.quantity || 1) : 0), 0);
+        const pendingQuantity = sessionRows.reduce((sum, row) => sum + (row.auditStatus === '待审核' ? Number(row.quantity || 1) : 0), 0);
+        const cancelledQuantity = sessionRows.reduce((sum, row) => sum + (row.signupStatus === '已取消' ? Number(row.quantity || 1) : 0), 0);
+        return { session, totalQuantity, checkedQuantity, pendingQuantity, cancelledQuantity };
+    });
+    return `
+    <table class="unit-data-table">
+        <thead>
+            <tr><th>场次</th><th>报名人数</th><th>已签到人数</th><th>待审核人数</th><th>已取消人数</th><th>签到率</th></tr>
+        </thead>
+        <tbody>
+            ${rows.map(item => `
+                <tr>
+                    <td><strong>${item.session.title}</strong><div class="text-muted">${item.session.time}</div></td>
+                    <td>${item.totalQuantity}</td>
+                    <td>${item.checkedQuantity}</td>
+                    <td>${unitPendingReviewValue(item.pendingQuantity)}</td>
+                    <td>${item.cancelledQuantity}</td>
+                    <td>${unitRateBadge(formatPercent(item.checkedQuantity, Math.max(item.totalQuantity - item.cancelledQuantity, 1)))}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>`;
+}
+
+function renderOfflineSigninUserTable(rows) {
+    return `
+    <table class="unit-data-table">
+        <thead>
+            <tr><th>报名编号</th><th>报名人</th><th>手机号</th><th>组别</th><th>场次</th><th>选送单位</th><th>报名人数</th><th>报名状态</th><th>签到状态</th><th>签到时间</th><th>签到方式</th><th>核验人员</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+            ${rows.map(row => {
+                const checkinLog = hasOfflineRegistrationActiveCheckin(row)
+                    ? getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkin')
+                    : null;
+                return `
+                <tr>
+                    <td><strong>${row.signupNo}</strong></td>
+                    <td>${escapeHtml(row.name)}</td>
+                    <td>${row.phone}</td>
+                    <td>${registrationGroupBadge(row.group)}</td>
+                    <td>${escapeHtml(row.session)}</td>
+                    <td>${escapeHtml(row.org)}</td>
+                    <td>${row.quantity}</td>
+                    <td>${offlineRegistrationStatusBadge(row)}</td>
+                    <td>${offlineCheckinStatusBadge(hasOfflineRegistrationActiveCheckin(row) ? '已签到' : '未签到')}</td>
+                    <td>${checkinLog ? formatDateTimeSecond(checkinLog.time) : '-'}</td>
+                    <td>${checkinLog ? '工作人员扫码签到' : '-'}</td>
+                    <td>${checkinLog ? escapeHtml(checkinLog.operator) : '-'}</td>
+                    <td><span class="action-link" onclick="openOfflineRegistrationAudit('${row.id}')">查看详情</span></td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
+}
+
+function renderOfflineUnitDataPage() {
+    const rows = getOfflineUnitDataRows();
+    return `
+    <div class="unit-data-page offline-unit-data-page">
+        <section class="card exam-score-filter unit-data-filter">
+            <div class="exam-filter-form unit-exam-filter-form">
+                <label><span>组别</span><select id="offlineUnitDataGroup" class="form-control">${getOfflineRegistrationGroupTabs().slice(1).map(tab => `<option value="${tab.id}" ${currentOfflineUnitDataFilters.groupId === tab.id ? 'selected' : ''}>${tab.label}</option>`).join('')}</select></label>
+                <label><span>场次</span><select id="offlineUnitDataSession" class="form-control"><option value="all" ${currentOfflineUnitDataFilters.sessionId === 'all' ? 'selected' : ''}>全部场次</option>${OFFLINE_REGISTRATION_SESSIONS.map(session => `<option value="${session.id}" ${currentOfflineUnitDataFilters.sessionId === session.id ? 'selected' : ''}>${session.title}</option>`).join('')}</select></label>
+                <label><span>选送单位</span><input id="offlineUnitDataOrg" class="form-control" placeholder="请输入选送单位" value="${escapeHtml(currentOfflineUnitDataFilters.org)}"></label>
+                <div class="exam-filter-actions">
+                    <button class="btn btn-primary btn-sm" onclick="applyOfflineUnitDataFilters()">查询</button>
+                    <button class="btn btn-outline btn-sm" onclick="resetOfflineUnitDataFilters()">重置</button>
+                    <button class="btn btn-outline btn-sm" onclick="notifyOfflineRegistration('单位数据导出任务已创建')">导出</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="card unit-data-table-card">
+            <div class="review-list-title">单位报名数据</div>
+            <div class="unit-data-table-wrap">
+                ${renderOfflineUnitDataTable(rows)}
+            </div>
+            ${renderStandardPagination(rows.length)}
+        </section>
+    </div>`;
+}
+
+function getOfflineUnitDataRows() {
+    const sourceRows = OFFLINE_REGISTRATION_ROWS.filter(row => {
+        const filters = currentOfflineUnitDataFilters;
+        const matchGroup = filters.groupId === 'all' || row.groupId === filters.groupId;
+        const matchSession = filters.sessionId === 'all' || row.sessionId === filters.sessionId;
+        const matchOrg = !filters.org.trim() || String(row.org).includes(filters.org.trim());
+        return matchGroup && matchSession && matchOrg;
+    });
+    return groupRowsByOrg(sourceRows).map(([org, orgRows]) => {
+        return {
+            name: org,
+            ...getOfflineUnitMetrics(orgRows)
+        };
+    });
+}
+
+function getOfflineUnitMetrics(rows) {
+    const pendingQuantity = rows.reduce((sum, row) => sum + (row.auditStatus === '待审核' ? Number(row.quantity || 1) : 0), 0);
+    const successQuantity = rows.reduce((sum, row) => sum + (row.auditStatus === '已通过' && row.signupStatus !== '已取消' ? Number(row.quantity || 1) : 0), 0);
+    const rejectedQuantity = rows.reduce((sum, row) => sum + (row.auditStatus === '已拒绝' ? Number(row.quantity || 1) : 0), 0);
+    const cancelledQuantity = rows.reduce((sum, row) => sum + (row.signupStatus === '已取消' ? Number(row.quantity || 1) : 0), 0);
+    const checkedQuantity = rows.reduce((sum, row) => sum + (hasOfflineRegistrationActiveCheckin(row) ? Number(row.quantity || 1) : 0), 0);
+    const uncheckedQuantity = Math.max(successQuantity - checkedQuantity, 0);
+    const checkoutQuantity = rows.reduce((sum, row) => sum + (hasOfflineRegistrationCheckout(row) ? Number(row.quantity || 1) : 0), 0);
+    const uncheckoutQuantity = Math.max(checkedQuantity - checkoutQuantity, 0);
+    return {
+        pendingQuantity,
+        successQuantity,
+        rejectedQuantity,
+        cancelledQuantity,
+        checkedQuantity,
+        uncheckedQuantity,
+        checkoutQuantity,
+        uncheckoutQuantity,
+        checkinRate: successQuantity > 0 ? formatPercent(checkedQuantity, successQuantity) : '0',
+        checkoutRate: checkedQuantity > 0 ? formatPercent(checkoutQuantity, checkedQuantity) : '0'
+    };
+}
+
+function applyOfflineUnitDataFilters() {
+    currentOfflineUnitDataFilters = {
+        groupId: document.getElementById('offlineUnitDataGroup')?.value || getOfflineUnitDataDefaultGroupId(),
+        sessionId: document.getElementById('offlineUnitDataSession')?.value || 'all',
+        org: document.getElementById('offlineUnitDataOrg')?.value || ''
+    };
+    refreshOfflinePage('unit-data');
+    notifyOfflineRegistration('已按筛选条件查询');
+}
+
+function resetOfflineUnitDataFilters() {
+    currentOfflineUnitDataFilters = getDefaultOfflineUnitDataFilters();
+    refreshOfflinePage('unit-data');
+    notifyOfflineRegistration('筛选条件已重置');
+}
+
+function renderOfflineUnitDataTable(rows) {
+    return `
+    <table class="unit-data-table">
+        <thead>
+            <tr><th>单位名称</th><th>待审核</th><th>报名成功</th><th>已驳回</th><th>已取消</th><th>已签到</th><th>未签到</th><th>签到率</th><th>已签退</th><th>未签退</th><th>签退率</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+            ${rows.map(row => `
+                <tr>
+                    <td><strong>${escapeHtml(row.name)}</strong></td>
+                    <td>${unitPendingReviewValue(row.pendingQuantity)}</td>
+                    <td>${row.successQuantity}</td>
+                    <td>${row.rejectedQuantity}</td>
+                    <td>${row.cancelledQuantity}</td>
+                    <td>${row.checkedQuantity}</td>
+                    <td>${unitAbsenceValue(row.uncheckedQuantity)}</td>
+                    <td>${unitRateBadge(row.checkinRate)}</td>
+                    <td>${row.checkoutQuantity}</td>
+                    <td>${row.uncheckoutQuantity}</td>
+                    <td>${unitRateBadge(row.checkoutRate)}</td>
+                    <td><span class="action-link" onclick="openOfflineUnitDetail('${escHtml(row.name)}')">查看名单</span></td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>`;
+}
+
+function openOfflineUnitDetail(unitName) {
+    navigateTo('offline-unit-detail', {
+        params: { unitName },
+        source: { pageId: 'unit-data', params: {}, tabKey: activeTabKey }
+    });
+}
+
+let currentOfflineUnitDetailFilters = getDefaultOfflineUnitDetailFilters();
+
+function getOfflineUnitDetailDefaultGroupId() {
+    return getOfflineRegistrationGroupTabs().slice(1)[0]?.id || '';
+}
+
+function getDefaultOfflineUnitDetailFilters() {
+    return {
+        sessionId: 'all',
+        groupId: getOfflineUnitDetailDefaultGroupId(),
+        signupStatus: '全部状态',
+        auditStatus: '全部状态',
+        checkinStatus: '全部状态',
+        checkoutStatus: '全部状态',
+        wenyuNo: '',
+        participantName: '',
+        name: '',
+        participantPhone: '',
+        registrantPhone: '',
+        registeredAt: ''
+    };
+}
+
+function getOfflineUnitDetailSummary(rows) {
+    const metrics = getOfflineUnitMetrics(rows);
+    return {
+        ...metrics
+    };
+}
+
+function getOfflineUnitDetailFilterStatus(row) {
+    if (row.signupStatus === '已取消') return '已取消';
+    if (row.auditStatus === '已拒绝') return '已驳回';
+    if (row.auditStatus === '待审核') return '待审核';
+    return '已通过';
+}
+
+function getOfflineUnitDetailStatuses(row) {
+    const signupStatus = getOfflineUnitDetailFilterStatus(row);
+    const checkinStatus = hasOfflineRegistrationActiveCheckin(row) ? '已签到' : '未签到';
+    const checkoutStatus = hasOfflineRegistrationCheckout(row) ? '已签退' : '未签退';
+    return { signupStatus, checkinStatus, checkoutStatus };
+}
+
+function matchesOfflineUnitDetailFilters(row) {
+    const filters = currentOfflineUnitDetailFilters;
+    const matchSession = filters.sessionId === 'all' || row.sessionId === filters.sessionId;
+    const matchGroup = filters.groupId === 'all' || row.groupId === filters.groupId;
+    const matchSignupStatus = filters.signupStatus === '全部状态' || getOfflineRegistrationReviewFreeStatus(row) === filters.signupStatus;
+    const matchAuditStatus = filters.auditStatus === '全部状态' || getOfflineRegistrationFilterStatus(row) === filters.auditStatus;
+    const normalizedCheckinStatus = hasOfflineRegistrationActiveCheckin(row) ? '已签到' : '未签到';
+    const normalizedCheckoutStatus = hasOfflineRegistrationCheckout(row) ? '已签退' : '未签退';
+    const matchCheckinStatus = filters.checkinStatus === '全部状态' || normalizedCheckinStatus === filters.checkinStatus;
+    const matchCheckoutStatus = filters.checkoutStatus === '全部状态' || normalizedCheckoutStatus === filters.checkoutStatus;
+    const matchWenyuNo = !filters.wenyuNo || String(row.wenyuNo).includes(filters.wenyuNo.trim());
+    const matchParticipantName = !filters.participantName || String(row.name).includes(filters.participantName.trim());
+    const matchName = !filters.name || String(row.name).includes(filters.name.trim());
+    const matchParticipantPhone = !filters.participantPhone || String(row.phone).includes(filters.participantPhone.trim());
+    const matchRegistrantPhone = !filters.registrantPhone || String(row.phone).includes(filters.registrantPhone.trim());
+    const matchRegisteredAt = !filters.registeredAt || String(row.registeredAt).includes(filters.registeredAt.trim());
+    return matchSession && matchGroup && matchSignupStatus && matchAuditStatus && matchCheckinStatus && matchCheckoutStatus && matchWenyuNo && matchParticipantName && matchName && matchParticipantPhone && matchRegistrantPhone && matchRegisteredAt;
+}
+
+function applyOfflineUnitDetailFilters() {
+    currentOfflineUnitDetailFilters = {
+        sessionId: document.getElementById('offlineUnitDetailSession')?.value || 'all',
+        groupId: document.getElementById('offlineUnitDetailGroup')?.value || getOfflineUnitDetailDefaultGroupId(),
+        signupStatus: document.getElementById('offlineUnitDetailSignupStatus')?.value || '全部状态',
+        auditStatus: document.getElementById('offlineUnitDetailAuditStatus')?.value || '全部状态',
+        checkinStatus: document.getElementById('offlineUnitDetailCheckinStatus')?.value || '全部状态',
+        checkoutStatus: document.getElementById('offlineUnitDetailCheckoutStatus')?.value || '全部状态',
+        wenyuNo: document.getElementById('offlineUnitDetailWenyuNo')?.value || '',
+        participantName: document.getElementById('offlineUnitDetailParticipantName')?.value || '',
+        name: document.getElementById('offlineUnitDetailName')?.value || '',
+        participantPhone: document.getElementById('offlineUnitDetailParticipantPhone')?.value || '',
+        registrantPhone: document.getElementById('offlineUnitDetailRegistrantPhone')?.value || '',
+        registeredAt: document.getElementById('offlineUnitDetailRegisteredAt')?.value || ''
+    };
+    navigateTo('offline-unit-detail', {
+        params: currentPageParams,
+        source: currentPageSource,
+        refresh: true,
+        reuseTabKey: activeTabKey
+    });
+    notifyOfflineRegistration('已按筛选条件查询');
+}
+
+function resetOfflineUnitDetailFilters() {
+    currentOfflineUnitDetailFilters = getDefaultOfflineUnitDetailFilters();
+    navigateTo('offline-unit-detail', {
+        params: currentPageParams,
+        source: currentPageSource,
+        refresh: true,
+        reuseTabKey: activeTabKey
+    });
+    notifyOfflineRegistration('筛选条件已重置');
+}
+
+function renderOfflineUnitDetailPage(unitName) {
+    const allRows = OFFLINE_REGISTRATION_ROWS.filter(row => row.org === unitName);
+    const rows = allRows.filter(matchesOfflineUnitDetailFilters);
+    const selectedGroup = getOfflineRegistrationGroupTabs().find(tab => tab.id === currentOfflineUnitDetailFilters.groupId);
+    const selectedSession = currentOfflineUnitDetailFilters.sessionId === 'all'
+        ? { title: '全部场次' }
+        : getOfflineRegistrationSessionMeta(currentOfflineUnitDetailFilters.sessionId);
+    const listTitle = `报名人员列表｜${selectedGroup?.label || '全部组别'} - ${selectedSession?.title || '全部场次'}`;
+    const showAuditStatus = true;
+    return `
+    <div class="daily-user-detail-page unit-daily-detail-page">
+        <section class="card answer-detail-titlebar daily-user-detail-titlebar">
+            <div class="answer-detail-title-left">
+                ${renderSourceBack('offline-unit-detail')}
+                <div class="answer-detail-heading">
+                    <strong>${unitName || '-'}</strong>
+                </div>
+            </div>
+        </section>
+        <section class="card registration-card offline-registration-card">
+            <div class="offline-registration-filter-panel">
+                <div class="offline-registration-filter">
+                    <label><span>报名状态</span><select id="offlineUnitDetailSignupStatus" class="form-control"><option ${currentOfflineUnitDetailFilters.signupStatus === '全部状态' ? 'selected' : ''}>全部</option><option ${currentOfflineUnitDetailFilters.signupStatus === '已报名' ? 'selected' : ''}>已报名</option><option ${currentOfflineUnitDetailFilters.signupStatus === '已取消' ? 'selected' : ''}>已取消</option></select></label>
+                    <label><span>审核状态</span><select id="offlineUnitDetailAuditStatus" class="form-control"><option ${currentOfflineUnitDetailFilters.auditStatus === '全部状态' ? 'selected' : ''}>全部状态</option><option ${currentOfflineUnitDetailFilters.auditStatus === '待审核' ? 'selected' : ''}>待审核</option><option ${currentOfflineUnitDetailFilters.auditStatus === '已通过' ? 'selected' : ''}>已通过</option><option ${currentOfflineUnitDetailFilters.auditStatus === '已驳回' ? 'selected' : ''}>已驳回</option></select></label>
+                    <label><span>签到状态</span><select id="offlineUnitDetailCheckinStatus" class="form-control"><option ${currentOfflineUnitDetailFilters.checkinStatus === '全部状态' ? 'selected' : ''}>全部状态</option><option ${currentOfflineUnitDetailFilters.checkinStatus === '已签到' ? 'selected' : ''}>已签到</option><option ${currentOfflineUnitDetailFilters.checkinStatus === '未签到' ? 'selected' : ''}>未签到</option></select></label>
+                    <label><span>签退状态</span><select id="offlineUnitDetailCheckoutStatus" class="form-control"><option ${currentOfflineUnitDetailFilters.checkoutStatus === '全部状态' ? 'selected' : ''}>全部状态</option><option ${currentOfflineUnitDetailFilters.checkoutStatus === '已签退' ? 'selected' : ''}>已签退</option><option ${currentOfflineUnitDetailFilters.checkoutStatus === '未签退' ? 'selected' : ''}>未签退</option></select></label>
+                    <label><span>文遇号</span><input id="offlineUnitDetailWenyuNo" class="form-control" placeholder="请输入报名编号" value="${escapeHtml(currentOfflineUnitDetailFilters.wenyuNo)}"></label>
+                    <label><span>参与人</span><input id="offlineUnitDetailParticipantName" class="form-control" placeholder="请输入参与人姓名" value="${escapeHtml(currentOfflineUnitDetailFilters.participantName)}"></label>
+                    <label><span>报名人</span><input id="offlineUnitDetailName" class="form-control" placeholder="请输入报名人姓名" value="${escapeHtml(currentOfflineUnitDetailFilters.name)}"></label>
+                    <label><span>报名人手机号</span><input id="offlineUnitDetailRegistrantPhone" class="form-control" placeholder="请输入报名人手机号" value="${escapeHtml(currentOfflineUnitDetailFilters.registrantPhone)}"></label>
+                    <label><span>参与人手机号</span><input id="offlineUnitDetailParticipantPhone" class="form-control" placeholder="请输入参与人手机号" value="${escapeHtml(currentOfflineUnitDetailFilters.participantPhone)}"></label>
+                    <label><span>组别</span><select id="offlineUnitDetailGroup" class="form-control">${getOfflineRegistrationGroupTabs().slice(1).map(tab => `<option value="${tab.id}" ${currentOfflineUnitDetailFilters.groupId === tab.id ? 'selected' : ''}>${tab.label}</option>`).join('')}</select></label>
+                    <label><span>场次</span><select id="offlineUnitDetailSession" class="form-control"><option value="all" ${currentOfflineUnitDetailFilters.sessionId === 'all' ? 'selected' : ''}>全部场次</option>${OFFLINE_REGISTRATION_SESSIONS.map(session => `<option value="${session.id}" ${currentOfflineUnitDetailFilters.sessionId === session.id ? 'selected' : ''}>${session.title}</option>`).join('')}</select></label>
+                    <label><span>报名时间</span><input id="offlineUnitDetailRegisteredAt" class="form-control" placeholder="开始时间 - 结束时间" value="${escapeHtml(currentOfflineUnitDetailFilters.registeredAt)}"></label>
+                    <div class="registration-actions">
+                        <button class="btn btn-primary" onclick="applyOfflineUnitDetailFilters()">查询</button>
+                        <button class="btn btn-outline" onclick="resetOfflineUnitDetailFilters()">重置</button>
+                        <button class="btn btn-outline" onclick="notifyOfflineRegistration('单位报名明细导出任务已创建')">导出</button>
+                    </div>
+                </div>
+            </div>
+            <div class="offline-registration-list-section">
+                <div class="offline-registration-list-head">
+                    <strong>${escapeHtml(listTitle)}</strong>
+                </div>
+                <div class="registration-table-wrap offline-registration-table-wrap">
+                    <table class="registration-table offline-registration-table">
+                        <thead>
+                            ${renderOfflineRegistrationReadonlyDetailHead(showAuditStatus)}
+                        </thead>
+                        <tbody>
+                            ${rows.map((row, index) => renderOfflineRegistrationReadonlyDetailRow(row, index, false, showAuditStatus)).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${renderStandardPagination(rows.length)}
+            </div>
+        </section>
+    </div>`;
+}
+
+function renderOfflineCheckinStaffPage() {
+    const rows = getOfflineCheckinStaffRows();
+    return `
+    <div class="offline-checkin-staff-page">
+        <div class="quiz-data-toolbar-actions" style="justify-content:flex-start;margin-bottom:12px;">
+            <button class="btn btn-outline btn-sm" onclick="openOfflineCheckinStaffCreateModal()">新增工作人员</button>
+            <button class="btn btn-outline btn-sm" onclick="openOfflineRegistrationImportModal()">导入</button>
+        </div>
+        <section class="card quiz-data-toolbar">
+            <label><span>工作人员姓名</span><input id="offlineCheckinStaffName" class="form-control" placeholder="请输入姓名" value="${escapeHtml(currentOfflineCheckinStaffFilters.name)}"></label>
+            <label><span>手机号</span><input id="offlineCheckinStaffPhone" class="form-control" placeholder="请输入手机号" value="${escapeHtml(currentOfflineCheckinStaffFilters.phone)}"></label>
+            <div class="quiz-data-toolbar-actions">
+                <button class="btn btn-primary btn-sm" onclick="applyOfflineCheckinStaffFilters()">查询</button>
+                <button class="btn btn-outline btn-sm" onclick="resetOfflineCheckinStaffFilters()">重置</button>
+                <button class="btn btn-outline btn-sm" onclick="notifyOfflineRegistration('签到工作人员导出任务已创建')">导出</button>
+            </div>
+        </section>
+
+        <section class="card unit-data-table-card">
+            <div class="review-list-title">扫码签到工作人员</div>
+            <div class="unit-data-table-wrap">
+                ${renderOfflineCheckinStaffTable(rows)}
+            </div>
+            ${renderStandardPagination(rows.length)}
+        </section>
+    </div>`;
+}
+
+function getOfflineCheckinStaffRows() {
+    return OFFLINE_CHECKIN_STAFF_ROWS.filter(row => {
+        const matchName = !currentOfflineCheckinStaffFilters.name.trim() || String(row.name).includes(currentOfflineCheckinStaffFilters.name.trim());
+        const matchPhone = !currentOfflineCheckinStaffFilters.phone.trim() || String(row.phone).includes(currentOfflineCheckinStaffFilters.phone.trim());
+        return matchName && matchPhone;
+    });
+}
+
+function applyOfflineCheckinStaffFilters() {
+    currentOfflineCheckinStaffFilters = {
+        name: document.getElementById('offlineCheckinStaffName')?.value || '',
+        phone: document.getElementById('offlineCheckinStaffPhone')?.value || ''
+    };
+    refreshOfflinePage('offline-checkin-staff');
+    notifyOfflineRegistration('已按筛选条件查询');
+}
+
+function resetOfflineCheckinStaffFilters() {
+    currentOfflineCheckinStaffFilters = getDefaultOfflineCheckinStaffFilters();
+    refreshOfflinePage('offline-checkin-staff');
+    notifyOfflineRegistration('筛选条件已重置');
+}
+
+function renderOfflineCheckinStaffTable(rows) {
+    return `
+    <table class="unit-data-table">
+        <thead>
+            <tr><th>姓名</th><th>手机号</th><th>今日核销次数</th><th>最近活跃时间</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+            ${rows.map(row => `
+                <tr>
+                    <td><strong>${escapeHtml(row.name)}</strong></td>
+                    <td>${row.phone}</td>
+                    <td>${row.scansToday}</td>
+                    <td>${formatDateTimeSecond(row.lastActiveAt)}</td>
+                    <td><span class="action-link" onclick="openOfflineCheckinStaffLogModal('${row.id}')">查看记录</span><span class="action-link danger" onclick="removeOfflineCheckinStaff('${row.id}')">删除</span></td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>`;
+}
+
+function openOfflineCheckinStaffCreateModal() {
+    openModal('新增工作人员', `
+        <div class="offline-status-modal">
+            <label class="offline-status-modal-field">
+                <span>姓名</span>
+                <input id="offlineCheckinStaffCreateName" class="form-control" placeholder="请输入工作人员姓名">
+            </label>
+            <label class="offline-status-modal-field">
+                <span>手机号</span>
+                <input id="offlineCheckinStaffCreatePhone" class="form-control" placeholder="请输入手机号">
+            </label>
+        </div>
+    `, () => {
+        const name = document.getElementById('offlineCheckinStaffCreateName')?.value?.trim();
+        const phone = document.getElementById('offlineCheckinStaffCreatePhone')?.value?.trim();
+        if (!name || !phone) {
+            notifyOfflineRegistration('请完善工作人员姓名和手机号', 'warning');
+            return false;
+        }
+        OFFLINE_CHECKIN_STAFF_ROWS.unshift({
+            id: `staff-${Date.now()}`,
+            name,
+            phone,
+            org: currentManageActivity.name || '当前活动',
+            groups: [],
+            sessions: [],
+            permissions: ['扫码签到'],
+            scansToday: 0,
+            lastActiveAt: '-',
+            status: '启用'
+        });
+        notifyOfflineRegistration('已新增工作人员');
+        refreshOfflinePage('offline-checkin-staff');
+    }, { confirmText: '保存', modalClass: 'modal-md' });
+}
+
+function openOfflineCheckinStaffLogModal(staffId) {
+    const logs = OFFLINE_CHECKIN_STAFF_LOGS.filter(log => log.staffId === staffId && log.action === '扫码签到');
+    const staff = OFFLINE_CHECKIN_STAFF_ROWS.find(item => item.id === staffId);
+    openModal(`${staff ? escapeHtml(staff.name) : '工作人员'}操作记录`, `
+        <div class="unit-data-table-wrap">
+            ${logs.length ? renderOfflineCheckinStaffLogTable(logs, { compact: true }) : '<div class="text-muted">暂无扫码记录</div>'}
+        </div>
+    `, null, { hideCancel: true, confirmText: '关闭', modalClass: 'modal-lg' });
+}
+
+function removeOfflineCheckinStaff(staffId) {
+    const index = OFFLINE_CHECKIN_STAFF_ROWS.findIndex(item => item.id === staffId);
+    if (index < 0) return;
+    const staff = OFFLINE_CHECKIN_STAFF_ROWS[index];
+    openModal('删除工作人员', `<p>确认删除工作人员 <strong>${escapeHtml(staff.name)}</strong> 吗？</p>`, () => {
+        OFFLINE_CHECKIN_STAFF_ROWS.splice(index, 1);
+        notifyOfflineRegistration('已删除工作人员');
+        refreshOfflinePage('offline-checkin-staff');
+    }, { confirmText: '删除', danger: true });
+}
+
+function renderOfflineCheckinStaffLogTable(logs = OFFLINE_CHECKIN_STAFF_LOGS, options = {}) {
+    const compact = Boolean(options.compact);
+    return `
+    <table class="unit-data-table">
+        <thead>
+            <tr>${compact ? '<th>扫码时间</th><th>参与人</th><th>场次</th><th>组别</th><th>结果</th>' : '<th>操作时间</th><th>工作人员</th><th>用户</th><th>场次</th><th>组别</th><th>操作类型</th><th>结果</th><th>说明</th>'}</tr>
+        </thead>
+        <tbody>
+            ${logs.map(log => {
+                const staff = OFFLINE_CHECKIN_STAFF_ROWS.find(item => item.id === log.staffId);
+                return `
+                <tr>
+                    ${compact
+                        ? `<td>${formatDateTimeSecond(log.time)}</td>
+                    <td>${escapeHtml(log.user)}</td>
+                    <td>${escapeHtml(log.session)}</td>
+                    <td>${escapeHtml(log.group)}</td>
+                    <td>${log.result === '成功' ? '<span class="badge badge-green">成功</span>' : '<span class="badge badge-red">失败</span>'}</td>`
+                        : `<td>${formatDateTimeSecond(log.time)}</td>
+                    <td>${staff ? escapeHtml(staff.name) : '-'}</td>
+                    <td>${escapeHtml(log.user)}</td>
+                    <td>${escapeHtml(log.session)}</td>
+                    <td>${escapeHtml(log.group)}</td>
+                    <td>${escapeHtml(log.action)}</td>
+                    <td>${log.result === '成功' ? '<span class="badge badge-green">成功</span>' : '<span class="badge badge-red">失败</span>'}</td>
+                    <td>${escapeHtml(log.note)}</td>`}
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
 }
