@@ -1318,20 +1318,18 @@ function renderReviewTeacherManagePage(options = {}) {
       <span class="review-divider"></span>
       <strong>阅卷老师配置</strong>
     </div>`}
-    <div class="review-page-hero card">
-      <div class="review-page-hero-copy">
-        <h2>阅卷老师配置</h2>
-        <p>统一维护阅卷老师账号、密码与添加时间，支持快速检索和复制信息。</p>
-      </div>
-      <div class="review-page-actions">
+    <section class="review-config-topbar review-config-topbar-actions-only">
+      <div class="review-page-actions review-page-actions-top review-config-page-actions">
         <button class="btn btn-primary review-teacher-add-btn" onclick="openAddReviewTeacher()">添加阅卷老师</button>
       </div>
-    </div>
-    <div class="review-teacher-filter card">
+    </section>
+    <div class="review-teacher-filter review-config-filter card">
       <label>阅卷老师姓名</label><input class="form-control" placeholder="请输入阅卷老师姓名">
       <label>阅卷老师账号</label><input class="form-control" placeholder="请输入阅卷老师账号">
-      <button class="btn btn-primary review-teacher-search-btn" onclick="filterReviewTasks()">查询</button>
-      <button class="btn btn-outline" onclick="resetReviewFilters()">重置</button>
+      <div class="review-teacher-filter-actions">
+        <button class="btn btn-primary review-teacher-search-btn" onclick="filterReviewTasks()">查询</button>
+        <button class="btn btn-outline" onclick="resetReviewFilters()">重置</button>
+      </div>
     </div>
 
     <div class="card review-table-card review-teacher-table-card">
@@ -1359,7 +1357,7 @@ function renderReviewTeacherManagePage(options = {}) {
               <td></td>
               <td><span class="review-inline-text">${t.name}</span></td>
               <td><span class="review-inline-text">${t.account}</span></td>
-              <td><span class="review-inline-text review-password-text">${t.showPassword ? t.password : maskTeacherPassword(t.password)}</span><button class="icon-btn review-password-toggle" onclick="toggleReviewTeacherPassword('${t.id}')">👁</button></td>
+              <td><span class="review-inline-text review-password-text">${t.showPassword ? t.password : maskTeacherPassword(t.password)}</span><button class="icon-btn review-password-toggle" onclick="toggleReviewTeacherPassword('${t.id}')">查看</button></td>
               <td>${formatDateTimeSecond(t.addedAt || '-')}</td>
               <td>
                 <span class="action-link" onclick="editReviewTeacher('${t.id}')">编辑</span>

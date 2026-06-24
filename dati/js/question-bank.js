@@ -20,6 +20,36 @@ function renderQuestionBankOptions(selected) {
     return QUESTION_BANK_CHOICES.map(name => `<option ${selected === name ? 'selected' : ''}>${name}</option>`).join('');
 }
 
+function qbEscapeHtml(value = '') {
+    if (typeof escapeHtml === 'function') return escapeHtml(value);
+    return String(value).replace(/[&<>"']/g, match => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[match]));
+}
+
+function qbStripHtml(value = '') {
+    const temp = document.createElement('div');
+    temp.innerHTML = value || '';
+    return (temp.textContent || temp.innerText || '').trim();
+}
+
+function qbContentSummary(value = '') {
+    const text = qbStripHtml(value);
+    if (text) return text;
+    if (/<img\b/i.test(value)) return '[图片题干]';
+    if (/<audio\b/i.test(value)) return '[音频题干]';
+    if (/<video\b/i.test(value)) return '[视频题干]';
+    return '';
+}
+
+function qbContentForPlainEditor(value = '') {
+    return qbEscapeHtml(qbStripHtml(value));
+}
+
 function generateQuestions(bankId, count) {
     const questions = [];
     const bankName = questionBanks.find(b => b.id === bankId)?.name || '题库';
@@ -150,7 +180,7 @@ function renderQuestionManagePage() {
             </div>
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="openCreateQuestionModal()">+ 添加题目</button>
-                <button class="btn btn-outline" onclick="openBatchImportModal()">📥 批量导入</button>
+                <button class="btn btn-outline" onclick="openBatchImportModal()">批量导入</button>
             </div>
         </div>
         ${tableWrap(
@@ -158,7 +188,7 @@ function renderQuestionManagePage() {
             questions.map((q, i) => `<tr data-qid="${q.id}">
                 <td>${i + 1}</td>
                 <td><span class="badge ${questionTypeBadgeClass(q.type)}">${q.type}</span></td>
-                <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${q.content}">${q.content}</td>
+                <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${qbEscapeHtml(qbContentSummary(q.content))}">${qbEscapeHtml(qbContentSummary(q.content))}</td>
                 <td style="font-size:12px;color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.options}</td>
                 <td><span class="badge ${q.status === '启用' ? 'badge-green' : 'badge-gray'}">${q.status}</span></td>
                 <td>
@@ -239,7 +269,7 @@ function openEditBankModal(bankId) {
 function deleteBank(bankId) {
     const bank = questionBanks.find(b => b.id === bankId);
     if (!bank) return;
-    openModal('删除确认', `<div style="text-align:center;padding:10px 0"><div style="font-size:40px;margin-bottom:12px">⚠️</div><p>确定删除题库 <strong>${bank.name}</strong> 吗？</p><p style="color:var(--danger);font-size:12px;margin-top:8px">删除后该题库下所有题目将一并删除，操作不可恢复！</p></div>`, () => {
+    openModal('删除确认', `<div style="text-align:center;padding:10px 0"><div style="font-size:40px;margin-bottom:12px"></div><p>确定删除题库 <strong>${bank.name}</strong> 吗？</p><p style="color:var(--danger);font-size:12px;margin-top:8px">删除后该题库下所有题目将一并删除，操作不可恢复！</p></div>`, () => {
         const idx = questionBanks.findIndex(b => b.id === bankId);
         if (idx > -1) questionBanks.splice(idx, 1);
         navigateTo('question-bank');
@@ -325,7 +355,24 @@ function renderQuestionForm(q, options = {}) {
                     <label><span class="req">*</span> 题目内容</label>
                     <button type="button" class="btn btn-outline btn-sm" id="qInsertBlankBtn" onclick="insertQuestionBlank()">+ 插入填空</button>
                 </div>
-                <textarea class="form-control qb-question-title" rows="3" id="qContent" placeholder="请输入题目内容">${isEdit ? q.content : ''}</textarea>
+                <div class="hint qb-question-content-hint">请输入题干内容，可添加文字说明、材料说明或答题要求。</div>
+                <textarea class="form-control qb-question-title" id="qContentEditor" rows="5" oninput="syncQuestionRichContent()" placeholder="请输入题目内容，例如：请阅读下列材料，并选择正确答案。">${isEdit ? qbContentForPlainEditor(q.content) : ''}</textarea>
+                <div class="qb-stem-assets">
+                    <div>
+                        <div class="qb-stem-assets-title">题干素材（可选）</div>
+                        <div class="qb-stem-assets-desc">用于上传与题目相关的图片、音频或视频，用户答题时将在题干下方展示。</div>
+                    </div>
+                    <div class="qb-stem-asset-actions">
+                        <button class="btn btn-outline btn-sm" type="button" onclick="openQuestionMediaPicker('image')">上传图片</button>
+                        <button class="btn btn-outline btn-sm" type="button" onclick="openQuestionMediaPicker('audio')">上传音频</button>
+                        <button class="btn btn-outline btn-sm" type="button" onclick="openQuestionMediaPicker('video')">上传视频</button>
+                    </div>
+                    <div class="qb-stem-asset-list" id="qStemAssetList"></div>
+                </div>
+                <input type="hidden" id="qContent" value="${isEdit ? qbEscapeHtml(q.content) : ''}">
+                <input type="file" id="qMediaImageInput" accept="image/*" hidden onchange="insertQuestionMediaFromInput('image', this)">
+                <input type="file" id="qMediaAudioInput" accept="audio/*" hidden onchange="insertQuestionMediaFromInput('audio', this)">
+                <input type="file" id="qMediaVideoInput" accept="video/*" hidden onchange="insertQuestionMediaFromInput('video', this)">
             </div>
         </section>
         <section class="qb-standard-middle">
@@ -386,6 +433,7 @@ function initQuestionForm(q) {
             answerText: q?.type === '排序题' ? q.answer : ''
         }
     };
+    syncQuestionRichContent();
     setQuestionType(document.getElementById('qType')?.value || '单选题', true);
 }
 
@@ -412,9 +460,9 @@ function setQuestionType(type, keepAnswer = false) {
     if (help) help.textContent = getQuestionDynamicHelp(type);
     const blankBtn = document.getElementById('qInsertBlankBtn');
     if (blankBtn) blankBtn.style.display = type === '填空题' ? '' : 'none';
-    const contentInput = document.getElementById('qContent');
-    if (contentInput) {
-        contentInput.placeholder = type === '填空题'
+    const contentEditor = document.getElementById('qContentEditor');
+    if (contentEditor) {
+        contentEditor.placeholder = type === '填空题'
             ? '例如：中国的首都是____，简称____。'
             : '请输入题目内容';
     }
@@ -423,15 +471,58 @@ function setQuestionType(type, keepAnswer = false) {
 }
 
 function insertQuestionBlank() {
+    const editor = document.getElementById('qContentEditor');
+    if (!editor) return;
+    editor.focus();
+    const start = editor.selectionStart ?? editor.value.length;
+    const end = editor.selectionEnd ?? editor.value.length;
+    editor.value = `${editor.value.slice(0, start)}____${editor.value.slice(end)}`;
+    editor.selectionStart = editor.selectionEnd = start + 4;
+    syncQuestionRichContent();
+}
+
+function syncQuestionRichContent() {
+    const editor = document.getElementById('qContentEditor');
     const input = document.getElementById('qContent');
-    if (!input) return;
-    const blank = '____';
-    const start = input.selectionStart ?? input.value.length;
-    const end = input.selectionEnd ?? input.value.length;
-    input.value = `${input.value.slice(0, start)}${blank}${input.value.slice(end)}`;
-    const next = start + blank.length;
-    input.focus();
-    input.setSelectionRange(next, next);
+    if (!editor || !input) return;
+    input.value = editor.value.trim();
+}
+
+function openQuestionMediaPicker(type) {
+    const inputMap = {
+        image: 'qMediaImageInput',
+        audio: 'qMediaAudioInput',
+        video: 'qMediaVideoInput'
+    };
+    document.getElementById(inputMap[type])?.click();
+}
+
+function insertQuestionMediaFromInput(type, input) {
+    const file = input?.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const name = qbEscapeHtml(file.name);
+    const labelMap = { image: '图片', audio: '音频', video: '视频' };
+    const previewMap = {
+        image: `<img src="${url}" alt="${name}">`,
+        audio: `<div class="qb-stem-asset-audio-icon">音频</div><audio controls src="${url}"></audio>`,
+        video: `<video controls src="${url}"></video>`
+    };
+    const list = document.getElementById('qStemAssetList');
+    if (list) {
+        list.insertAdjacentHTML('beforeend', `
+            <div class="qb-stem-asset-card ${type}">
+                <button type="button" class="qb-stem-asset-remove" title="移除素材" onclick="removeQuestionStemAsset(this)">×</button>
+                <div class="qb-stem-asset-preview">${previewMap[type] || ''}</div>
+                <div class="qb-stem-asset-name">${labelMap[type] || '素材'} · ${name}</div>
+            </div>`);
+    }
+    input.value = '';
+    syncQuestionRichContent();
+}
+
+function removeQuestionStemAsset(button) {
+    button?.closest?.('.qb-stem-asset-card')?.remove();
 }
 
 function getQuestionDynamicTitle(type) {
@@ -651,6 +742,7 @@ function parseSortItemsText(text = '') {
 
 function validateQuestionForm() {
     syncQuestionAnswerState();
+    syncQuestionRichContent();
     const type = document.getElementById('qType')?.value || '';
     const bank = document.getElementById('qBank')?.value || '';
     const content = document.getElementById('qContent')?.value.trim();
@@ -658,7 +750,7 @@ function validateQuestionForm() {
     const state = document.querySelector('.qb-question-editor')?.typeState?.[type];
     if (!type) { alert('请选择题型'); return false; }
     if (!bank) { alert('请选择题库'); return false; }
-    if (!content) { alert('请填写题目内容'); return false; }
+    if (!qbContentSummary(content)) { alert('请填写题目内容'); return false; }
     if (['单选题', '多选题'].includes(type)) {
         const options = parseChoiceOptionsText(state?.optionsText || '');
         const labels = options.map(opt => opt.label);
@@ -703,6 +795,7 @@ function validateQuestionForm() {
 
 function getQuestionFormValues() {
     syncQuestionAnswerState();
+    syncQuestionRichContent();
     const type = document.getElementById('qType')?.value || '单选题';
     const bank = document.getElementById('qBank')?.value || QUESTION_BANK_CHOICES[0];
     const content = document.getElementById('qContent')?.value.trim() || '';
@@ -740,7 +833,7 @@ function previewQuestion(qId) {
 
 // ===== 删除题目 =====
 function deleteQuestion(qId) {
-    openModal('删除确认', '<div style="text-align:center;padding:10px 0"><div style="font-size:40px;margin-bottom:12px">⚠️</div><p>确定删除该题目吗？</p><p style="color:var(--danger);font-size:12px;margin-top:8px">操作不可恢复！</p></div>', () => {
+    openModal('删除确认', '<div style="text-align:center;padding:10px 0"><div style="font-size:40px;margin-bottom:12px"></div><p>确定删除该题目吗？</p><p style="color:var(--danger);font-size:12px;margin-top:8px">操作不可恢复！</p></div>', () => {
         alert('题目已删除！（演示提示）');
         openQuestionManage(currentBankId);
     }, { confirmText: '确认删除', danger: true });
@@ -752,7 +845,7 @@ function openBatchImportModal() {
     openModal('批量导入题目', `
         <div class="info-box blue">💡 请下载模板文件，按照模板格式填写后上传。支持 Excel (.xlsx) 格式。</div>
         <div class="form-group"><label>下载模板</label>
-            <button class="btn btn-outline btn-sm" onclick="alert('模板下载中...（演示提示）')">📥 下载导入模板</button>
+            <button class="btn btn-outline btn-sm" onclick="alert('模板下载中...（演示提示）')">下载导入模板</button>
         </div>
         <div class="form-group"><label>上传文件</label>
             <div style="border:2px dashed var(--border);border-radius:var(--radius-md);padding:32px;text-align:center;cursor:pointer;transition:var(--t-fast)" onmouseover="this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">

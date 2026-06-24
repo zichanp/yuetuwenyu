@@ -778,7 +778,7 @@ function renderQuizStepIntroFree() {
         ${renderQuizIntroDeviceControls()}
         <div class="intro-free-editor">
             <div class="intro-toolbar intro-free-toolbar">
-                <span>H</span><span>B</span><span><i>I</i></span><span>U</span><span>S</span><span>✎</span><span>⌁</span><span>🔗</span><span>☷</span><span>≡</span><span>“</span><span>☺</span><span>▧</span><span>▦</span><span>▶</span><span>&gt;_</span><span>↶</span><span>↷</span>
+                <span>H</span><span>B</span><span><i>I</i></span><span>U</span><span>S</span><span>✎</span><span>⌁</span><span></span><span>☷</span><span>≡</span><span>“</span><span>☺</span><span>▧</span><span>▦</span><span>▶</span><span>&gt;_</span><span>↶</span><span>↷</span>
             </div>
             <div class="intro-free-editor-body" contenteditable="true" oninput="markIntroDeviceEdited()"></div>
         </div>
@@ -842,7 +842,7 @@ function renderIntroEditorBlock(title, placeholder) {
         <div class="intro-editor-row">
             <div class="intro-editor">
                 <div class="intro-toolbar">
-                    <span>H</span><span>B</span><span><i>I</i></span><span>U</span><span>S</span><span>✎</span><span>⌁</span><span>🔗</span><span>☷</span><span>≡</span><span>“</span><span>☺</span><span>▧</span><span>▦</span><span>▶</span><span>&gt;_</span><span>↶</span><span>↷</span>
+                    <span>H</span><span>B</span><span><i>I</i></span><span>U</span><span>S</span><span>✎</span><span>⌁</span><span></span><span>☷</span><span>≡</span><span>“</span><span>☺</span><span>▧</span><span>▦</span><span>▶</span><span>&gt;_</span><span>↶</span><span>↷</span>
                 </div>
                 <div class="intro-editor-body">${placeholder}</div>
             </div>
@@ -978,7 +978,7 @@ function renderQuizStepSignupAnswer() {
     <section class="quiz-config-card">
         <h3 style="font-size:var(--font-size-md);font-weight:var(--font-weight-bold);color:var(--text-primary);margin-bottom:var(--spacing-md)">${needSignup ? '报名须知' : '参与须知'}</h3>
         <div class="qc-editor">
-            <div class="qc-editor-toolbar"><button>B</button><button>I</button><button>U</button><button>🔗</button><button>🖼</button></div>
+            <div class="qc-editor-toolbar"><button>B</button><button>I</button><button>U</button><button></button><button></button></div>
             <div contenteditable="true">请输入报名须知、参与说明和注意事项...</div>
         </div>
     </section>`;
@@ -1354,8 +1354,9 @@ function renderGroupCard(g, i) {
                 ${menuOpen ? `
                 <div class="gc-menu" onclick="event.stopPropagation()">
                     <div class="gc-menu-item" onclick="copyGroup(${i});closeGroupMenus()">⧉ 复制组别</div>
+                    ${groups.length > 1 ? `
                     <div class="gc-menu-divider"></div>
-                    <div class="gc-menu-item danger" onclick="openDeleteGroup(${i});closeGroupMenus()">🗑 删除组别</div>
+                    <div class="gc-menu-item danger" onclick="openDeleteGroup(${i});closeGroupMenus()">删除组别</div>` : ''}
                 </div>` : ''}
             </div>
             <div class="gc-progress-line">
@@ -1367,7 +1368,7 @@ function renderGroupCard(g, i) {
                 ${needSignup ? `
                 <div class="gc-config-tile ${g.formConfigured ? 'done' : 'todo'}" onclick="openFormConfig(${i})">
                     <div class="gc-tile-top">
-                        <div class="gc-tile-icon">📄</div>
+                        <div class="gc-tile-icon"></div>
                         <span class="gc-tile-state">${g.formConfigured ? '已完成' : '待配置'}</span>
                     </div>
                     <div class="gc-tile-title">报名表</div>
@@ -2839,7 +2840,7 @@ function renderDailyExamPaperPanel() {
     return `
     <div class="cfg-panel" id="dailyExamPapers">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('dailyExamPapers')">
-            <div class="cfg-panel-icon green">📄</div>
+            <div class="cfg-panel-icon green"></div>
             <div><div class="cfg-panel-title">每日试卷配置</div><div class="cfg-panel-subtitle">按开放日期自动生成每日配置项</div></div>
             <div class="daily-exam-head-actions">
                 <button class="btn btn-outline btn-sm daily-exam-edit-btn" type="button" onclick="event.stopPropagation();openEditDailyExamModal()">编辑</button>
@@ -2939,7 +2940,7 @@ function renderDailyExamSinglePaperCard(day, index) {
         </div>
         ${paper ? `
             <div class="paper-source-card selected" style="cursor:default">
-                <div class="psc-title">📄 ${paper.name} <span style="margin-left:6px">${paperModeBadges(paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${paper.status || '启用'}</span></div>
+                <div class="psc-title">${paper.name} <span style="margin-left:6px">${paperModeBadges(paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${paper.status || '启用'}</span></div>
                 <div class="psc-meta-grid">
                     <div><span class="psc-meta-lbl">题目数量：</span><span class="psc-meta-val">${paper.qCount} 题</span></div>
                     <div><span class="psc-meta-lbl">试卷总分：</span><span class="psc-meta-val">${paper.total} 分</span></div>
@@ -3016,7 +3017,7 @@ function renderExamModule1(ec, qCount, total) {
     return `
     <div class="cfg-panel" id="examQSource">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('examQSource')">
-            <div class="cfg-panel-icon blue">📄</div>
+            <div class="cfg-panel-icon blue"></div>
             <div><div class="cfg-panel-title">题目配置</div><div class="cfg-panel-subtitle">在当前页面配置本场考试题目，或从题库选择题目。</div></div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
@@ -3084,7 +3085,7 @@ function renderFixedPaperBlock(paper) {
         <div class="cfg-row-label"><span class="req">*</span> 题目配置</div>
         <div class="cfg-row-control">
             <div class="paper-source-card selected" style="cursor:default">
-                <div class="psc-title">📄 ${paper.name} <span style="margin-left:6px">${paperModeBadges(paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${paper.status||'启用'}</span></div>
+                <div class="psc-title">${paper.name} <span style="margin-left:6px">${paperModeBadges(paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${paper.status||'启用'}</span></div>
                 <div class="psc-meta-grid">
                     <div><span class="psc-meta-lbl">题目数量：</span><span class="psc-meta-val">${paper.qCount} 题</span></div>
                     <div><span class="psc-meta-lbl">试卷总分：</span><span class="psc-meta-val">${paper.total} 分</span></div>
@@ -3203,7 +3204,7 @@ function renderExamModule4(ec, total) {
     return `
     <div class="cfg-panel" id="examScore">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('examScore')">
-            <div class="cfg-panel-icon orange">📊</div>
+            <div class="cfg-panel-icon orange"></div>
             <div><div class="cfg-panel-title">分数与成绩规则</div><div class="cfg-panel-subtitle">及格分数、成绩取值规则、排名规则</div></div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
@@ -3492,7 +3493,7 @@ function renderPhasedModule3And4(pc) {
     return `
     <div class="cfg-panel" id="phasedPapers">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('phasedPapers')">
-            <div class="cfg-panel-icon purple">📚</div>
+            <div class="cfg-panel-icon purple"></div>
             <div><div class="cfg-panel-title">分期试卷列表</div><div class="cfg-panel-subtitle">按考试期次配置主题试卷，系统将根据每期开放时间在用户端展示当前可作答的试卷</div></div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
@@ -3611,7 +3612,7 @@ function renderPhaseDetail(p, i) {
             <div class="cfg-row-control">
                 ${p.paper ? `
                     <div class="paper-source-card selected" style="cursor:default">
-                        <div class="psc-title">📄 ${p.paper.name} <span style="margin-left:6px">${paperModeBadges(p.paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${p.paper.status}</span></div>
+                        <div class="psc-title">${p.paper.name} <span style="margin-left:6px">${paperModeBadges(p.paper)}</span> <span class="badge badge-green" style="font-size:11px;margin-left:6px">${p.paper.status}</span></div>
                     <div class="psc-meta-grid">
                         <div><span class="psc-meta-lbl">题目数量：</span><span class="psc-meta-val">${p.paper.qCount} 题</span></div>
                         <div><span class="psc-meta-lbl">题型分值：</span><span class="psc-meta-val">${formatPaperTypeScores(p.paper)}</span></div>
@@ -4340,8 +4341,8 @@ function renderQuizExamPublishConfirmFallback() {
                     </div>
                     ${renderQuizConfirmRowsFallback([
                         { label: '活动名称', value: activityTitle },
-                        { label: '活动模式', value: '<span class="badge badge-blue">在线考试</span>' },
-                        { label: '活动分类', value: `知识问答-${getQuizCreateModeTitle()}` },
+                        { label: '活动模式', value: '<span class="badge badge-blue">知识问答题活动</span>' },
+                        { label: '活动分类', value: `知识问答题-${getQuizCreateModeTitle()}` },
                         { label: '活动状态', value: '未发布' }
                     ])}
                     <div class="confirm-chip-row"><span>赛事</span><span>读书</span><span>线上活动</span><span>活动报名</span><span>全国性活动</span><span>${getQuizUnitRoleOption().label}</span></div>
@@ -4359,7 +4360,7 @@ function renderQuizExamPublishConfirmFallback() {
                     <div class="confirm-rich-list">
                         <div><strong>活动背景</strong><p>围绕华服文化、传统礼仪、典籍阅读与图书馆业务知识，组织线上线下结合的知识挑战活动，帮助参与者在答题中了解中华优秀传统文化。</p></div>
                         <div><strong>活动对象</strong><p>面向全国图书馆从业者、阅读推广志愿者、高校学生及传统文化爱好者开放参与。</p></div>
-                        <div><strong>规则说明</strong><p>参与者完成报名后进入在线考试。系统按固定试卷出题，达到及格线即视为通过；活动结束后按成绩生成排行榜。</p></div>
+                        <div><strong>规则说明</strong><p>参与者完成报名后进入知识问答答题流程。系统按配置规则出题，用户完成作答后生成成绩结果与排行榜展示。</p></div>
                     </div>
                 </section>
 
@@ -4372,11 +4373,11 @@ function renderQuizExamPublishConfirmFallback() {
                         <div class="confirm-group-head"><strong>${firstGroup.name || '组别一'}</strong><span class="badge badge-green">已配置</span><em>配置进度 2/2</em></div>
                         <div class="confirm-preview-grid">
                             <div class="confirm-preview-card"><strong>报名表</strong><span>字段：姓名、手机号、单位、职务、所在地区</span><span>实名信息与提交规则已配置</span></div>
-                            <div class="confirm-preview-card"><strong>答题配置</strong><span>在线考试 · 固定试卷 · 限时作答</span><span>考试开放时间：2026-06-09 09:00 至 2026-06-09 18:00 <span class="locked-tag">锁定</span></span></div>
+                            <div class="confirm-preview-card"><strong>答题配置</strong><span>知识问答题 · 固定试卷 · 限时作答</span><span>答题开放时间：2026-06-09 09:00 至 2026-06-09 18:00 <span class="locked-tag">锁定</span></span></div>
                         </div>
                     </div>
                     <div class="exam-paper-confirm-card">
-                        <div class="exam-paper-confirm-title">在线考试试卷 <span class="badge badge-green">固定题目</span></div>
+                        <div class="exam-paper-confirm-title">知识问答题试卷 <span class="badge badge-green">固定题目</span></div>
                         <div class="exam-paper-confirm-grid"><span>题目数量：${firstGroup.quizQCount || 50}</span><span>试卷总分：${firstGroup.quizTotal || 100}</span><span>题型组成：按所选试卷配置</span><span>状态：待发布引用</span></div>
                     </div>
                     ${renderQuizConfirmRowsFallback([
@@ -4525,7 +4526,7 @@ function renderPaperDrawer() {
         return `
         <div class="pd-paper-card" onclick="selectPaperFromDrawer(${p.sourceIndex})">
             <div class="pd-paper-head">
-                <div class="pd-paper-name">📄 ${p.name}</div>
+                <div class="pd-paper-name">${p.name}</div>
                 <span>${paperModeBadges(p)}</span>
             </div>
             <div class="pd-paper-meta">
@@ -4601,7 +4602,7 @@ function renderDailyModeConfig() {
     <!-- 1. 题目来源 -->
     <div class="cfg-panel" id="dailyQSource">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('dailyQSource')">
-            <div class="cfg-panel-icon green">📄</div>
+            <div class="cfg-panel-icon green"></div>
             <div class="daily-panel-title-wrap">
                 <div class="cfg-panel-title">每日答题配置</div>
                 <div class="cfg-panel-subtitle">系统将按开放日期自动生成日历；可先批量配置随机抽题规则，再为单日设置抽题规则、固定题目或开放状态。</div>
@@ -4681,7 +4682,7 @@ function renderDailyRandomSourceContent() {
                         <button type="button" class="btn btn-outline btn-sm" onclick="addDailyRandomRule()">+ 新增抽题规则</button>
                         <div style="font-size:12px;color:var(--text-tertiary)">每日题目数量：<strong style="color:var(--primary)">${getRuleQuestionCount(dailyRandomRules)}</strong> 题</div>
                     </div>
-                    <div class="info-box yellow" style="margin-top:8px">⚠ 每日答题仅支持标准答案题：单选题、多选题、判断题、填空题、排序题，至少配置 1 条抽题规则。</div>
+                    <div class="info-box yellow" style="margin-top:8px">每日答题仅支持标准答案题：单选题、多选题、判断题、填空题、排序题，至少配置 1 条抽题规则。</div>
                 </div>
             </div>
     `;
@@ -5107,7 +5108,7 @@ function renderLevelDetail() {
 
     <div class="cfg-panel" id="levelQSource">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('levelQSource')">
-            <div class="cfg-panel-icon blue">📄</div>
+            <div class="cfg-panel-icon blue"></div>
             <div><div class="cfg-panel-title">本关题目配置</div><div class="cfg-panel-subtitle">${questionMode === 'fixed' ? '按本关配置固定题目' : '按本关配置抽题规则'}</div></div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
@@ -5169,7 +5170,7 @@ function renderLevelQuestionFullscreenEditor(level) {
     <div class="level-question-inline-shell">
         <div class="cfg-panel level-question-inline-panel">
             <div class="cfg-panel-head">
-                <div class="cfg-panel-icon blue">📄</div>
+                <div class="cfg-panel-icon blue"></div>
                 <div><div class="cfg-panel-title">本关题目配置</div><div class="cfg-panel-subtitle">可选择随机抽题或固定题目。</div></div>
                 <span class="cfg-panel-badge essential">必填</span>
             </div>
@@ -5210,7 +5211,7 @@ function renderLevelQuestionSourceEditor(level) {
                     <div id="levelDrawRules">
                         ${rules.map((rule, idx) => renderScoreDrawRuleRow(rule, idx, 'level', rules.length)).join('')}
                     </div>
-                    <div class="info-box yellow" style="margin-top:8px">⚠趣味闯关仅支持标准答案题：单选题、多选题、判断题、填空题、排序题，至少配置 1 条抽题规则。</div>
+                    <div class="info-box yellow" style="margin-top:8px">趣味闯关仅支持标准答案题：单选题、多选题、判断题、填空题、排序题，至少配置 1 条抽题规则。</div>
                 </div>
             </div>
         `}`;

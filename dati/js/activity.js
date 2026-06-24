@@ -13,7 +13,7 @@ registerPage('activity-list', () => {
             <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>${isOfflineList ? '讲座沙龙' : '在线考试'}</option><option>${isOfflineList ? '培训会议' : '每日答题'}</option><option>${isOfflineList ? '展览导览' : '趣味闯关'}</option></select></div>
             <div class="form-group"><label>活动状态</label><select class="form-control"><option>全部状态</option><option>未发布</option><option>预告中</option><option>进行中</option><option>已结束</option><option>已下架</option></select></div>
             <div style="display:flex;align-items:flex-end;justify-content:flex-end;gap:var(--spacing-sm)">
-                <button class="btn btn-primary">🔍 搜索</button>
+                <button class="btn btn-primary">搜索</button>
                 <button class="btn btn-ghost">重置</button>
             </div>
         </div>
@@ -99,6 +99,9 @@ function activityCard(c) {
             <div style="display:flex;align-items:center;gap:var(--spacing-sm);margin-bottom:var(--spacing-xs);flex-wrap:wrap">
                 <strong style="font-size:var(--font-size-md)">${c.title}</strong>
                 <span class="badge ${c.statusCls}">${c.status}</span>
+                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="访问活动" aria-label="访问活动">↗</button>
+                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="复制链接" aria-label="复制链接">⧉</button>
+                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="二维码" aria-label="二维码">▦</button>
             </div>
             <div style="display:flex;align-items:center;gap:var(--spacing-sm);margin-bottom:var(--spacing-xs)">
                 <span class="badge ${c.toolCls}">${toolLabel}</span>
@@ -106,26 +109,120 @@ function activityCard(c) {
             </div>
             <div style="display:flex;align-items:center;gap:var(--spacing-lg);font-size:var(--font-size-xs);color:var(--text-tertiary);flex-wrap:wrap">
                 <span>🕐 ${activityTime}</span>
-                <span>🏢 ${c.host}</span>
+                <span>🏢 创建单位：广州大学</span>
                 <span>👤 ${creatorText}</span>
             </div>
         </div>
         <div style="display:flex;align-items:center;gap:var(--spacing-xxs);flex-shrink:0;${c.series ? 'margin-top:8px' : ''}">
-            <div class="top-nav-icon" title="访问活动">🔗</div>
-            <div class="top-nav-icon" title="复制链接">📋</div>
-            <div class="top-nav-icon" title="二维码">📱</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:var(--spacing-xxs);flex-shrink:0;border-left:1px solid var(--border-color-light);padding-left:var(--spacing-md);${c.series ? 'margin-top:8px' : ''}">
             ${renderQuizPublishScoreButton(c.scorePublishProgress, c)}
             ${c.canManage
-                ? `<button class="btn btn-primary btn-sm" onclick="${c.manageType === 'quiz' ? `enterQuizActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.mode || '')}')` : c.manageType === 'offline' ? `enterOfflineActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : `navigateTo('activity-manage')`}">进入管理</button>
-                   <button class="btn btn-outline btn-sm" onclick="${c.manageType === 'quiz' ? `navigateTo('quiz-activity-create', { params: { mode: 'edit' } })` : c.manageType === 'offline' ? `navigateTo('offline-activity-create', { params: { mode: 'edit' } })` : `navigateTo('activity-create')`}">编辑活动</button>`
+                ? `<button class="btn btn-primary btn-sm" onclick="${c.manageType === 'quiz' ? `enterQuizActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.mode || '')}')` : c.manageType === 'offline' ? `enterOfflineActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : c.manageType === 'vote' ? `enterVoteActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : `navigateTo('activity-manage')`}">进入管理</button>
+                   <button class="btn btn-outline btn-sm" onclick="${c.manageType === 'quiz' ? `navigateTo('quiz-activity-create', { params: { mode: 'edit' } })` : c.manageType === 'offline' ? `navigateTo('offline-activity-create', { params: { mode: 'edit' } })` : c.manageType === 'vote' ? `navigateTo('vote-activity-create', { params: { mode: 'edit' } })` : `navigateTo('activity-create')`}">编辑活动</button>`
                 : `<button class="btn btn-outline btn-sm">查看数据</button>
                    <button class="btn btn-outline btn-sm">创建副本</button>`
             }
-            <div class="top-nav-icon" title="更多">⋮</div>
+            <div class="activity-more-wrap">
+                <button type="button" class="top-nav-icon activity-more-trigger" aria-label="更多操作" onclick="toggleActivityCardMoreMenu(event)">⋮</button>
+                <div class="activity-more-menu">
+                    ${isSystemAdmin() ? '<button type="button" onclick="handleActivityMoreAction(event, \'recommend\')">推荐到首页（admin）</button>' : ''}
+                    <button type="button" onclick="handleActivityMoreAction(event, 'copy')">创建副本</button>
+                    <button type="button" onclick="handleActivityMoreAction(event, 'offline')">下架</button>
+                    <button type="button" onclick="handleActivityMoreAction(event, 'delete')">删除</button>
+                </div>
+            </div>
         </div>
     </div>`;
+}
+
+function isSystemAdmin() {
+    const user = window.currentUser || window.CURRENT_USER || window.__CURRENT_USER__ || {};
+    const roleText = [
+        user.role,
+        user.roleName,
+        user.identity,
+        Array.isArray(user.roles) ? user.roles.join(' ') : '',
+        Array.isArray(user.permissions) ? user.permissions.join(' ') : ''
+    ].filter(Boolean).join(' ');
+    if (roleText) return /系统管理员|平台管理员|super.?admin|system.?admin/i.test(roleText);
+    return true;
+}
+
+function toggleActivityCardMoreMenu(event) {
+    event.stopPropagation();
+    const menu = event.currentTarget.closest('.activity-more-wrap')?.querySelector('.activity-more-menu');
+    if (!menu) return;
+    const willShow = !menu.classList.contains('show');
+    closeActivityCardMoreMenus();
+    closeActivityDropdown();
+    if (willShow) menu.classList.add('show');
+}
+
+function closeActivityCardMoreMenus() {
+    document.querySelectorAll('.activity-more-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+    });
+}
+
+function handleActivityMoreAction(event, action) {
+    event.stopPropagation();
+    closeActivityCardMoreMenus();
+    if (action === 'recommend') {
+        openRecommendHomeConfirm();
+        return;
+    }
+    if (action === 'copy') {
+        openCopyActivityProgress();
+        return;
+    }
+    const actionText = {
+        offline: '活动已下架',
+        delete: '活动已删除'
+    };
+    openModal('操作成功', `<p>${actionText[action] || '操作已完成'}。</p>`, null, {
+        hideCancel: true,
+        confirmText: '知道了'
+    });
+}
+
+function openRecommendHomeConfirm() {
+    openModal(
+        '确认推荐到首页',
+        `<div class="recommend-home-confirm">
+            <p>推荐后，该活动将在首页优先展示。推荐顺序越小越靠前，1 为最前；若推荐顺序相同，则后推荐的活动排在前面</p>
+            <input id="recommendHomeOrderInput" class="form-control" type="number" min="1" step="1" placeholder="请输入推荐顺序，如 1、2、3">
+        </div>`,
+        () => {
+            const order = document.getElementById('recommendHomeOrderInput')?.value?.trim();
+            openModal('操作成功', `<p>已推荐到首页${order ? `，推荐顺序为 ${order}` : ''}。</p>`, null, {
+                hideCancel: true,
+                confirmText: '知道了'
+            });
+        },
+        {
+            confirmText: '确认推荐',
+            cancelText: '取消',
+            modalClass: 'modal-md recommend-home-modal'
+        }
+    );
+}
+
+function openCopyActivityProgress() {
+    openModal(
+        '',
+        `<div class="activity-copy-progress">
+            <p>正在复制活动配置，请稍候...</p>
+            <div class="activity-copy-progress-track">
+                <div class="activity-copy-progress-fill" style="width:60%"><span>60%</span></div>
+            </div>
+            <strong>创建过程中请勿关闭页面</strong>
+        </div>`,
+        null,
+        {
+            hideCancel: true,
+            confirmText: '知道了',
+            modalClass: 'modal-md activity-copy-progress-modal'
+        }
+    );
 }
 
 function formatCreatorWithTimeSecond(value) {
@@ -135,6 +232,7 @@ function formatCreatorWithTimeSecond(value) {
 }
 
 function formatActivityToolLabel(c) {
+    if (c.tool === '投票' && c.mode) return `投票 - ${c.mode}`;
     if (c.tool !== '知识问答') return c.tool;
     const mode = normalizeQuizActivityModeLabel(c.mode || c.quizMode || c.activityType);
     return `知识问答 - ${mode}`;
@@ -180,7 +278,7 @@ function renderQuizActivityList() {
             <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>在线考试</option><option>每日答题</option><option>趣味闯关</option></select></div>
             <div class="form-group"><label>活动状态</label><select class="form-control"><option>全部状态</option><option>未发布</option><option>预告中</option><option>进行中</option><option>已结束</option><option>已下架</option></select></div>
             <div style="display:flex;align-items:flex-end;gap:var(--spacing-sm);justify-content:flex-end">
-                <button class="btn btn-primary">🔍 搜索</button>
+                <button class="btn btn-primary">搜索</button>
                 <button class="btn btn-ghost">重置</button>
             </div>
         </div>
@@ -279,8 +377,9 @@ function quizCard(c) {
             <div class="quiz-list-title-row">
                 <div class="quiz-list-title">${c.title}</div>
                 <span class="quiz-list-status ${statusClass}">${c.status}</span>
-                <button class="wb-icon-btn" title="复制链接">⧉</button>
-                <button class="wb-icon-btn" title="二维码">▦</button>
+                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="访问活动" aria-label="访问活动">↗</button>
+                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="复制链接" aria-label="复制链接">⧉</button>
+                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="二维码" aria-label="二维码">▦</button>
             </div>
             <div class="quiz-list-tags">
                 <span class="badge badge-mode">${formatActivityToolLabel({ tool: '知识问答', mode: c.mode })}</span>
@@ -298,6 +397,15 @@ function quizCard(c) {
             ${renderQuizPublishScoreButton(c.scorePublishProgress, c)}
             ${primaryAction}
             ${secondaryAction}
+            <div class="activity-more-wrap">
+                <button type="button" class="top-nav-icon activity-more-trigger" aria-label="更多操作" onclick="toggleActivityCardMoreMenu(event)">⋮</button>
+                <div class="activity-more-menu">
+                    ${isSystemAdmin() ? '<button type="button" onclick="handleActivityMoreAction(event, \'recommend\')">推荐到首页（admin）</button>' : ''}
+                    <button type="button" onclick="handleActivityMoreAction(event, 'copy')">创建副本</button>
+                    <button type="button" onclick="handleActivityMoreAction(event, 'offline')">下架</button>
+                    <button type="button" onclick="handleActivityMoreAction(event, 'delete')">删除</button>
+                </div>
+            </div>
         </div>
     </div>`;
 }
@@ -379,8 +487,8 @@ function renderActivityCreate() {
         </div>
         <div class="btn-group">
             <button class="btn btn-ghost">取消</button>
-            <button class="btn btn-ghost">💾 保存草稿</button>
-            ${currentStep < 5 ? '<button class="btn btn-primary" onclick="goStep(' + (currentStep + 1) + ')">下一步</button>' : '<button class="btn btn-success" onclick="openExamPublishConfirm()">🚀 发布活动</button>'}
+            <button class="btn btn-ghost">保存草稿</button>
+            ${currentStep < 5 ? '<button class="btn btn-primary" onclick="goStep(' + (currentStep + 1) + ')">下一步</button>' : '<button class="btn btn-success" onclick="openExamPublishConfirm()">发布活动</button>'}
         </div>
     </div>`;
 }
@@ -393,10 +501,10 @@ function openExamPublishConfirm() {
             if (tip) tip.textContent = '请先阅读并同意相关协议及管理规范';
             return false;
         }
-        openModal('发布成功', '<p>在线考试活动已发布。用户端将按当前配置开放报名与答题入口。</p>', () => navigateTo('quiz-activity-list'), {
+        openModal('发布成功', renderPublishSuccessModal(), () => navigateTo('quiz-activity-list'), {
             hideCancel: true,
-            confirmText: '返回活动列表',
-            modalClass: 'modal-md'
+            confirmText: '关闭',
+            modalClass: 'modal-lg publish-success-modal'
         });
         return false;
     }, {
@@ -437,6 +545,83 @@ function setupExamPublishAgreement() {
 
     checkbox.onchange = sync;
     sync();
+}
+
+function getPublishSuccessData() {
+    const activityName = typeof quizActivityName !== 'undefined' && quizActivityName
+        ? quizActivityName
+        : (currentManageActivity?.name || '知识问答活动');
+    const startTime = typeof quizSignupStart !== 'undefined' ? quizSignupStart : '';
+    const endTime = typeof quizSignupEnd !== 'undefined' ? quizSignupEnd : '';
+    const activityTime = startTime && endTime
+        ? `${startTime} 至 ${endTime}`
+        : (currentManageActivity?.time || '');
+    const slug = String(activityName || 'activity')
+        .trim()
+        .replace(/[“”"'`]/g, '')
+        .replace(/\s+/g, '')
+        .replace(/[^\w\u4e00-\u9fa5-]+/g, '')
+        .slice(0, 24)
+        .toLowerCase() || 'activity';
+    const url = `https://www.yuetu100.com/${encodeURIComponent(slug)}`;
+    return {
+        activityName,
+        activityTime,
+        url
+    };
+}
+
+function renderPublishSuccessModal() {
+    const data = getPublishSuccessData();
+    const timeBlock = data.activityTime
+        ? `<div class="publish-success-time">活动时间：${data.activityTime}</div>`
+        : '';
+
+    return `
+    <div class="publish-success-shell">
+        <div class="publish-success-hero">
+            <div class="publish-success-title">${data.activityName}</div>
+            ${timeBlock}
+            <div class="publish-success-icon">!</div>
+            <div class="publish-success-status">发布成功</div>
+            <div class="publish-success-actions">
+                <button type="button" class="btn btn-primary" onclick="navigateTo('quiz-activity-list');closeModal();">进入活动列表</button>
+                <button type="button" class="btn btn-outline" onclick="visitPublishedActivity()">立即访问</button>
+            </div>
+        </div>
+        <div class="publish-success-link-card">
+            <div class="publish-success-link-row">
+                <strong>活动网址：</strong>
+                <a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a>
+                <div class="publish-success-link-actions">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="copyPublishedActivityUrl()">复制</button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="visitPublishedActivity()">访问</button>
+                </div>
+            </div>
+            <div class="publish-success-qr-wrap">
+                <div class="publish-success-qr-demo" aria-hidden="true"></div>
+                <div class="publish-success-qr-text">扫一扫，马上访问</div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function copyPublishedActivityUrl() {
+    const { url } = getPublishSuccessData();
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+            alert(`✅ 已复制活动链接：\n${url}`);
+        }).catch(() => {
+            prompt('请手动复制链接：', url);
+        });
+        return;
+    }
+    prompt('请手动复制链接：', url);
+}
+
+function visitPublishedActivity() {
+    const { url } = getPublishSuccessData();
+    window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function renderConfirmRows(rows) {
@@ -653,7 +838,7 @@ function renderStep2() {
             <div class="form-group"><label><span class="req">*</span> 活动介绍（富文本）</label>
                 <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);min-height:240px;padding:var(--spacing-md);background:var(--color-neutral-50)">
                     <div style="border-bottom:1px solid var(--border-light);padding-bottom:8px;margin-bottom:12px;display:flex;gap:8px">
-                        <button class="btn btn-ghost btn-sm">B 加粗</button><button class="btn btn-ghost btn-sm">I 斜体</button><button class="btn btn-ghost btn-sm">📊 表格</button><button class="btn btn-ghost btn-sm">🖼 图片</button><button class="btn btn-ghost btn-sm">🔗 链接</button>
+                        <button class="btn btn-ghost btn-sm">B 加粗</button><button class="btn btn-ghost btn-sm">I 斜体</button><button class="btn btn-ghost btn-sm">表格</button><button class="btn btn-ghost btn-sm">图片</button><button class="btn btn-ghost btn-sm">链接</button>
                     </div>
                     <div contenteditable="true" style="min-height:160px;outline:none;font-size:13px;color:var(--text-secondary)">请输入活动背景、目标、参与对象、规则说明等内容...</div>
                 </div>
@@ -884,7 +1069,7 @@ function renderExamConfig() {
     <!-- 3. 题目来源 -->
     <div class="cfg-panel" id="examPanel3">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('examPanel3')">
-            <div class="cfg-panel-icon blue">📄</div>
+            <div class="cfg-panel-icon blue"></div>
             <div><div class="cfg-panel-title">题目来源</div><div class="cfg-panel-subtitle">从试卷库中选择试卷作为考试内容</div></div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
@@ -920,7 +1105,7 @@ function renderExamConfig() {
     <!-- 4. 及格分数 -->
     <div class="cfg-panel" id="examPanel4">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('examPanel4')">
-            <div class="cfg-panel-icon orange">📊</div>
+            <div class="cfg-panel-icon orange"></div>
             <div><div class="cfg-panel-title">及格分数</div><div class="cfg-panel-subtitle">设置考试及格分数线</div></div>
             <span class="cfg-panel-badge essential">必填</span>
             <span class="cfg-panel-arrow">▼</span>
@@ -1005,7 +1190,7 @@ function renderExamConfig() {
                 <label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label>
             </div>
             <div class="rule-toggle">
-                <span class="rule-icon">📊</span>
+                <span class="rule-icon"></span>
                 <div class="rule-text">
                     <div class="rule-label">默认提交试卷后立即展示成绩</div>
                     <div class="rule-desc">交卷后即刻显示考试成绩和及格状态</div>
@@ -1186,7 +1371,7 @@ function renderChallengeConfig() {
     <!-- 6. 分值与排名 -->
     <div class="cfg-panel" id="chPanel6">
         <div class="cfg-panel-head" onclick="toggleCfgPanel('chPanel6')">
-            <div class="cfg-panel-icon orange">📊</div>
+            <div class="cfg-panel-icon orange"></div>
             <div><div class="cfg-panel-title">分值与排名</div><div class="cfg-panel-subtitle">每日得分计算与排行榜规则</div></div>
             <span class="cfg-panel-badge optional">选填</span>
             <span class="cfg-panel-arrow">▼</span>
@@ -1334,7 +1519,7 @@ function renderLevelModeConfig() {
                 <div class="rule-text"><div class="rule-label">每题后显示解析 <span class="lock-tag">固定</span></div><div class="rule-desc">每答完一题后自动展示该题答案与解析</div></div>
             </div>
             <div class="rule-toggle locked">
-                <span class="rule-icon">✅</span>
+                <span class="rule-icon"></span>
                 <div class="rule-text"><div class="rule-label">实时校验是否通关 <span class="lock-tag">固定</span></div><div class="rule-desc">每答一题即实时校验是否已达到通关分数</div></div>
             </div>
             <div class="rule-toggle locked">
@@ -1487,12 +1672,12 @@ function renderLevelModeConfig() {
     </div></div>
 
     <!-- 分值规则 -->
-    <div class="section"><div class="section-head"><div class="sec-icon yellow">📊</div><div><div class="sec-title">分值规则</div></div></div><div class="section-body">
+    <div class="section"><div class="section-head"><div class="sec-icon yellow"></div><div><div class="sec-title">分值规则</div></div></div><div class="section-body">
         <div class="info-box blue">💡 闯关模式的每题分值在上方抽题规则中配置，系统自动汇总计算总分。</div>
         <div class="config-block">
             <div class="sw-row"><div class="sw-text"><div class="sw-label">每题分值</div><div class="sw-hint">在上方抽题规则中已配置</div></div><span class="badge badge-blue">已配置</span></div>
             <div class="sw-row"><div class="sw-text"><div class="sw-label">总分计算</div><div class="sw-hint">系统根据题目数量和分值自动计算</div></div><span class="badge badge-green">自动计算</span></div>
-            <div class="sw-row"><div class="sw-text"><div class="sw-label">满分是否默认 100 分</div><div class="sw-hint">⚠️ 此项待确认</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
+            <div class="sw-row"><div class="sw-text"><div class="sw-label">满分是否默认 100 分</div><div class="sw-hint">此项待确认</div></div><label class="switch"><input type="checkbox" checked><span class="sw-slider"></span></label></div>
         </div>
         <div class="form-row" style="margin-top:12px">
             <div class="form-group"><label>每日得分计算规则</label><select class="form-control"><option>每日最高分</option><option>每日最后一次得分</option></select></div>
@@ -1643,7 +1828,7 @@ function renderLevelModeConfig() {
 
     <!-- Section 5: 随机规则 -->
     <div class="section"><div class="section-head"><div class="sec-icon green">🔀</div><div><div class="sec-title">随机规则</div><div class="sec-subtitle">闯关模式固定题目与选项顺序，不做随机排序</div></div></div><div class="section-body">
-        <div class="info-box yellow">⚠️ 闯关模式默认<strong>不随机排序</strong>题目和选项，确保所有用户在同一关卡看到相同的题目顺序和选项顺序。</div>
+        <div class="info-box yellow">闯关模式默认<strong>不随机排序</strong>题目和选项，确保所有用户在同一关卡看到相同的题目顺序和选项顺序。</div>
         <div class="config-block">
             <div class="sw-row"><div class="sw-text"><div class="sw-label">题目顺序随机</div><div class="sw-hint">闯关模式建议关闭，保持一致体验</div></div><label class="switch"><input type="checkbox" disabled><span class="sw-slider"></span></label></div>
             <div class="sw-row"><div class="sw-text"><div class="sw-label">选项顺序随机</div><div class="sw-hint">闯关模式建议关闭，保持一致体验</div></div><label class="switch"><input type="checkbox" disabled><span class="sw-slider"></span></label></div>
@@ -1675,7 +1860,7 @@ function renderLevelModeConfig() {
     </div></div>
 
     <!-- Section 7: 分值规则 -->
-    <div class="section"><div class="section-head"><div class="sec-icon blue">📊</div><div><div class="sec-title">分值规则</div></div></div><div class="section-body">
+    <div class="section"><div class="section-head"><div class="sec-icon blue"></div><div><div class="sec-title">分值规则</div></div></div><div class="section-body">
         <div class="info-box blue">💡 闯关模式的每题分值在上方关卡列表中逐关配置，系统自动汇总计算总分和通关条件。</div>
         <div class="config-block">
             <div class="sw-row"><div class="sw-text"><div class="sw-label">每题分值</div><div class="sw-hint">在上方关卡列表中已逐关配置</div></div><span class="badge badge-blue">已配置</span></div>

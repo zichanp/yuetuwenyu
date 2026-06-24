@@ -205,7 +205,7 @@ registerPage('workbench', () => {
         }
         .wb-top-grid{
             display:grid;
-            grid-template-columns:360px 1fr;
+            grid-template-columns:minmax(280px,360px) minmax(0,1fr);
             gap:var(--spacing-md);
             margin-bottom:var(--spacing-md);
         }
@@ -287,7 +287,7 @@ registerPage('workbench', () => {
         }
         .wb-rec-item{
             display:grid;
-            grid-template-columns:160px 1fr auto;
+            grid-template-columns:160px minmax(0,1fr) auto;
             gap:var(--spacing-md);
             align-items:center;
             padding:var(--spacing-md);
@@ -312,7 +312,8 @@ registerPage('workbench', () => {
             overflow:hidden;
             text-overflow:ellipsis;
             white-space:nowrap;
-            max-width:520px;
+            max-width:100%;
+            min-width:0;
         }
         .wb-rec-status{
             color:#fff;
@@ -350,6 +351,54 @@ registerPage('workbench', () => {
             display:flex;
             gap:var(--spacing-sm);
             white-space:nowrap;
+        }
+        .wb-rec-thumb,
+        .wb-rec-main,
+        .wb-rec-title-row,
+        .wb-rec-meta,
+        .wb-rec-actions{
+            min-width:0;
+            max-width:100%;
+        }
+        @media (max-width: 900px){
+            .wb-top-grid{
+                grid-template-columns:1fr;
+            }
+            .wb-type-grid{
+                grid-template-columns:repeat(2,minmax(0,1fr));
+            }
+            .wb-rec-item{
+                grid-template-columns:128px minmax(0,1fr);
+                align-items:start;
+            }
+            .wb-rec-actions{
+                grid-column:1 / -1;
+                flex-wrap:wrap;
+            }
+        }
+        @media (max-width: 640px){
+            .wb-profile-card,
+            .wb-pending-card,
+            .wb-section-card{
+                padding:var(--spacing-md);
+            }
+            .wb-pending-grid,
+            .wb-type-grid,
+            .wb-rec-item{
+                grid-template-columns:1fr;
+            }
+            .wb-rec-thumb{
+                width:100%;
+                height:120px;
+            }
+            .wb-rec-main,
+            .wb-rec-actions{
+                width:100%;
+            }
+            .wb-rec-title-row,
+            .wb-rec-meta{
+                flex-wrap:wrap;
+            }
         }
     </style>
 

@@ -5,6 +5,7 @@ registerPage('leaderboard', () => {
     return `
     ${pageHeader('🏆 排行榜', '活动管理 / [当前活动] / 排行榜')}
     <div class="card">
+        <div class="info-box blue" style="margin-bottom:16px">提示：候选项按得票数从高到低排名；得票数相同时并列，后续名次顺延。</div>
         <div class="tabs" data-tab-group="lb">
             <div class="tab active" onclick="switchLbTab('personal')">个人榜</div>
             <div class="tab" onclick="switchLbTab('daily')">每日榜</div>

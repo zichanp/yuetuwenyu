@@ -50,10 +50,10 @@ function violationStatusBadge(status) {
 // ===== Attachment Tag Helper =====
 function attachmentTags(images, videos, audios, docs) {
     let tags = '';
-    if (images > 0) tags += `<span class="sub-attach-tag sub-attach-img">🖼 图片(${images})</span>`;
+    if (images > 0) tags += `<span class="sub-attach-tag sub-attach-img">图片(${images})</span>`;
     if (videos > 0) tags += `<span class="sub-attach-tag sub-attach-video">🎬 视频(${videos})</span>`;
     if (audios > 0) tags += `<span class="sub-attach-tag sub-attach-audio">🎵 音频(${audios})</span>`;
-    if (docs > 0)   tags += `<span class="sub-attach-tag sub-attach-doc">📄 文档(${docs})</span>`;
+    if (docs > 0)   tags += `<span class="sub-attach-tag sub-attach-doc">文档(${docs})</span>`;
     if (!tags) tags = '<span style="color:var(--text-quaternary);font-size:var(--font-size-xs)">无附件</span>';
     return tags;
 }
@@ -135,9 +135,9 @@ function renderSubmissionListPage() {
             <button class="btn btn-primary btn-sm" onclick="filterSubmissions()">查询</button>
             <button class="btn btn-ghost btn-sm" onclick="resetSubmissionFilters()">重置</button>
             <div style="flex:1"></div>
-            <button class="btn btn-outline btn-sm" onclick="exportSubmissions()">📥 导出主表</button>
-            <button class="btn btn-outline btn-sm" onclick="exportAttachments()">📎 导出附件明细</button>
-            <button class="btn btn-success btn-sm" onclick="batchReview()">✅ 批量审核</button>
+            <button class="btn btn-outline btn-sm" onclick="exportSubmissions()">导出主表</button>
+            <button class="btn btn-outline btn-sm" onclick="exportAttachments()">导出附件明细</button>
+            <button class="btn btn-success btn-sm" onclick="batchReview()">批量审核</button>
         </div>
     </div>
 
@@ -227,7 +227,7 @@ function showAttachPreview(event, idx) {
 
     let html = '';
     if (s.attachments.images.length) {
-        html += `<div class="attach-preview-section"><div class="attach-preview-label">🖼 图片 (${s.attachments.images.length})</div>`;
+        html += `<div class="attach-preview-section"><div class="attach-preview-label">图片 (${s.attachments.images.length})</div>`;
         html += s.attachments.images.map(f => `<div class="attach-preview-file">${f}</div>`).join('');
         html += '</div>';
     }
@@ -242,7 +242,7 @@ function showAttachPreview(event, idx) {
         html += '</div>';
     }
     if (s.attachments.docs.length) {
-        html += `<div class="attach-preview-section"><div class="attach-preview-label">📄 文档 (${s.attachments.docs.length})</div>`;
+        html += `<div class="attach-preview-section"><div class="attach-preview-label">文档 (${s.attachments.docs.length})</div>`;
         html += s.attachments.docs.map(f => `<div class="attach-preview-file">${f}</div>`).join('');
         html += '</div>';
     }
@@ -314,8 +314,7 @@ function exportAttachments() {
                 <span>✓ 文件下载链接</span>
             </div>
         </div>
-        <div style="background:var(--warning-light);border:1px solid var(--color-warning-100);padding:var(--spacing-sm) var(--spacing-md);border-radius:var(--radius-md);font-size:var(--font-size-xs);color:var(--warning-600)">
-            ⚠️ 附件明细表与主表通过「投稿编号」关联，建议两个 Sheet 一同下载
+        <div style="background:var(--warning-light);border:1px solid var(--color-warning-100);padding:var(--spacing-sm) var(--spacing-md);border-radius:var(--radius-md);font-size:var(--font-size-xs);color:var(--warning-600)">附件明细表与主表通过「投稿编号」关联，建议两个 Sheet 一同下载
         </div>
     `, () => { showToast('附件明细导出任务已创建'); }, { confirmText: '确认导出' });
 }
@@ -374,13 +373,13 @@ function openSubmissionMore(id) {
     if (!s) return;
 
     const violationBtn = s.violation === '正常'
-        ? `<div class="more-menu-item more-menu-danger" onclick="closeSubmissionMore(); showToast('已标记为违规下架')">⚠ 违规下架</div>`
+        ? `<div class="more-menu-item more-menu-danger" onclick="closeSubmissionMore(); showToast('已标记为违规下架')">违规下架</div>`
         : `<div class="more-menu-item" onclick="closeSubmissionMore(); showToast('已撤销违规标记')">↩ 撤销违规</div>`;
 
     const html = `
-        <div class="more-menu-item" onclick="closeSubmissionMore(); showToast('附件下载任务已创建')">📥 下载全部附件</div>
+        <div class="more-menu-item" onclick="closeSubmissionMore(); showToast('附件下载任务已创建')">下载全部附件</div>
         ${violationBtn}
-        <div class="more-menu-item more-menu-danger" onclick="closeSubmissionMore(); showToast('投稿已删除')">🗑 删除投稿</div>
+        <div class="more-menu-item more-menu-danger" onclick="closeSubmissionMore(); showToast('投稿已删除')">删除投稿</div>
     `;
 
     // Remove existing
@@ -436,11 +435,11 @@ function openAttachmentDrawer(id) {
     if (s.attachments.images.length) {
         content += `
             <div class="sub-drawer-section">
-                <div class="sub-drawer-section-title">🖼 图片 (${s.attachments.images.length})</div>
+                <div class="sub-drawer-section-title">图片 (${s.attachments.images.length})</div>
                 <div class="sub-drawer-grid">
                     ${s.attachments.images.map((f, i) => `
                         <div class="sub-drawer-thumb" onclick="showToast('预览: ${f}')">
-                            <div class="sub-drawer-thumb-placeholder" style="background:var(--primary-light);color:var(--primary)">🖼</div>
+                            <div class="sub-drawer-thumb-placeholder" style="background:var(--primary-light);color:var(--primary)"></div>
                             <div class="sub-drawer-thumb-name">${f}</div>
                         </div>
                     `).join('')}
@@ -490,11 +489,11 @@ function openAttachmentDrawer(id) {
     if (s.attachments.docs.length) {
         content += `
             <div class="sub-drawer-section">
-                <div class="sub-drawer-section-title">📄 文档 (${s.attachments.docs.length})</div>
+                <div class="sub-drawer-section-title">文档 (${s.attachments.docs.length})</div>
                 <div class="sub-drawer-list">
                     ${s.attachments.docs.map(f => `
                         <div class="sub-drawer-file-item" onclick="showToast('下载: ${f}')">
-                            <div class="sub-drawer-file-icon" style="background:var(--success-light);color:var(--success)">📄</div>
+                            <div class="sub-drawer-file-icon" style="background:var(--success-light);color:var(--success)"></div>
                             <div class="sub-drawer-file-info">
                                 <div class="sub-drawer-file-name">${f}</div>
                                 <div class="sub-drawer-file-meta">点击下载</div>
@@ -506,14 +505,14 @@ function openAttachmentDrawer(id) {
     }
 
     if (!s.attachments.images.length && !s.attachments.videos.length && !s.attachments.audios.length && !s.attachments.docs.length) {
-        content += `<div class="empty-state" style="padding:var(--spacing-3xl)"><div class="empty-state-icon">📎</div><div class="empty-state-title">暂无附件</div></div>`;
+        content += `<div class="empty-state" style="padding:var(--spacing-3xl)"><div class="empty-state-icon"></div><div class="empty-state-title">暂无附件</div></div>`;
     }
 
     content += `
         </div>
         <div class="sub-drawer-foot">
             <button class="btn btn-ghost btn-sm" onclick="closeAttachmentDrawer()">关闭</button>
-            <button class="btn btn-outline btn-sm" onclick="showToast('全部附件下载任务已创建')">📥 下载全部</button>
+            <button class="btn btn-outline btn-sm" onclick="showToast('全部附件下载任务已创建')">下载全部</button>
         </div>
     </div>`;
 
@@ -597,16 +596,16 @@ function viewSubmissionDetail(id) {
     <!-- 3. 附件内容区 -->
     <div class="section">
         <div class="section-head">
-            <div class="sec-icon yellow">📎</div>
+            <div class="sec-icon yellow"></div>
             <div><div class="sec-title">附件内容</div><div class="sec-subtitle">图片 ${s.images} · 视频 ${s.videos} · 音频 ${s.audios} · 文档 ${s.docs}</div></div>
         </div>
         <div class="section-body" style="padding:0">
             <!-- Tabs -->
             <div class="tabs" style="padding:0 var(--spacing-xl)">
-                ${s.attachments.images.length ? '<div class="tab active" onclick="switchDetailTab(this, \'img\')">🖼 图片</div>' : ''}
+                ${s.attachments.images.length ? '<div class="tab active" onclick="switchDetailTab(this, \'img\')">图片</div>' : ''}
                 ${s.attachments.videos.length ? `<div class="tab${!s.attachments.images.length ? ' active' : ''}" onclick="switchDetailTab(this, 'vid')">🎬 视频</div>` : ''}
                 ${s.attachments.audios.length ? `<div class="tab${!s.attachments.images.length && !s.attachments.videos.length ? ' active' : ''}" onclick="switchDetailTab(this, 'aud')">🎵 音频</div>` : ''}
-                ${s.attachments.docs.length ? `<div class="tab${!s.attachments.images.length && !s.attachments.videos.length && !s.attachments.audios.length ? ' active' : ''}" onclick="switchDetailTab(this, 'doc')">📄 文档</div>` : ''}
+                ${s.attachments.docs.length ? `<div class="tab${!s.attachments.images.length && !s.attachments.videos.length && !s.attachments.audios.length ? ' active' : ''}" onclick="switchDetailTab(this, 'doc')">文档</div>` : ''}
             </div>
 
             <!-- Tab Panes -->
@@ -616,7 +615,7 @@ function viewSubmissionDetail(id) {
                     <div class="sub-drawer-grid" style="max-width:100%">
                         ${s.attachments.images.map(f => `
                             <div class="sub-drawer-thumb" onclick="showToast('预览: ${f}')">
-                                <div class="sub-drawer-thumb-placeholder" style="background:var(--primary-light);color:var(--primary)">🖼</div>
+                                <div class="sub-drawer-thumb-placeholder" style="background:var(--primary-light);color:var(--primary)"></div>
                                 <div class="sub-drawer-thumb-name">${f}</div>
                             </div>
                         `).join('')}
@@ -650,7 +649,7 @@ function viewSubmissionDetail(id) {
                 <div class="detail-tab-pane" data-tab="doc" style="display:none">
                     ${s.attachments.docs.map(f => `
                         <div class="sub-drawer-file-item" onclick="showToast('下载: ${f}')" style="margin-bottom:var(--spacing-sm)">
-                            <div class="sub-drawer-file-icon" style="background:var(--success-light);color:var(--success);width:48px;height:48px;font-size:var(--font-size-xl)">📄</div>
+                            <div class="sub-drawer-file-icon" style="background:var(--success-light);color:var(--success);width:48px;height:48px;font-size:var(--font-size-xl)"></div>
                             <div class="sub-drawer-file-info">
                                 <div class="sub-drawer-file-name" style="font-size:var(--font-size-base)">${f}</div>
                                 <div class="sub-drawer-file-meta">点击下载 · 2.3 MB</div>
@@ -665,7 +664,7 @@ function viewSubmissionDetail(id) {
     <!-- 4. 审核记录区 -->
     <div class="section">
         <div class="section-head">
-            <div class="sec-icon red">✅</div>
+            <div class="sec-icon red"></div>
             <div><div class="sec-title">审核记录</div></div>
         </div>
         <div class="section-body" style="padding:0">
@@ -685,13 +684,13 @@ function viewSubmissionDetail(id) {
     <!-- 5. 操作区 -->
     <div class="card" style="display:flex;gap:var(--spacing-sm);flex-wrap:wrap;align-items:center">
         <span style="font-size:var(--font-size-sm);color:var(--text-tertiary);margin-right:var(--spacing-sm)">操作：</span>
-        <button class="btn btn-success btn-sm" onclick="showToast('审核通过')">✅ 审核通过</button>
-        <button class="btn btn-danger btn-sm" onclick="showToast('已驳回')">❌ 驳回</button>
+        <button class="btn btn-success btn-sm" onclick="showToast('审核通过')">审核通过</button>
+        <button class="btn btn-danger btn-sm" onclick="showToast('已驳回')">驳回</button>
         ${s.violation === '正常'
-            ? '<button class="btn btn-warning btn-sm" onclick="showToast(\'已违规下架\')">⚠ 违规下架</button>'
+            ? '<button class="btn btn-warning btn-sm" onclick="showToast(\'已违规下架\')">违规下架</button>'
             : '<button class="btn btn-outline btn-sm" onclick="showToast(\'已撤销违规\')">↩ 撤销违规</button>'}
-        <button class="btn btn-outline btn-sm" onclick="showToast('全部附件下载任务已创建')">📥 下载全部附件</button>
-        <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="showToast('投稿已删除')">🗑 删除投稿</button>
+        <button class="btn btn-outline btn-sm" onclick="showToast('全部附件下载任务已创建')">下载全部附件</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="showToast('投稿已删除')">删除投稿</button>
     </div>`;
 
     window.scrollTo({ top: 0, behavior: 'smooth' });

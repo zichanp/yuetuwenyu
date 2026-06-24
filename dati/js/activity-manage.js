@@ -448,6 +448,185 @@ function questionRow(title, type, topic, rate, wrong) {
 
 // ===== 机构管理 =====
 registerPage('org-mgmt', () => renderPublicFeatureEmptyPage());
+registerPage('activity-feedback', () => renderActivityFeedbackPage());
+
+let activityFeedbackFilters = getDefaultActivityFeedbackFilters();
+let activityFeedbackDraft = { ...activityFeedbackFilters };
+
+const ACTIVITY_FEEDBACK_ROWS = [
+    { id: 'fb-001', userName: '林悦', phone: '138****1234', userNo: '123456', org: '广州市图书馆', submittedAt: '2026-06-26 16:18', score: 5, scoreLabel: '非常满意', comment: '签到流程很顺畅，讲师内容也很扎实，现场志愿者响应很快。' },
+    { id: 'fb-002', userName: '黄嘉', phone: '136****9012', userNo: '345678', org: '天河区图书馆', submittedAt: '2026-06-26 16:25', score: 4, scoreLabel: '满意', comment: '整体不错，建议下次增加亲子互动环节，孩子会更投入。' },
+    { id: 'fb-003', userName: '苏晴', phone: '133****1122', userNo: '789012', org: '海珠区图书馆', submittedAt: '2026-06-26 16:42', score: 3, scoreLabel: '一般', comment: '场地后排音响有些听不清，希望后续优化设备和指引。' },
+    { id: 'fb-004', userName: '程默', phone: '132****4509', userNo: '112358', org: '佛山市图书馆', submittedAt: '2026-06-26 17:05', score: 2, scoreLabel: '不满意', comment: '报名后没有及时收到入场提醒，差点错过活动开始时间。' },
+    { id: 'fb-005', userName: '赵明', phone: '134****2345', userNo: '678901', org: '徐汇区文化馆', submittedAt: '2026-06-26 17:18', score: 1, scoreLabel: '很不满意', comment: '现场座位安排比较混乱，签到后找座位花了很多时间。' }
+];
+
+function getDefaultActivityFeedbackFilters() {
+    return {
+        keyword: '',
+        score: '全部评分',
+        submittedAt: ''
+    };
+}
+
+function renderActivityFeedbackPage() {
+    const rows = getActivityFeedbackRows();
+    return `
+    <section class="card activity-feedback-filter-card">
+        <div class="activity-feedback-filter-grid compact">
+            <label>
+                <span>用户信息</span>
+                <input class="form-control" value="${escapeHtml(activityFeedbackDraft.keyword)}" placeholder="姓名 / 手机号 / 文遇号 / 选送单位" oninput="updateActivityFeedbackDraft('keyword', this.value)">
+            </label>
+            <label>
+                <span>满意度评分</span>
+                <select class="form-control" onchange="updateActivityFeedbackDraft('score', this.value)">
+                    ${['全部评分', '5分', '4分', '3分', '2分', '1分'].map(item => `<option ${activityFeedbackDraft.score === item ? 'selected' : ''}>${item}</option>`).join('')}
+                </select>
+            </label>
+            <label>
+                <span>提交时间</span>
+                <input class="form-control" value="${escapeHtml(activityFeedbackDraft.submittedAt)}" placeholder="2026-06-26 至 2026-06-27" oninput="updateActivityFeedbackDraft('submittedAt', this.value)">
+            </label>
+            <div class="activity-feedback-filter-actions">
+                <button class="btn btn-primary" type="button" onclick="applyActivityFeedbackFilters()">查询</button>
+                <button class="btn btn-outline" type="button" onclick="resetActivityFeedbackFilters()">重置</button>
+                <button class="btn btn-outline" type="button" onclick="openActivityFeedbackExport()">导出</button>
+            </div>
+        </div>
+    </section>
+    <section class="card activity-feedback-table-card">
+        <div class="activity-feedback-table-head">
+            <div>
+                <h3>反馈列表</h3>
+            </div>
+        </div>
+        ${renderActivityFeedbackTable(rows)}
+    </section>`;
+}
+
+function updateActivityFeedbackDraft(field, value) {
+    activityFeedbackDraft[field] = value;
+}
+
+function applyActivityFeedbackFilters() {
+    activityFeedbackFilters = { ...activityFeedbackDraft };
+    navigateTo('activity-feedback');
+}
+
+function resetActivityFeedbackFilters() {
+    activityFeedbackFilters = getDefaultActivityFeedbackFilters();
+    activityFeedbackDraft = { ...activityFeedbackFilters };
+    navigateTo('activity-feedback');
+}
+
+function getActivityFeedbackRows() {
+    const filters = activityFeedbackFilters;
+    return ACTIVITY_FEEDBACK_ROWS
+        .filter(row => {
+            if (filters.keyword) {
+                const keyword = filters.keyword.trim();
+                const text = [row.userName, row.phone, row.userNo, row.org].join(' ');
+                if (!text.includes(keyword)) return false;
+            }
+            if (filters.score !== '全部评分' && `${row.score}分` !== filters.score) return false;
+            if (filters.submittedAt && !isActivityFeedbackDateInRange(row.submittedAt, filters.submittedAt)) return false;
+            return true;
+        })
+        .sort((a, b) => new Date(String(b.submittedAt).replace(/-/g, '/')) - new Date(String(a.submittedAt).replace(/-/g, '/')));
+}
+
+function isActivityFeedbackDateInRange(dateText, rangeText) {
+    const parts = String(rangeText).split('至').map(item => item.trim()).filter(Boolean);
+    if (!parts.length) return true;
+    const current = new Date(String(dateText).replace(/-/g, '/')).getTime() || 0;
+    const start = parts[0] ? new Date(`${parts[0].replace(/-/g, '/')} 00:00`).getTime() : 0;
+    const end = parts[1] ? new Date(`${parts[1].replace(/-/g, '/')} 23:59`).getTime() : Number.MAX_SAFE_INTEGER;
+    return current >= start && current <= end;
+}
+
+function renderActivityFeedbackTable(rows) {
+    if (!rows.length) {
+        return `
+        <div class="empty-state">
+            <div class="empty-state-title">未找到符合条件的反馈记录</div>
+            <div class="empty-state-desc">请调整筛选条件后重试。</div>
+        </div>`;
+    }
+    return `
+    <div class="table-wrap activity-feedback-table-wrap">
+        <table class="activity-feedback-table">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>文遇号</th>
+                    <th>用户姓名</th>
+                    <th>手机号</th>
+                    <th>选送单位</th>
+                    <th>满意度</th>
+                    <th>反馈内容</th>
+                    <th>提交时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows.map((row, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${escapeHtml(row.userNo)}</td>
+                        <td>${escapeHtml(row.userName)}</td>
+                        <td>${escapeHtml(row.phone)}</td>
+                        <td>${escapeHtml(row.org)}</td>
+                        <td>${renderActivityFeedbackScore(row.score, row.scoreLabel)}</td>
+                        <td><span class="activity-feedback-comment" title="${escapeHtml(row.comment)}">${escapeHtml(row.comment)}</span></td>
+                        <td>${escapeHtml(row.submittedAt)}</td>
+                        <td>
+                            <div class="activity-feedback-row-actions">
+                                <button class="btn btn-outline btn-sm" type="button" onclick="openActivityFeedbackDetail('${row.id}')">查看详情</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+    ${renderStandardPagination(rows.length)}`;
+}
+
+function renderActivityFeedbackScore(score, label) {
+    return `
+    <div class="activity-feedback-score">
+        <strong>${score}.0</strong>
+        <span>${escapeHtml(label)}</span>
+    </div>`;
+}
+
+function openActivityFeedbackDetail(id) {
+    const row = ACTIVITY_FEEDBACK_ROWS.find(item => item.id === id);
+    if (!row) return;
+    openModal('反馈详情', `
+        <div class="activity-feedback-detail-modal">
+            <div class="activity-feedback-detail-head">
+                <strong>${escapeHtml(row.userName)}</strong>
+                <span>${escapeHtml(row.phone)} · ${escapeHtml(row.userNo)} · ${escapeHtml(row.org)}</span>
+            </div>
+            <div class="activity-feedback-detail-grid">
+                <div><span>满意度</span><strong>${row.score}.0 分 / ${escapeHtml(row.scoreLabel)}</strong></div>
+                <div><span>提交时间</span><strong>${escapeHtml(row.submittedAt)}</strong></div>
+                <div><span>文遇号</span><strong>${escapeHtml(row.userNo)}</strong></div>
+                <div><span>所属单位</span><strong>${escapeHtml(row.org)}</strong></div>
+            </div>
+            <label class="activity-feedback-detail-block">
+                <span>反馈内容</span>
+                <p>${escapeHtml(row.comment)}</p>
+            </label>
+        </div>
+    `, null, { confirmText: '知道了', hideCancel: true, modalClass: 'modal-lg' });
+}
+
+function openActivityFeedbackExport() {
+    openModal('导出反馈', '<p>将按当前筛选条件导出活动反馈列表。</p>', null, { confirmText: '开始导出', modalClass: 'modal-sm' });
+}
 
 function roleBadge(role) {
     const map = {

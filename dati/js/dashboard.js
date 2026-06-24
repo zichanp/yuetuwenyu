@@ -26,10 +26,10 @@ registerPage('dashboard', () => {
         <div class="card">
             <h3 style="font-size:var(--font-size-base);font-weight:700;margin-bottom:var(--spacing-md)">快速操作</h3>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                <button class="btn btn-primary" onclick="navigateTo('activity-create')" style="justify-content:center">➕ 创建活动</button>
-                <button class="btn btn-outline" onclick="navigateTo('question-bank')" style="justify-content:center">📚 题库管理</button>
-                <button class="btn btn-outline" onclick="navigateTo('paper-mgmt')" style="justify-content:center">📄 试卷管理</button>
-                <button class="btn btn-outline" onclick="navigateTo('exam-records')" style="justify-content:center">📈 答题情况</button>
+                <button class="btn btn-primary" onclick="navigateTo('activity-create')" style="justify-content:center">创建活动</button>
+                <button class="btn btn-outline" onclick="navigateTo('question-bank')" style="justify-content:center">题库管理</button>
+                <button class="btn btn-outline" onclick="navigateTo('paper-mgmt')" style="justify-content:center">试卷管理</button>
+                <button class="btn btn-outline" onclick="navigateTo('exam-records')" style="justify-content:center">答题情况</button>
             </div>
         </div>
         <div class="card">

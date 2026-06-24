@@ -114,7 +114,7 @@ function renderGlobalActivityCreateDropdown(options = {}) {
                 <div class="activity-dropdown-item" onclick="navigateTo('offline-activity-create');closeActivityDropdown()">
                     <div class="ad-icon" style="background:#FFF1F0;color:#F5222D">📍</div>活动报名
                 </div>
-                <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
+                <div class="activity-dropdown-item" onclick="navigateTo('vote-activity-create');closeActivityDropdown()">
                     <div class="ad-icon" style="background:#E6F7FF;color:#1890FF">🙋</div>投票
                 </div>
             </div>
@@ -153,6 +153,7 @@ document.addEventListener('click', (event) => {
         return;
     }
     closeActivityDropdown();
+    if (typeof closeActivityCardMoreMenus === 'function') closeActivityCardMoreMenus();
     closePageTabsMenu();
 });
 
@@ -168,6 +169,7 @@ let tabVisitHistory = [];
 let pageStateStore = {};
 let manageSidebarOpenState = {};
 let activitySidebarOpenState = {};
+const NAVIGATION_STATE_STORAGE_KEY = 'qoder.navigationState';
 
 let currentManageActivity = {
     name: '阅启新篇·读享时光 —— 阅途成长共读计划',
@@ -186,6 +188,13 @@ const PAGE_META = {
     'quiz-activity-list': { title: '知识问答活动列表', tabTitle: '知识问答', parentPath: 'workbench', breadcrumb: ['活动管理', '活动概况', '知识问答', '活动列表'], showBack: true, generateTab: true },
     'vote-activity-list': { title: '投票活动列表', tabTitle: '投票活动列表', parentPath: 'workbench', breadcrumb: ['活动管理', '投票', '活动列表'], showBack: true, generateTab: true },
     'vote-activity-data': { title: '投票数据概况', tabTitle: '投票数据概况', parentPath: 'workbench', breadcrumb: ['活动管理', '投票', '数据概况'], showBack: true, generateTab: true },
+    'vote-activity-create': { title: params => params?.mode === 'edit' ? '编辑投票活动' : '创建投票活动', tabTitle: params => params?.mode === 'edit' ? '编辑投票活动' : '创建投票活动', parentPath: 'vote-activity-list', breadcrumb: () => ['活动管理', currentPageParams?.mode === 'edit' ? '编辑投票活动' : '创建投票活动'], showBack: true, generateTab: true },
+    'vote-manage-overview': { title: '活动概览', tabTitle: () => `投票管理-${currentManageActivity.name}`, parentPath: 'vote-activity-list', breadcrumb: ['活动管理', currentManageActivity.name, '活动概览'], showBack: true, generateTab: true },
+    'vote-records': { title: '投票情况', tabTitle: '投票情况', parentPath: 'vote-manage-overview', breadcrumb: ['活动管理', currentManageActivity.name, '投票情况'], showBack: true, generateTab: true },
+    'vote-stats': { title: '数据统计', tabTitle: '数据统计', parentPath: 'vote-manage-overview', breadcrumb: ['活动管理', currentManageActivity.name, '数据统计'], showBack: true, generateTab: true },
+    'vote-unit-data': { title: '单位数据情况', tabTitle: '单位数据情况', parentPath: 'vote-stats', breadcrumb: ['活动管理', currentManageActivity.name, '数据统计', '单位数据情况'], showBack: true, generateTab: true },
+    'vote-risk-records': { title: '异常投票记录', tabTitle: '异常投票记录', parentPath: 'vote-manage-overview', breadcrumb: ['活动管理', currentManageActivity.name, '异常投票记录'], showBack: true, generateTab: true },
+    'vote-settings': { title: '活动设置', tabTitle: '活动设置', parentPath: 'vote-manage-overview', breadcrumb: ['活动管理', currentManageActivity.name, '活动设置'], showBack: true, generateTab: true },
     'offline-activity-data': { title: '活动报名数据概况', tabTitle: '活动报名数据概况', parentPath: 'workbench', breadcrumb: ['活动管理', '活动报名', '数据概况'], showBack: true, generateTab: true },
     dashboard: { title: '运营驾驶舱', tabTitle: '运营驾驶舱', parentPath: null, breadcrumb: ['运营管理', '运营驾驶舱'], showBack: false, generateTab: true },
     'activity-stat-placeholder': { title: '数据统计', tabTitle: '数据统计', parentPath: 'workbench', breadcrumb: ['活动管理', '数据统计'], showBack: false, generateTab: true },
@@ -246,7 +255,8 @@ const PAGE_META = {
     'station-activity-create': { title: params => params?.mode === 'edit' ? '编辑分站活动' : '新建分站活动', tabTitle: params => params?.mode === 'edit' ? '编辑分站活动' : '新建分站活动', parentPath: 'station-activity-list', breadcrumb: ['运营管理', '分站活动', '新建分站活动'], showBack: true, generateTab: true },
     'resource-mgmt': { title: '资源管理', tabTitle: '资源管理', parentPath: 'workbench', breadcrumb: ['资源管理'], showBack: false, generateTab: true },
     'data-mgmt': { title: '数据管理', tabTitle: '数据管理', parentPath: 'workbench', breadcrumb: ['数据管理'], showBack: false, generateTab: true },
-    'system-mgmt': { title: '系统管理', tabTitle: '系统管理', parentPath: 'workbench', breadcrumb: ['系统管理'], showBack: false, generateTab: true }
+    'system-mgmt': { title: '系统设置', tabTitle: '系统设置', parentPath: 'workbench', breadcrumb: ['系统设置'], showBack: false, generateTab: true },
+    'blacklist-mgmt': { title: '黑名单管理', tabTitle: '黑名单管理', parentPath: 'system-mgmt', breadcrumb: ['系统设置', '黑名单管理'], showBack: false, generateTab: true }
 };
 
 // ===== SIDEBAR MENUS PER SECTION =====
@@ -306,6 +316,9 @@ const ACTIVITY_SIDEBAR_MODULES_BY_TYPE = {
     ]
 };
 
+const ACTIVITY_SIDEBAR_DISABLED_TYPES = new Set(['collection', 'task']);
+const ACTIVITY_SIDEBAR_DISABLED_TOOLTIP = '详见墨刀原型';
+
 const QUIZ_PLATFORM_PAGE_IDS = new Set([
     'quiz-activity-list',
     'question-bank',
@@ -321,7 +334,8 @@ const QUIZ_PLATFORM_PAGE_IDS = new Set([
 ]);
 const VOTE_PLATFORM_PAGE_IDS = new Set([
     'vote-activity-list',
-    'vote-activity-data'
+    'vote-activity-data',
+    'vote-activity-create'
 ]);
 const OFFLINE_PLATFORM_PAGE_IDS = new Set([
     'offline-activity-data'
@@ -379,7 +393,6 @@ const SIDEBAR_OFFLINE_ACTIVITY_MANAGE = [
     },
     { page: 'activity-dynamic', label: '活动动态' },
     { page: 'recommend-resources', label: '推荐资源' },
-    { page: 'activity-feedback', label: '活动反馈' },
     {
         page: 'offline-signin-stats',
         label: '数据统计',
@@ -390,9 +403,30 @@ const SIDEBAR_OFFLINE_ACTIVITY_MANAGE = [
     { page: 'more-functions', label: '更多功能' }
 ];
 
+const SIDEBAR_VOTE_ACTIVITY_MANAGE = [
+    { page: 'vote-manage-overview', label: '活动概览' },
+    { page: 'org-mgmt', label: '组织机构' },
+    { page: 'vote-records', label: '投票情况' },
+    {
+        page: 'certificate-mgmt',
+        label: '奖证管理',
+        children: [
+            { page: 'certificate-mgmt', label: '奖项列表' },
+            { page: 'certificates', label: '活动证明' }
+        ]
+    },
+    { page: 'activity-dynamic', label: '活动动态' },
+    { page: 'recommend-resources', label: '推荐资源' },
+    { page: 'more-functions', label: '更多功能' }
+];
+
 const SIDEBAR_OPERATION = [
     { page: 'dashboard', icon: '📊', label: '运营驾驶舱' },
     { page: 'station-activity-list', icon: '🏫', label: '分站活动' }
+];
+
+const SIDEBAR_SYSTEM = [
+    { page: 'system-mgmt', icon: '⚙️', label: '系统设置' }
 ];
 
 // Section → page ID mapping for auto-detect
@@ -422,9 +456,11 @@ const SECTION_PAGE_MAP = {
     'offline-activity-data': 'activity',
     'activity-stat-placeholder': 'activity',
     'offline-activity-create': 'activity',
+    'vote-activity-create': 'activity',
     'dashboard':          'operation',
     'station-activity-list': 'operation',
     'station-activity-create': 'operation',
+    'blacklist-mgmt':     'system',
     // Manage mode pages → activity section
     'activity-overview': 'activity',
     'org-mgmt':          'activity',
@@ -457,17 +493,24 @@ const SECTION_PAGE_MAP = {
     'activity-dynamic':  'activity',
     'recommend-resources': 'activity',
     'more-functions':   'activity',
+    'vote-manage-overview': 'activity',
+    'vote-records': 'activity',
+    'vote-stats': 'activity',
+    'vote-unit-data': 'activity',
+    'vote-risk-records': 'activity',
+    'vote-settings': 'activity',
     'resource-mgmt':    'resource',
     'data-mgmt':        'data',
     'system-mgmt':      'system'
 };
 
-const MANAGE_NAV_PAGE_IDS = new Set([...SIDEBAR_ACTIVITY_MANAGE, ...SIDEBAR_OFFLINE_ACTIVITY_MANAGE].flatMap(m => [m.page, ...(m.children || []).map(child => child.page)]));
+const MANAGE_NAV_PAGE_IDS = new Set([...SIDEBAR_ACTIVITY_MANAGE, ...SIDEBAR_OFFLINE_ACTIVITY_MANAGE, ...SIDEBAR_VOTE_ACTIVITY_MANAGE].flatMap(m => [m.page, ...(m.children || []).map(child => child.page)]));
 const MANAGE_PAGE_IDS = new Set(MANAGE_NAV_PAGE_IDS);
 ['paper-review-student-list', 'paper-review-question-list', 'paper-review-attempt-list', 'paper-review-marking', 'paper-review-question-marking', 'paper-review-detail', 'paper-review-teachers', 'paper-review-assign-question', 'paper-review-my-tasks', 'practice-create', 'submission-list', 'leaderboard', 'daily-user-detail', 'exam-session-detail', 'level-user-detail', 'level-answer-detail', 'answer-detail', 'unit-exam-detail', 'unit-daily-detail', 'unit-level-detail', 'offline-unit-detail'].forEach(id => MANAGE_PAGE_IDS.add(id));
 const ACTIVITY_PAGE_IDS = new Set(SIDEBAR_ACTIVITY.map(m => m.page).filter(Boolean));
 const OPERATION_PAGE_IDS = new Set(SIDEBAR_OPERATION.map(m => m.page).filter(Boolean));
-const SIDEBAR_NAV_PAGE_IDS = new Set([...ACTIVITY_PAGE_IDS, ...OPERATION_PAGE_IDS, ...MANAGE_NAV_PAGE_IDS]);
+const SYSTEM_PAGE_IDS = new Set(SIDEBAR_SYSTEM.map(m => m.page).filter(Boolean));
+const SIDEBAR_NAV_PAGE_IDS = new Set([...ACTIVITY_PAGE_IDS, ...OPERATION_PAGE_IDS, ...SYSTEM_PAGE_IDS, ...MANAGE_NAV_PAGE_IDS]);
 
 // ===== TOP NAV SWITCHING =====
 
@@ -511,7 +554,11 @@ function renderSidebar() {
     let menuItems = [];
 
     if (isInManageMode) {
-        menuItems = currentManageActivity.type === '活动报名' ? SIDEBAR_OFFLINE_ACTIVITY_MANAGE : SIDEBAR_ACTIVITY_MANAGE;
+        menuItems = currentManageActivity.type === '活动报名'
+            ? SIDEBAR_OFFLINE_ACTIVITY_MANAGE
+            : currentManageActivity.type === '投票'
+                ? SIDEBAR_VOTE_ACTIVITY_MANAGE
+                : SIDEBAR_ACTIVITY_MANAGE;
     } else {
         // Section-specific sidebar
         switch (topNavSection) {
@@ -523,8 +570,10 @@ function renderSidebar() {
             case 'operation':
                 menuItems = SIDEBAR_OPERATION;
                 break;
-            case 'data':
             case 'system':
+                menuItems = SIDEBAR_SYSTEM;
+                break;
+            case 'data':
             default:
                 menuItems = [];
                 break;
@@ -556,9 +605,11 @@ function renderActivitySidebar(menuItems) {
         const isActiveType = activeModule === item.key;
         const isOpen = isActivitySidebarGroupOpen(item.key, isActiveType);
         const modules = ACTIVITY_SIDEBAR_MODULES_BY_TYPE[item.key] || [];
+        const isDisabled = ACTIVITY_SIDEBAR_DISABLED_TYPES.has(item.key);
+        const disabledAttrs = isDisabled ? ` data-tooltip="${ACTIVITY_SIDEBAR_DISABLED_TOOLTIP}" title="${ACTIVITY_SIDEBAR_DISABLED_TOOLTIP}" aria-disabled="true"` : '';
         return `
-        <div class="activity-tool-group ${isActiveType ? 'active' : ''} ${isOpen ? 'open' : ''}">
-            <div class="activity-tool-title" onclick="openActivitySidebarDefault('${item.key}', '${item.label}', '${item.defaultPage || ''}', event)" role="button" aria-expanded="${isOpen}">
+        <div class="activity-tool-group ${isActiveType ? 'active' : ''} ${isOpen ? 'open' : ''} ${isDisabled ? 'is-disabled' : ''}">
+            <div class="activity-tool-title ${isDisabled ? 'tooltip' : ''}" onclick="toggleActivitySidebarGroup('${item.key}', event)" role="button" aria-expanded="${isOpen}"${disabledAttrs}>
                 <span class="activity-tool-icon">${item.icon}</span>
                 <span>${item.label}</span>
                 <b onclick="event.stopPropagation();toggleActivitySidebarGroup('${item.key}', event)">⌃</b>
@@ -574,7 +625,9 @@ function renderActivitySidebar(menuItems) {
                     );
                     const page = module.page || 'activity-module-placeholder';
                     const clickAction = `navigateActivitySidebarModule('${page}', '${item.key}', '${item.label}', '${module.module || module.label}')`;
-                    return `<div class="activity-side-child ${isActive ? 'active' : ''}" data-page="${page}" onclick="${clickAction}">${module.label}</div>`;
+                    const childDisabledAttrs = isDisabled ? ` data-tooltip="${ACTIVITY_SIDEBAR_DISABLED_TOOLTIP}" title="${ACTIVITY_SIDEBAR_DISABLED_TOOLTIP}" aria-disabled="true"` : '';
+                    const childClickAction = isDisabled ? 'event.stopPropagation()' : clickAction;
+                    return `<div class="activity-side-child ${isActive ? 'active' : ''} ${isDisabled ? 'is-disabled tooltip' : ''}" data-page="${page}" onclick="${childClickAction}"${childDisabledAttrs}>${module.label}</div>`;
                 }).join('')}
             </div>
         </div>`;
@@ -601,6 +654,7 @@ function isActivitySidebarGroupOpen(key, defaultOpen = false) {
 function toggleActivitySidebarGroup(key, event) {
     event?.stopPropagation();
     activitySidebarOpenState[key] = !isActivitySidebarGroupOpen(key);
+    persistNavigationState();
     renderSidebar();
 }
 
@@ -610,6 +664,7 @@ function openActivitySidebarDefault(activityType, activityLabel, defaultPage, ev
         ...activitySidebarOpenState,
         [activityType]: true
     };
+    persistNavigationState();
     if (activityType === 'quiz') {
         openQuizActivityList(event);
         return;
@@ -630,6 +685,7 @@ function openQuizActivityList(event) {
         ...activitySidebarOpenState,
         quiz: true
     };
+    persistNavigationState();
     navigateTo('quiz-activity-list', {
         params: {
             activityType: 'quiz',
@@ -713,13 +769,13 @@ function isManageSidebarGroupOpen(pageId) {
 function toggleManageSidebarGroup(pageId, event) {
     event?.stopPropagation();
     manageSidebarOpenState[pageId] = !isManageSidebarGroupOpen(pageId);
+    persistNavigationState();
     renderSidebar();
 }
 
 registerPage('activity-dynamic', () => renderPublicFeatureEmptyPage());
 registerPage('recommend-resources', () => renderPublicFeatureEmptyPage());
 registerPage('more-functions', () => renderMoreFunctionsPage());
-registerPage('activity-feedback', () => renderPlanningEmptyPage('活动反馈', '活动反馈功能暂未实现，后续可在这里统一管理用户反馈。'));
 registerPage('activity-stat-placeholder', () => renderPlanningEmptyPage('数据统计', '数据统计模块待研发中，后续将在这里统一展示活动数据分析、趋势概览与指标看板。'));
 registerPage('activity-module-placeholder', () => {
     const activityLabel = currentPageParams?.activityLabel || '活动';
@@ -806,6 +862,56 @@ function getTabTitle(pageId, params = {}) {
 
 function jsString(value) {
     return JSON.stringify(String(value || ''));
+}
+
+function persistNavigationState() {
+    try {
+        sessionStorage.setItem(NAVIGATION_STATE_STORAGE_KEY, JSON.stringify({
+            currentPage,
+            currentPageParams,
+            currentPageSource,
+            topNavSection,
+            isInManageMode,
+            pageTabs,
+            activeTabKey,
+            tabVisitHistory,
+            manageSidebarOpenState,
+            activitySidebarOpenState,
+            currentManageActivity
+        }));
+    } catch (error) {
+        console.warn('Failed to persist navigation state:', error);
+    }
+}
+
+function restoreNavigationState() {
+    try {
+        const raw = sessionStorage.getItem(NAVIGATION_STATE_STORAGE_KEY);
+        if (!raw) return false;
+        const state = JSON.parse(raw);
+        if (!state || !state.currentPage || !Pages[state.currentPage]) return false;
+
+        currentPage = state.currentPage;
+        currentPageParams = state.currentPageParams && typeof state.currentPageParams === 'object' ? state.currentPageParams : {};
+        currentPageSource = state.currentPageSource || null;
+        topNavSection = state.topNavSection || 'activity';
+        isInManageMode = !!state.isInManageMode;
+        pageTabs = Array.isArray(state.pageTabs) ? state.pageTabs.filter(tab => tab?.pageId && Pages[tab.pageId]) : [];
+        activeTabKey = state.activeTabKey || '';
+        tabVisitHistory = Array.isArray(state.tabVisitHistory) ? state.tabVisitHistory.filter(key => pageTabs.some(tab => tab.key === key) || key === 'workbench') : [];
+        manageSidebarOpenState = state.manageSidebarOpenState && typeof state.manageSidebarOpenState === 'object' ? state.manageSidebarOpenState : {};
+        activitySidebarOpenState = state.activitySidebarOpenState && typeof state.activitySidebarOpenState === 'object' ? state.activitySidebarOpenState : {};
+        if (state.currentManageActivity && typeof state.currentManageActivity === 'object') {
+            currentManageActivity = { ...currentManageActivity, ...state.currentManageActivity };
+        }
+        if (activeTabKey && !pageTabs.some(tab => tab.key === activeTabKey) && activeTabKey !== 'workbench') {
+            activeTabKey = '';
+        }
+        return true;
+    } catch (error) {
+        console.warn('Failed to restore navigation state:', error);
+        return false;
+    }
 }
 
 function escapeHtml(value) {
@@ -941,6 +1047,7 @@ function closePageTab(tabKey) {
     } else {
         renderPageTabs();
     }
+    persistNavigationState();
 }
 
 function closeCurrentPageTab() {
@@ -952,6 +1059,7 @@ function closeOtherPageTabs() {
     tabVisitHistory = tabVisitHistory.filter(key => key === 'workbench' || key === activeTabKey);
     renderPageTabs();
     closePageTabsMenu();
+    persistNavigationState();
 }
 
 function closeRightPageTabs() {
@@ -962,6 +1070,7 @@ function closeRightPageTabs() {
     tabVisitHistory = tabVisitHistory.filter(key => pageTabs.some(tab => tab.key === key));
     renderPageTabs();
     closePageTabsMenu();
+    persistNavigationState();
 }
 
 function closeAllPageTabs() {
@@ -970,6 +1079,7 @@ function closeAllPageTabs() {
     activeTabKey = 'workbench';
     renderPageTabs();
     closePageTabsMenu();
+    persistNavigationState();
     navigateTo('workbench', { fromTabSwitch: true, reuseTabKey: 'workbench' });
 }
 
@@ -1100,7 +1210,7 @@ function navigateTo(pageId, options = {}) {
     } else {
         upsertPageTab(pageId, currentPageParams, currentPageSource);
     }
-    const isIndependentCreatePage = ['quiz-activity-create', 'activity-create', 'offline-activity-create'].includes(pageId);
+    const isIndependentCreatePage = ['quiz-activity-create', 'activity-create', 'offline-activity-create', 'vote-activity-create'].includes(pageId);
     document.body.classList.toggle('independent-create-page', isIndependentCreatePage);
     document.body.classList.toggle('manage-mode', isInManageMode);
 
@@ -1123,14 +1233,26 @@ function navigateTo(pageId, options = {}) {
     }
 
     window.location.hash = pageId;
+    persistNavigationState();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Initial render
 document.addEventListener('DOMContentLoaded', () => {
+    const restored = restoreNavigationState();
     ensureHomeTab();
     renderPageTabs();
     renderSidebar();
+    if (restored) {
+        navigateTo(currentPage, {
+            params: currentPageParams,
+            source: currentPageSource,
+            topNavSection,
+            fromTabSwitch: true,
+            reuseTabKey: activeTabKey
+        });
+        return;
+    }
     const initialPage = window.location.hash ? window.location.hash.slice(1) : 'workbench';
     navigateTo(Pages[initialPage] ? initialPage : 'workbench');
 });
@@ -1140,99 +1262,9 @@ document.addEventListener('DOMContentLoaded', () => {
 registerPage('home', () => renderPlaceholderPage('首页', 'home', '欢迎来到知识问答活动管理平台。请从顶部导航选择功能模块。'));
 registerPage('resource-mgmt', () => renderPlaceholderPage('资源管理', 'resource', '资源管理模块正在开发中，敬请期待。'));
 registerPage('data-mgmt', () => renderPlaceholderPage('数据管理', 'data', '数据管理模块正在开发中，敬请期待。'));
-registerPage('system-mgmt', () => renderPlaceholderPage('系统管理', 'system', '系统管理模块正在开发中，敬请期待。'));
+registerPage('system-mgmt', () => renderPlaceholderPage('系统设置', 'system', '请从左侧进入需要管理的系统功能。'));
 registerPage('activity-data', () => renderActivityDataPage());
 registerPage('offline-activity-data', () => renderOfflineActivityDataPage());
-registerPage('vote-activity-list', () => renderVoteActivityListPage());
-registerPage('vote-activity-data', () => renderVoteActivityDataPage());
-
-function renderVoteActivityListPage() {
-    const rows = [
-        ['年度最受欢迎阅读推广活动评选', '进行中', '2026-06-01 至 2026-06-30', '12,856', '作品投票'],
-        ['校园朗读者人气榜', '未开始', '2026-07-05 至 2026-07-20', '0', '人物评选'],
-        ['城市书房主题海报票选', '已结束', '2026-05-08 至 2026-05-22', '8,412', '主题投票']
-    ];
-
-    return pageHeader('🗳️ 投票活动列表', '活动管理 / 投票 / 活动列表') + `
-    <section class="card" style="margin-bottom:var(--spacing-md)">
-        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--spacing-md);align-items:end">
-            <label><span style="display:block;color:var(--text-secondary);font-size:var(--font-size-xs);margin-bottom:var(--spacing-xxs)">活动名称</span><input class="form-control" placeholder="请输入投票活动名称"></label>
-            <label><span style="display:block;color:var(--text-secondary);font-size:var(--font-size-xs);margin-bottom:var(--spacing-xxs)">活动状态</span><select class="form-control"><option>全部状态</option><option>未开始</option><option>进行中</option><option>已结束</option></select></label>
-            <label><span style="display:block;color:var(--text-secondary);font-size:var(--font-size-xs);margin-bottom:var(--spacing-xxs)">投票类型</span><select class="form-control"><option>全部类型</option><option>作品投票</option><option>人物评选</option><option>主题投票</option></select></label>
-            <div style="display:flex;gap:var(--spacing-sm)">
-                <button class="btn btn-primary">查询</button>
-                <button class="btn btn-outline">重置</button>
-            </div>
-        </div>
-    </section>
-    <section class="card">
-        <div class="activity-card-head">
-            <div>
-                <h3>投票活动</h3>
-                <p>独立管理投票类活动的基础信息、投票类型与参与数据。</p>
-            </div>
-            <button class="btn btn-primary">新建投票活动</button>
-        </div>
-        ${tableWrap(
-            ['活动名称', '状态', '活动时间', '累计票数', '投票类型', '操作'],
-            rows.map(row => `
-                <tr>
-                    <td><strong>${row[0]}</strong></td>
-                    <td><span class="badge ${row[1] === '进行中' ? 'badge-green' : row[1] === '未开始' ? 'badge-blue' : 'badge-gray'}">${row[1]}</span></td>
-                    <td>${row[2]}</td>
-                    <td>${row[3]}</td>
-                    <td>${row[4]}</td>
-                    <td><button class="btn btn-ghost btn-sm">进入管理</button></td>
-                </tr>
-            `).join(''),
-            { total: rows.length }
-        )}
-    </section>`;
-}
-
-function renderVoteActivityDataPage() {
-    return pageHeader('📊 投票数据概况', '活动管理 / 投票 / 数据概况') + `
-    <section class="quiz-data-page">
-        <div class="quiz-data-metric-grid">
-            ${renderQuizDataMetric('投票活动数', '18', '进行中 6 / 已结束 9', '规模', 'blue')}
-            ${renderQuizDataMetric('累计投票数', '42,618', '较上期 +9.6%', '参与', 'cyan')}
-            ${renderQuizDataMetric('参与用户数', '15,904', '人均投票 2.7 次', '用户', 'green')}
-            ${renderQuizDataMetric('候选项总数', '286', '平均每活动 15.9 项', '内容', 'purple')}
-        </div>
-        <section class="card">
-            <div class="activity-card-head">
-                <div>
-                    <h3>投票趋势</h3>
-                    <p>展示投票类活动的每日投票量和参与人数变化。</p>
-                </div>
-            </div>
-            ${renderVoteTrendChart()}
-            <div class="quiz-data-chart-legend">
-                <span><i style="background:#00BCD4"></i>投票数</span>
-                <span><i style="background:#52C41A"></i>参与人数</span>
-            </div>
-        </section>
-    </section>`;
-}
-
-function renderVoteTrendChart() {
-    const days = ['6/9', '6/10', '6/11', '6/12', '6/13', '6/14', '6/15'];
-    const votes = [4200, 4860, 4520, 5380, 6120, 6840, 7350];
-    const users = [1560, 1720, 1680, 1980, 2260, 2480, 2690];
-    const max = Math.max(...votes);
-    return `
-    <div class="quiz-trend-chart">
-        ${days.map((day, index) => `
-            <div class="quiz-trend-day">
-                <div class="quiz-trend-bars">
-                    <i style="height:${Math.round(votes[index] / max * 100)}%;background:#00BCD4"></i>
-                    <i style="height:${Math.round(users[index] / max * 100)}%;background:#52C41A"></i>
-                </div>
-                <span>${day}</span>
-            </div>
-        `).join('')}
-    </div>`;
-}
 
 function renderPlaceholderPage(title, section, desc) {
     const icons = { home: '🏠', resource: '📁', data: '📈', system: '⚙️' };
