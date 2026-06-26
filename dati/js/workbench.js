@@ -165,7 +165,7 @@ function renderRecommendItem(item, i) {
             <div class="wb-rec-type">${item.type}</div>
             <div class="wb-rec-meta">
                 <span>活动时间：${formatDateTimeRangeSecond('2026-01-03 9:00 至 2026-01-20 12:00')}</span>
-                <span>主办单位：阅途文化集团</span>
+                <span>创建单位：阅途文化集团</span>
             </div>
         </div>
         <div class="wb-rec-actions">
@@ -412,7 +412,6 @@ registerPage('workbench', () => {
             <div class="wb-profile-stat"><span>总参与人数</span><strong>100000</strong></div>
             <div style="display:flex;gap:var(--spacing-xs);margin-top:var(--spacing-md)">
                 ${renderGlobalActivityCreateDropdown({ buttonStyle: 'background:var(--color-gold-500);border-color:var(--color-gold-500)' })}
-                <button class="btn btn-outline" style="border-color:var(--color-gold-500);color:var(--color-gold-500)">+ 专题活动</button>
             </div>
         </div>
         <div class="card wb-pending-card">

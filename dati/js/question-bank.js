@@ -50,6 +50,12 @@ function qbContentForPlainEditor(value = '') {
     return qbEscapeHtml(qbStripHtml(value));
 }
 
+function qbFormatAnswerSummary(answer = '') {
+    const text = String(answer || '').trim();
+    if (/^[A-Z]{2,}$/.test(text)) return text.split('').join('、');
+    return text;
+}
+
 function generateQuestions(bankId, count) {
     const questions = [];
     const bankName = questionBanks.find(b => b.id === bankId)?.name || '题库';
@@ -165,13 +171,13 @@ function renderQuestionManagePage() {
         <strong>${bank.name} / 题目管理</strong>
     </div>
     
-    <div class="stat-grid question-type-stat-grid">
+    <div class="stat-grid question-type-stat-grid qb-manage-stat-grid">
         ${statCard(bank.count, '总题目数', 'linear-gradient(135deg,var(--primary),var(--primary-hover))')}
         ${questionTypes.map(type => statCard(typeCounts[type] || 0, type, typeStatGradients[type])).join('')}
     </div>
 
-    <div class="card">
-        <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+    <div class="card qb-manage-card">
+        <div class="qb-manage-toolbar">
             <div class="filter-bar">
                 <select id="qbTypeFilter" onchange="filterQuestions()">
                     ${questionTypeOptions('全部题型', true)}
@@ -183,14 +189,15 @@ function renderQuestionManagePage() {
                 <button class="btn btn-outline" onclick="openBatchImportModal()">批量导入</button>
             </div>
         </div>
+        <div class="question-bank-question-table">
         ${tableWrap(
-            ['序号', '题型', '题目内容', '选项/答案', '状态', '操作'],
+            ['序号', '题型', '题目内容', '选项', '答案', '操作'],
             questions.map((q, i) => `<tr data-qid="${q.id}">
                 <td>${i + 1}</td>
                 <td><span class="badge ${questionTypeBadgeClass(q.type)}">${q.type}</span></td>
                 <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${qbEscapeHtml(qbContentSummary(q.content))}">${qbEscapeHtml(qbContentSummary(q.content))}</td>
-                <td style="font-size:12px;color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.options}</td>
-                <td><span class="badge ${q.status === '启用' ? 'badge-green' : 'badge-gray'}">${q.status}</span></td>
+                <td class="qb-question-options-cell" title="${qbEscapeHtml(q.options)}">${qbEscapeHtml(q.options)}</td>
+                <td class="qb-question-answer-cell" title="${qbEscapeHtml(q.answer)}"><span>${qbEscapeHtml(qbFormatAnswerSummary(q.answer))}</span></td>
                 <td>
                     <span class="action-link" onclick="openEditQuestionModal(${q.id})">编辑</span>
                     <span class="action-link" onclick="previewQuestion(${q.id})">预览</span>
@@ -198,6 +205,7 @@ function renderQuestionManagePage() {
                 </td>
             </tr>`).join('')
         )}
+        </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="color:var(--text-muted);font-size:var(--font-size-xs)">共 ${questions.length} 条记录（演示数据，最多显示15条）</div>
@@ -355,12 +363,12 @@ function renderQuestionForm(q, options = {}) {
                     <label><span class="req">*</span> 题目内容</label>
                     <button type="button" class="btn btn-outline btn-sm" id="qInsertBlankBtn" onclick="insertQuestionBlank()">+ 插入填空</button>
                 </div>
-                <div class="hint qb-question-content-hint">请输入题干内容，可添加文字说明、材料说明或答题要求。</div>
+                <div class="hint qb-question-content-hint">请输入题目内容，可添加文字说明、材料说明或答题要求。</div>
                 <textarea class="form-control qb-question-title" id="qContentEditor" rows="5" oninput="syncQuestionRichContent()" placeholder="请输入题目内容，例如：请阅读下列材料，并选择正确答案。">${isEdit ? qbContentForPlainEditor(q.content) : ''}</textarea>
                 <div class="qb-stem-assets">
                     <div>
-                        <div class="qb-stem-assets-title">题干素材（可选）</div>
-                        <div class="qb-stem-assets-desc">用于上传与题目相关的图片、音频或视频，用户答题时将在题干下方展示。</div>
+                        <div class="qb-stem-assets-title">题目素材（可选）</div>
+                        <div class="qb-stem-assets-desc">用于上传与题目相关的图片、音频或视频，用户答题时将在题目下方展示。</div>
                     </div>
                     <div class="qb-stem-asset-actions">
                         <button class="btn btn-outline btn-sm" type="button" onclick="openQuestionMediaPicker('image')">上传图片</button>
@@ -814,7 +822,6 @@ function previewQuestion(qId) {
         <div style="display:grid;gap:14px">
             <div style="display:flex;gap:8px;align-items:center">
                 <span class="badge ${questionTypeBadgeClass(q.type)}">${q.type}</span>
-                <span class="badge ${q.status === '启用' ? 'badge-green' : 'badge-gray'}">${q.status}</span>
             </div>
             <div style="font-size:var(--font-size-base);font-weight:600;line-height:1.6">${q.content}</div>
             <div style="background:var(--color-neutral-50);padding:var(--spacing-md);border-radius:var(--radius-md);border:1px solid var(--border-light)">

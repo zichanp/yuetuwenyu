@@ -124,7 +124,7 @@ const OFFLINE_REGISTRATION_ROWS = [
         { type: 'audit', title: '待审核 → 已通过', desc: '审核通过', time: '2026-06-20 11:36:00', operator: '管理员 周贺贺' },
         { type: 'cancel', title: '用户取消报名', desc: '用户在报名截止前主动取消', time: '2026-06-21 09:12:00', operator: '赵明' }
     ] },
-    { id: 'offline-signup-007', signupNo: 'BM20260626007', userNo: 'U007', wenyuNo: '789012', groupId: 'reader', name: '苏晴', phone: '13345671122', group: '普通读者', sessionId: 'session-0626', session: '6月26日 14:00 讲座沙龙', quantity: 1, org: '海珠区图书馆', formSummary: '年龄：35；同行：0人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '已签到', registeredAt: '2026-06-20 11:35:00', auditTrail: [
+    { id: 'offline-signup-007', signupNo: 'BM20260626007', userNo: 'U007', wenyuNo: '789012', groupId: 'reader', name: '苏晴', phone: '13345671122', group: '普通读者', sessionId: 'session-0627', session: '6月27日 10:00 亲子共读', quantity: 1, org: '海珠区图书馆', formSummary: '年龄：35；同行：0人', signupStatus: '已报名', auditStatus: '已通过', checkinStatus: '已签到', registeredAt: '2026-06-20 11:35:00', auditTrail: [
         { type: 'submit', title: '提交报名', desc: '用户提交活动报名信息', time: '2026-06-20 11:35:00', operator: '苏晴' },
         { type: 'audit', title: '待审核 → 已通过', desc: '管理员审核通过，报名成功', time: '2026-06-20 11:42:00', operator: '管理员 周贺贺' },
         { type: 'checkin', title: '现场签到成功', desc: '工作人员扫码核验完成签到', time: '2026-06-26 13:28:10', operator: '签到员 叶青' },
@@ -132,9 +132,9 @@ const OFFLINE_REGISTRATION_ROWS = [
     ] }
 ];
 const OFFLINE_REGISTRATION_SESSIONS = [
-    { id: 'session-0626', title: '讲座沙龙', time: '6月26日 14:00-16:00', duration: '2小时', status: '已结束', reviewRequired: false, capacityText: '报名成功 4/60 · 剩余 56' },
-    { id: 'session-0627', title: '亲子共读', time: '6月27日 10:00-11:30', duration: '1.5小时', status: '进行中', reviewRequired: true, capacityText: '报名成功 4/60 · 待审核 3' },
-    { id: 'session-0628', title: '志愿服务', time: '6月28日 15:30-17:30', duration: '2小时', status: '未开始', reviewRequired: false, capacityText: '报名成功 5/80 · 剩余 75' }
+    { id: 'session-0626', title: '讲座沙龙', signupTime: '6月20日 10:00-6月25日 18:00', time: '6月26日 14:00-16:00', duration: '2小时', status: '已结束', reviewRequired: false, capacityText: '报名成功 4/60 · 剩余 56' },
+    { id: 'session-0627', title: '亲子共读', signupTime: '6月20日 10:00-6月26日 18:00', time: '6月27日 10:00-11:30', duration: '1.5小时', status: '进行中', reviewRequired: true, capacityText: '报名成功 4/60 · 待审核 3' },
+    { id: 'session-0628', title: '志愿服务', signupTime: '6月20日 10:00-6月27日 18:00', time: '6月28日 15:30-17:30', duration: '2小时', status: '未开始', reviewRequired: false, capacityText: '报名成功 5/80 · 剩余 75' }
 ];
 
 function getDefaultOfflineRegistrationFilters() {
@@ -350,7 +350,6 @@ function renderOfflineRegistrationPage() {
                     <div class="offline-registration-batchbar-actions">
                         ${isReviewFreeSession ? '' : '<button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationBatchAction(\'approve\')">通过</button>'}
                         ${isReviewFreeSession ? '' : '<button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationBatchAction(\'reject\')">驳回</button>'}
-                        <button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationBatchAction('cancel')">取消报名</button>
                     </div>
                 </div>
                 <div class="registration-table-wrap offline-registration-table-wrap">
@@ -392,26 +391,22 @@ function renderOfflineRegistrationGroupTab(tab, active = false) {
 }
 
 function getOfflineRegistrationSessionTabs() {
-    const sessions = [
-        OFFLINE_REGISTRATION_SESSIONS.find(session => !session.reviewRequired),
-        OFFLINE_REGISTRATION_SESSIONS.find(session => session.reviewRequired)
-    ].filter(Boolean);
-    return sessions.map(session => ({
+    return OFFLINE_REGISTRATION_SESSIONS.map(session => ({
         id: session.id,
         title: session.title,
+        signupTime: session.signupTime,
         time: session.time,
         duration: session.duration,
-        reviewRequired: session.reviewRequired,
-        reviewStatus: session.reviewRequired ? '//活动报名需要审核时' : '//活动无需审核时'
+        reviewRequired: session.reviewRequired
     }));
 }
 
 function renderOfflineRegistrationSessionTab(tab, active = false) {
-    const timeText = `${tab.time} · ${tab.duration}`;
     return `
     <button class="${active ? 'active' : ''}" onclick="switchOfflineRegistrationSession('${tab.id}')">
-        <strong>${escapeHtml(tab.title)}${tab.reviewStatus ? `<b class="${tab.reviewRequired ? 'is-review-required' : 'is-review-free'}">${escapeHtml(tab.reviewStatus)}</b>` : ''}</strong>
-        <span>${escapeHtml(timeText)}</span>
+        <strong>${escapeHtml(tab.title)}${tab.reviewRequired ? '<b class="offline-registration-review-tag">审核</b>' : ''}</strong>
+        <span><em>报名时间</em>${escapeHtml(tab.signupTime || '-')}</span>
+        <span><em>举办时间</em>${escapeHtml(tab.time || '-')}</span>
     </button>`;
 }
 
@@ -559,7 +554,7 @@ function renderOfflineRegistrationSummaryRow(row, index) {
 function renderOfflineRegistrationDetailRow(row, index, isReviewFreeSession = false, showAuditStatus = false) {
     const sessionMeta = getOfflineRegistrationSessionMeta(row.sessionId);
     const currentStatus = getOfflineRegistrationCurrentStatus(row);
-    const signupStatusHtml = offlineRegistrationStatusBadge(getOfflineRegistrationUnifiedStatus(row));
+    const signupStatusHtml = offlineRegistrationStatusBadge(isReviewFreeSession ? getOfflineRegistrationReviewFreeStatus(row) : getOfflineRegistrationUnifiedStatus(row));
     const checkinLog = getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkin');
     const checkoutLog = hasOfflineRegistrationCheckout(row)
         ? getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkout')
@@ -601,7 +596,7 @@ function renderOfflineRegistrationDetailRow(row, index, isReviewFreeSession = fa
 
 function renderOfflineRegistrationReadonlyDetailRow(row, index, isReviewFreeSession = false, showAuditStatus = false) {
     const sessionMeta = getOfflineRegistrationSessionMeta(row.sessionId);
-    const signupStatusHtml = offlineRegistrationStatusBadge(getOfflineRegistrationUnifiedStatus(row));
+    const signupStatusHtml = offlineRegistrationStatusBadge(isReviewFreeSession ? getOfflineRegistrationReviewFreeStatus(row) : getOfflineRegistrationUnifiedStatus(row));
     const checkinLog = getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkin');
     const checkoutLog = hasOfflineRegistrationCheckout(row)
         ? getOfflineRegistrationLatestAuditEvent(row, item => item.type === 'checkout')
@@ -680,7 +675,7 @@ function matchesOfflineRegistrationFilters(row, isReviewFreeSession = false) {
         org,
         registeredAt
     } = currentOfflineRegistrationFilters;
-    const normalizedSignupStatus = getOfflineRegistrationUnifiedStatus(row);
+    const normalizedSignupStatus = isReviewFreeSession ? getOfflineRegistrationReviewFreeStatus(row) : getOfflineRegistrationUnifiedStatus(row);
     const normalizedCheckinStatus = getOfflineRegistrationCheckinDisplayStatus(row);
     const normalizedCheckoutStatus = getOfflineRegistrationCheckoutDisplayStatus(row);
     const matchSignupStatus = (signupStatus === '全部状态' || signupStatus === '全部') || normalizedSignupStatus === signupStatus;
@@ -697,7 +692,7 @@ function matchesOfflineRegistrationFilters(row, isReviewFreeSession = false) {
 }
 
 function getOfflineRegistrationReviewFreeStatus(row) {
-    return getOfflineRegistrationSignupDisplayStatus(row);
+    return row.signupStatus === '已取消' ? '已取消' : '报名成功';
 }
 
 function applyOfflineRegistrationFilters() {
@@ -1356,6 +1351,7 @@ function openOfflineRegistrationQuotaModal(wenyuNo) {
 
 function getOfflineRegistrationTimeline(row) {
     const trail = Array.isArray(row.auditTrail) ? row.auditTrail : [];
+    const sessionMeta = getOfflineRegistrationSessionMeta(row.sessionId);
     const eventMap = new Map();
     const addEvent = (item) => {
         if (!item) return;
@@ -1371,6 +1367,7 @@ function getOfflineRegistrationTimeline(row) {
 
     trail.forEach(item => {
         if (item?.type === 'notice') return;
+        if (sessionMeta.reviewRequired === false && isOfflineRegistrationAuditApprovalEvent(item)) return;
         addEvent(normalizeOfflineRegistrationTimelineEvent(row, item));
     });
 
@@ -1380,6 +1377,12 @@ function getOfflineRegistrationTimeline(row) {
         if (!b.timestamp) return -1;
         return new Date(b.timestamp.replace(/-/g, '/')) - new Date(a.timestamp.replace(/-/g, '/'));
     });
+}
+
+function isOfflineRegistrationAuditApprovalEvent(item) {
+    if (!item || item.type !== 'audit') return false;
+    const text = `${item.title || ''} ${item.desc || ''}`;
+    return text.includes('已通过') || text.includes('审核通过');
 }
 
 function formatOfflineRegistrationOperatorName(operator) {
@@ -5397,9 +5400,7 @@ function renderOfflineUnitDetailPage(unitName) {
                     <div class="text-muted">
                         已选 <strong id="offlineRegistrationSelectedCount">0</strong> 人
                     </div>
-                    <div class="offline-registration-batchbar-actions">
-                        <button class="btn btn-outline btn-sm" type="button" onclick="openOfflineRegistrationBatchAction('cancel')">取消报名</button>
-                    </div>
+                    <div class="offline-registration-batchbar-actions"></div>
                 </div>
                 <div class="registration-table-wrap offline-registration-table-wrap">
                     <table class="registration-table offline-registration-table">

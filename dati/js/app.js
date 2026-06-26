@@ -117,6 +117,9 @@ function renderGlobalActivityCreateDropdown(options = {}) {
                 <div class="activity-dropdown-item" onclick="navigateTo('vote-activity-create');closeActivityDropdown()">
                     <div class="ad-icon" style="background:#E6F7FF;color:#1890FF">🙋</div>投票
                 </div>
+                <div class="activity-dropdown-item is-disabled" aria-disabled="true">
+                    <div class="ad-icon" style="background:#FFF7E6;color:#FA8C16">+</div>专题活动
+                </div>
             </div>
         </div>
     `;
@@ -251,8 +254,10 @@ const PAGE_META = {
     'recommend-resources': { title: '推荐资源', tabTitle: '推荐资源', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '推荐资源'], showBack: true, generateTab: true },
     'more-functions': { title: '更多功能', tabTitle: '更多功能', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '更多功能'], showBack: true, generateTab: true },
     'activity-data': { title: '数据概况', tabTitle: '数据概况', parentPath: 'workbench', breadcrumb: ['活动管理', '数据概况'], showBack: true, generateTab: true },
-    'station-activity-list': { title: '分站活动', tabTitle: '分站活动', parentPath: 'dashboard', breadcrumb: ['运营管理', '分站活动'], showBack: false, generateTab: true },
-    'station-activity-create': { title: params => params?.mode === 'edit' ? '编辑分站活动' : '新建分站活动', tabTitle: params => params?.mode === 'edit' ? '编辑分站活动' : '新建分站活动', parentPath: 'station-activity-list', breadcrumb: ['运营管理', '分站活动', '新建分站活动'], showBack: true, generateTab: true },
+    'station-activity-list': { title: '老作品导入', tabTitle: '老作品导入', parentPath: 'dashboard', breadcrumb: ['运营管理', '作品导入', '老作品导入'], showBack: false, generateTab: true },
+    'station-activity-create': { title: '导入老活动作品', tabTitle: '导入老活动作品', parentPath: 'station-activity-list', breadcrumb: ['运营管理', '作品导入', '老作品导入', '导入老活动作品'], showBack: true, generateTab: true },
+    'new-works-import': { title: '新作品导入', tabTitle: '新作品导入', parentPath: 'dashboard', breadcrumb: ['运营管理', '作品导入', '新作品导入'], showBack: false, generateTab: true },
+    'new-works-import-create': { title: '导入新作品', tabTitle: '导入新作品', parentPath: 'new-works-import', breadcrumb: ['运营管理', '作品导入', '新作品导入', '导入新作品'], showBack: true, generateTab: true },
     'resource-mgmt': { title: '资源管理', tabTitle: '资源管理', parentPath: 'workbench', breadcrumb: ['资源管理'], showBack: false, generateTab: true },
     'data-mgmt': { title: '数据管理', tabTitle: '数据管理', parentPath: 'workbench', breadcrumb: ['数据管理'], showBack: false, generateTab: true },
     'system-mgmt': { title: '系统设置', tabTitle: '系统设置', parentPath: 'workbench', breadcrumb: ['系统设置'], showBack: false, generateTab: true },
@@ -383,14 +388,6 @@ const SIDEBAR_OFFLINE_ACTIVITY_MANAGE = [
     { page: 'org-mgmt', label: '组织机构' },
     { page: 'registration', label: '报名情况' },
     { page: 'offline-checkin-staff', label: '签到工作人员' },
-    {
-        page: 'certificate-mgmt',
-        label: '奖证管理',
-        children: [
-            { page: 'certificate-mgmt', label: '奖项列表' },
-            { page: 'certificates', label: '活动证明' }
-        ]
-    },
     { page: 'activity-dynamic', label: '活动动态' },
     { page: 'recommend-resources', label: '推荐资源' },
     {
@@ -422,7 +419,16 @@ const SIDEBAR_VOTE_ACTIVITY_MANAGE = [
 
 const SIDEBAR_OPERATION = [
     { page: 'dashboard', icon: '📊', label: '运营驾驶舱' },
-    { page: 'station-activity-list', icon: '🏫', label: '分站活动' }
+    {
+        key: 'works-import',
+        icon: '⇅',
+        label: '作品导入',
+        defaultPage: 'station-activity-list',
+        children: [
+            { page: 'station-activity-list', label: '老作品导入' },
+            { page: 'new-works-import', label: '新作品导入' }
+        ]
+    }
 ];
 
 const SIDEBAR_SYSTEM = [
@@ -460,6 +466,8 @@ const SECTION_PAGE_MAP = {
     'dashboard':          'operation',
     'station-activity-list': 'operation',
     'station-activity-create': 'operation',
+    'new-works-import':   'operation',
+    'new-works-import-create': 'operation',
     'blacklist-mgmt':     'system',
     // Manage mode pages → activity section
     'activity-overview': 'activity',
@@ -582,13 +590,17 @@ function renderSidebar() {
 
     html += isInManageMode
         ? renderManageSidebarTree(menuItems)
-        : (topNavSection === 'activity' ? renderActivitySidebar(menuItems) : menuItems.map(m => {
-              const isActive = currentPage === m.page;
-              return `
-              <div class="nav-item ${isActive ? 'active' : ''}" data-page="${m.page}" onclick="navigateTo('${m.page}')">
-                  <span class="icon">${m.icon}</span>${m.label}
-              </div>`;
-          }).join(''));
+        : topNavSection === 'activity'
+            ? renderActivitySidebar(menuItems)
+            : topNavSection === 'operation'
+                ? renderOperationSidebar(menuItems)
+                : menuItems.map(m => {
+                    const isActive = currentPage === m.page;
+                    return `
+                    <div class="nav-item ${isActive ? 'active' : ''}" data-page="${m.page}" onclick="navigateTo('${m.page}')">
+                        <span class="icon">${m.icon}</span>${m.label}
+                    </div>`;
+                }).join('');
 
     sidebar.innerHTML = html;
 }
@@ -644,6 +656,34 @@ function renderActivitySidebar(menuItems) {
     </div>`;
 }
 
+function renderOperationSidebar(menuItems) {
+    return `
+    <div class="activity-sidebar-tree operation-sidebar-tree">
+        ${menuItems.map(item => {
+            if (!item.children?.length) {
+                const isActive = currentPage === item.page;
+                return `<div class="nav-item ${isActive ? 'active' : ''}" data-page="${item.page}" onclick="navigateTo('${item.page}')"><span class="icon">${item.icon}</span>${item.label}</div>`;
+            }
+            const isActive = item.children.some(child => currentPage === child.page || getPageMeta(currentPage).parentPath === child.page);
+            const isOpen = isActivitySidebarGroupOpen(item.key, isActive);
+            return `
+            <div class="activity-side-group operation-side-group ${isActive ? 'active' : ''} ${isOpen ? 'open' : ''}">
+                <div class="activity-side-title operation-side-title" onclick="openOperationSidebarDefault('${item.key}', '${item.defaultPage}', event)" role="button" aria-expanded="${isOpen}">
+                    <span class="activity-side-icon">${item.icon}</span>
+                    <span>${item.label}</span>
+                    <b onclick="event.stopPropagation();toggleActivitySidebarGroup('${item.key}', event)">⌃</b>
+                </div>
+                <div class="activity-side-children">
+                    ${item.children.map(child => {
+                        const childActive = currentPage === child.page || getPageMeta(currentPage).parentPath === child.page;
+                        return `<div class="activity-side-child ${childActive ? 'active' : ''}" data-page="${child.page}" onclick="navigateTo('${child.page}')">${child.label}</div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+        }).join('')}
+    </div>`;
+}
+
 function isActivitySidebarGroupOpen(key, defaultOpen = false) {
     if (Object.prototype.hasOwnProperty.call(activitySidebarOpenState, key)) {
         return activitySidebarOpenState[key];
@@ -656,6 +696,17 @@ function toggleActivitySidebarGroup(key, event) {
     activitySidebarOpenState[key] = !isActivitySidebarGroupOpen(key);
     persistNavigationState();
     renderSidebar();
+}
+
+function openOperationSidebarDefault(key, defaultPage, event) {
+    event?.stopPropagation();
+    activitySidebarOpenState = {
+        ...activitySidebarOpenState,
+        [key]: true
+    };
+    persistNavigationState();
+    if (defaultPage) navigateTo(defaultPage);
+    else renderSidebar();
 }
 
 function openActivitySidebarDefault(activityType, activityLabel, defaultPage, event) {
