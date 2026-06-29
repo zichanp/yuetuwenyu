@@ -102,10 +102,10 @@ function renderGlobalActivityCreateDropdown(options = {}) {
         <div class="activity-dropdown">
             <button class="${buttonClass}" onclick="toggleActivityDropdown(event)"${styleAttr}>${buttonText}</button>
             <div class="activity-dropdown-menu">
-                <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
+                <div class="activity-dropdown-item is-disabled" aria-disabled="true">
                     <div class="ad-icon" style="background:#FFF7E6;color:#FA8C16">🪧</div>征集类
                 </div>
-                <div class="activity-dropdown-item" onclick="navigateTo('activity-create');closeActivityDropdown()">
+                <div class="activity-dropdown-item is-disabled" aria-disabled="true">
                     <div class="ad-icon" style="background:#E6FFFB;color:#13C2C2">⭐</div>任务打卡
                 </div>
                 <div class="activity-dropdown-item" onclick="navigateTo('quiz-activity-create');closeActivityDropdown()">
@@ -208,7 +208,7 @@ const PAGE_META = {
     'offline-checkin-staff': { title: '签到工作人员', tabTitle: '签到工作人员', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '签到工作人员'], showBack: true, generateTab: true },
     'activity-feedback': { title: '活动反馈', tabTitle: '活动反馈', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '活动反馈'], showBack: true, generateTab: true },
     'exam-records': { title: '用户答题情况', tabTitle: '用户答题情况', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况'], showBack: true, generateTab: true },
-    'offline-signin-stats': { title: '用户签到情况', tabTitle: '用户签到情况', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '数据统计', '用户签到情况'], showBack: true, generateTab: true },
+    'offline-signin-stats': { title: '签到/签退情况', tabTitle: '签到/签退情况', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '签到/签退情况'], showBack: true, generateTab: true },
     'user-qualified': { title: '用户达标情况', tabTitle: '用户达标情况', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '数据统计', '用户达标情况'], showBack: true, generateTab: true },
     'daily-score-detail': { title: '得分明细', tabTitle: '得分明细', parentPath: 'activity-overview', breadcrumb: ['活动管理', currentManageActivity.name, '得分明细'], showBack: true, generateTab: true },
     'daily-user-detail': { title: '每日记录', tabTitle: '每日记录', parentPath: 'exam-records', breadcrumb: ['活动管理', currentManageActivity.name, '用户答题情况', '每日记录'], showBack: true, generateTab: true },
@@ -280,17 +280,17 @@ const SIDEBAR_ACTIVITY = [
 
 const ACTIVITY_SIDEBAR_MODULES_BY_TYPE = {
     collection: [
-        { label: '活动列表', page: 'activity-list' },
-        { label: '评选管理' },
-        { label: '作品审核' },
-        { label: '作品推选' },
-        { label: '作品下载' },
-        { label: '数据概况', page: 'activity-data' }
+        { label: '活动列表', page: 'activity-list', activityTool: '作品征集' },
+        { label: '评选管理', disabled: true },
+        { label: '作品审核', disabled: true },
+        { label: '作品推选', disabled: true },
+        { label: '作品下载', disabled: true },
+        { label: '数据概况', page: 'activity-type-data-empty' }
     ],
     task: [
-        { label: '活动列表', page: 'activity-list' },
-        { label: '评分管理' },
-        { label: '数据概况', page: 'activity-data' }
+        { label: '活动列表', page: 'activity-list', activityTool: '任务打卡' },
+        { label: '评分管理', disabled: true },
+        { label: '数据概况', page: 'activity-type-data-empty' }
     ],
     quiz: [
         { label: '活动列表', page: 'quiz-activity-list' },
@@ -321,7 +321,7 @@ const ACTIVITY_SIDEBAR_MODULES_BY_TYPE = {
     ]
 };
 
-const ACTIVITY_SIDEBAR_DISABLED_TYPES = new Set(['collection', 'task']);
+const ACTIVITY_SIDEBAR_DISABLED_TYPES = new Set([]);
 const ACTIVITY_SIDEBAR_DISABLED_TOOLTIP = '详见墨刀原型';
 
 const QUIZ_PLATFORM_PAGE_IDS = new Set([
@@ -387,11 +387,12 @@ const SIDEBAR_OFFLINE_ACTIVITY_MANAGE = [
     { page: 'activity-overview', label: '活动概览' },
     { page: 'org-mgmt', label: '组织机构' },
     { page: 'registration', label: '报名情况' },
+    { page: 'offline-signin-stats', label: '签到/签退情况' },
     { page: 'offline-checkin-staff', label: '签到工作人员' },
     { page: 'activity-dynamic', label: '活动动态' },
     { page: 'recommend-resources', label: '推荐资源' },
     {
-        page: 'offline-signin-stats',
+        page: 'unit-data',
         label: '数据统计',
         children: [
             { page: 'unit-data', label: '单位数据情况' }
@@ -415,6 +416,58 @@ const SIDEBAR_VOTE_ACTIVITY_MANAGE = [
     { page: 'activity-dynamic', label: '活动动态' },
     { page: 'recommend-resources', label: '推荐资源' },
     { page: 'more-functions', label: '更多功能' }
+];
+
+const SIDEBAR_TASK_ACTIVITY_MANAGE = [
+    { page: 'activity-overview', label: '活动概览' },
+    { page: 'org-mgmt', label: '组织机构', disabled: true },
+    { page: 'registration', label: '报名情况', badge: 'check', disabled: true },
+    { page: 'task-checkin-records', label: '打卡记录', disabled: true },
+    {
+        page: 'certificate-mgmt',
+        label: '奖证管理',
+        disabled: true,
+        children: [
+            { page: 'certificate-mgmt', label: '奖项列表', disabled: true },
+            { page: 'certificates', label: '活动证明', disabled: true }
+        ]
+    },
+    { page: 'activity-dynamic', label: '活动动态', badge: 'warn', disabled: true },
+    { page: 'recommend-resources', label: '推荐资源', disabled: true },
+    { page: 'task-score-mgmt', label: '评分管理', disabled: true },
+    { page: 'task-points-detail', label: '积分明细', disabled: true },
+    {
+        page: 'task-data-stats',
+        label: '数据统计',
+        disabled: true,
+        children: [
+            { page: 'task-user-completion', label: '用户完成情况', disabled: true },
+            { page: 'task-checkin-data', label: '任务打卡情况', disabled: true },
+            { page: 'task-unit-participation', label: '单位参与情况', disabled: true }
+        ]
+    },
+    { page: 'more-functions', label: '更多功能', disabled: true }
+];
+
+const SIDEBAR_COLLECTION_ACTIVITY_MANAGE = [
+    { page: 'activity-overview', label: '活动概览' },
+    { page: 'org-mgmt', label: '组织机构', disabled: true },
+    { page: 'registration', label: '报名情况', badge: 'check', disabled: true },
+    { page: 'submission-list', label: '投稿情况', disabled: true },
+    { page: 'collection-recommend', label: '推选情况', disabled: true },
+    { page: 'collection-review', label: '评选管理', disabled: true },
+    {
+        page: 'certificate-mgmt',
+        label: '奖证管理',
+        disabled: true,
+        children: [
+            { page: 'certificate-mgmt', label: '奖项列表', badge: 'warn', disabled: true },
+            { page: 'certificates', label: '活动证明', disabled: true }
+        ]
+    },
+    { page: 'activity-dynamic', label: '活动动态', disabled: true },
+    { page: 'recommend-resources', label: '资源推荐', disabled: true },
+    { page: 'more-functions', label: '更多功能', disabled: true }
 ];
 
 const SIDEBAR_OPERATION = [
@@ -459,6 +512,7 @@ const SECTION_PAGE_MAP = {
     'practice-create':    'activity',
     'practice-records':   'activity',
     'activity-data':      'activity',
+    'activity-type-data-empty': 'activity',
     'offline-activity-data': 'activity',
     'activity-stat-placeholder': 'activity',
     'offline-activity-create': 'activity',
@@ -512,7 +566,7 @@ const SECTION_PAGE_MAP = {
     'system-mgmt':      'system'
 };
 
-const MANAGE_NAV_PAGE_IDS = new Set([...SIDEBAR_ACTIVITY_MANAGE, ...SIDEBAR_OFFLINE_ACTIVITY_MANAGE, ...SIDEBAR_VOTE_ACTIVITY_MANAGE].flatMap(m => [m.page, ...(m.children || []).map(child => child.page)]));
+const MANAGE_NAV_PAGE_IDS = new Set([...SIDEBAR_ACTIVITY_MANAGE, ...SIDEBAR_OFFLINE_ACTIVITY_MANAGE, ...SIDEBAR_VOTE_ACTIVITY_MANAGE, ...SIDEBAR_TASK_ACTIVITY_MANAGE, ...SIDEBAR_COLLECTION_ACTIVITY_MANAGE].flatMap(m => [m.page, ...(m.children || []).map(child => child.page)]));
 const MANAGE_PAGE_IDS = new Set(MANAGE_NAV_PAGE_IDS);
 ['paper-review-student-list', 'paper-review-question-list', 'paper-review-attempt-list', 'paper-review-marking', 'paper-review-question-marking', 'paper-review-detail', 'paper-review-teachers', 'paper-review-assign-question', 'paper-review-my-tasks', 'practice-create', 'submission-list', 'leaderboard', 'daily-user-detail', 'exam-session-detail', 'level-user-detail', 'level-answer-detail', 'answer-detail', 'unit-exam-detail', 'unit-daily-detail', 'unit-level-detail', 'offline-unit-detail'].forEach(id => MANAGE_PAGE_IDS.add(id));
 const ACTIVITY_PAGE_IDS = new Set(SIDEBAR_ACTIVITY.map(m => m.page).filter(Boolean));
@@ -566,7 +620,11 @@ function renderSidebar() {
             ? SIDEBAR_OFFLINE_ACTIVITY_MANAGE
             : currentManageActivity.type === '投票'
                 ? SIDEBAR_VOTE_ACTIVITY_MANAGE
-                : SIDEBAR_ACTIVITY_MANAGE;
+                : currentManageActivity.type === '任务打卡'
+                    ? SIDEBAR_TASK_ACTIVITY_MANAGE
+                    : currentManageActivity.type === '征集类'
+                        ? SIDEBAR_COLLECTION_ACTIVITY_MANAGE
+                        : SIDEBAR_ACTIVITY_MANAGE;
     } else {
         // Section-specific sidebar
         switch (topNavSection) {
@@ -636,10 +694,11 @@ function renderActivitySidebar(menuItems) {
                         (module.module && currentPage === 'activity-module-placeholder' && currentPageParams?.module === module.module)
                     );
                     const page = module.page || 'activity-module-placeholder';
-                    const clickAction = `navigateActivitySidebarModule('${page}', '${item.key}', '${item.label}', '${module.module || module.label}')`;
-                    const childDisabledAttrs = isDisabled ? ` data-tooltip="${ACTIVITY_SIDEBAR_DISABLED_TOOLTIP}" title="${ACTIVITY_SIDEBAR_DISABLED_TOOLTIP}" aria-disabled="true"` : '';
-                    const childClickAction = isDisabled ? 'event.stopPropagation()' : clickAction;
-                    return `<div class="activity-side-child ${isActive ? 'active' : ''} ${isDisabled ? 'is-disabled tooltip' : ''}" data-page="${page}" onclick="${childClickAction}"${childDisabledAttrs}>${module.label}</div>`;
+                    const clickAction = `navigateActivitySidebarModule('${page}', '${item.key}', '${item.label}', '${module.module || module.label}', '${module.activityTool || ''}')`;
+                    const isChildDisabled = isDisabled || module.disabled;
+                    const childDisabledAttrs = isChildDisabled ? ` data-tooltip="${ACTIVITY_SIDEBAR_DISABLED_TOOLTIP}" title="${ACTIVITY_SIDEBAR_DISABLED_TOOLTIP}" aria-disabled="true"` : '';
+                    const childClickAction = isChildDisabled ? 'event.stopPropagation()' : clickAction;
+                    return `<div class="activity-side-child ${isActive ? 'active' : ''} ${isChildDisabled ? 'is-disabled tooltip' : ''}" data-page="${page}" onclick="${childClickAction}"${childDisabledAttrs}>${module.label}</div>`;
                 }).join('')}
             </div>
         </div>`;
@@ -755,13 +814,14 @@ function resolveActivitySidebarTarget(page, activityType, moduleName) {
     return page;
 }
 
-function navigateActivitySidebarModule(page, activityType, activityLabel, moduleName) {
+function navigateActivitySidebarModule(page, activityType, activityLabel, moduleName, activityTool = '') {
     const targetPage = resolveActivitySidebarTarget(page, activityType, moduleName);
     navigateTo(targetPage, {
         params: {
             activityType,
             activityLabel,
-            module: moduleName
+            module: moduleName,
+            ...(activityTool ? { activityTool } : {})
         }
     });
 }
@@ -788,12 +848,15 @@ function renderManageSidebarTree(menuItems) {
             const childActive = children.some(child => child.page === activePage);
             const isActive = activePage === item.page || childActive;
             const isOpen = children.length && isManageSidebarGroupOpen(item.page);
-            const itemClick = children.length
+            const isDisabled = !!item.disabled;
+            const itemClick = isDisabled
+                ? 'event.stopPropagation()'
+                : children.length
                 ? `toggleManageSidebarGroup('${item.page}', event)`
                 : `navigateTo('${item.page}')`;
             return `
-            <div class="manage-nav-block ${isOpen ? 'open' : ''}">
-                <div class="manage-nav-item ${isActive ? 'active' : ''}" onclick="${itemClick}" ${children.length ? `role="button" aria-expanded="${isOpen}"` : ''}>
+            <div class="manage-nav-block ${isOpen ? 'open' : ''} ${isDisabled ? 'is-disabled' : ''}">
+                <div class="manage-nav-item ${isActive ? 'active' : ''} ${isDisabled ? 'is-disabled' : ''}" onclick="${itemClick}" ${children.length ? `role="button" aria-expanded="${isOpen}"` : ''} ${isDisabled ? 'aria-disabled="true"' : ''}>
                     <span>${item.label}</span>
                     ${item.badge === 'check' ? '<em class="manage-nav-badge ok">✓</em>' : ''}
                     ${item.badge === 'warn' ? '<em class="manage-nav-badge warn">!</em>' : ''}
@@ -801,9 +864,13 @@ function renderManageSidebarTree(menuItems) {
                 </div>
                 ${children.length ? `
                 <div class="manage-subnav">
-                    ${children.map(child => `
-                        <div class="manage-subnav-item ${activePage === child.page ? 'active' : ''}" onclick="event.stopPropagation();${child.page === 'paper-review-detail' ? 'openReviewProgressList()' : `navigateTo('${child.page}')`}">${child.label}</div>
-                    `).join('')}
+                    ${children.map(child => {
+                        const isChildDisabled = isDisabled || child.disabled;
+                        const childClick = isChildDisabled
+                            ? 'event.stopPropagation()'
+                            : `event.stopPropagation();${child.page === 'paper-review-detail' ? 'openReviewProgressList()' : `navigateTo('${child.page}')`}`;
+                        return `<div class="manage-subnav-item ${activePage === child.page ? 'active' : ''} ${isChildDisabled ? 'is-disabled' : ''}" onclick="${childClick}" ${isChildDisabled ? 'aria-disabled="true"' : ''}>${child.label}</div>`;
+                    }).join('')}
                 </div>` : ''}
             </div>`;
         }).join('')}
@@ -828,6 +895,7 @@ registerPage('activity-dynamic', () => renderPublicFeatureEmptyPage());
 registerPage('recommend-resources', () => renderPublicFeatureEmptyPage());
 registerPage('more-functions', () => renderMoreFunctionsPage());
 registerPage('activity-stat-placeholder', () => renderPlanningEmptyPage('数据统计', '数据统计模块待研发中，后续将在这里统一展示活动数据分析、趋势概览与指标看板。'));
+registerPage('activity-type-data-empty', () => renderModuleDataOverviewPage(getModuleDataTypeFromParams('collection')));
 registerPage('activity-module-placeholder', () => {
     const activityLabel = currentPageParams?.activityLabel || '活动';
     const moduleName = currentPageParams?.module || '功能模块';
@@ -1314,8 +1382,8 @@ registerPage('home', () => renderPlaceholderPage('首页', 'home', '欢迎来到
 registerPage('resource-mgmt', () => renderPlaceholderPage('资源管理', 'resource', '资源管理模块正在开发中，敬请期待。'));
 registerPage('data-mgmt', () => renderPlaceholderPage('数据管理', 'data', '数据管理模块正在开发中，敬请期待。'));
 registerPage('system-mgmt', () => renderPlaceholderPage('系统设置', 'system', '请从左侧进入需要管理的系统功能。'));
-registerPage('activity-data', () => renderActivityDataPage());
-registerPage('offline-activity-data', () => renderOfflineActivityDataPage());
+registerPage('activity-data', () => renderModuleDataOverviewPage(getModuleDataTypeFromParams('quiz')));
+registerPage('offline-activity-data', () => renderModuleDataOverviewPage('offline'));
 
 function renderPlaceholderPage(title, section, desc) {
     const icons = { home: '🏠', resource: '📁', data: '📈', system: '⚙️' };
@@ -1353,6 +1421,520 @@ function renderPlanningEmptyPage(title, desc) {
         <p>${desc}</p>
         <span>即将上线</span>
     </div>`;
+}
+
+const MODULE_DATA_TYPE_LABELS = {
+    collection: '征集类',
+    task: '任务打卡',
+    quiz: '知识问答',
+    offline: '活动报名',
+    vote: '投票'
+};
+
+const MODULE_DATA_TOOL_LABELS = {
+    collection: '作品征集',
+    task: '任务打卡',
+    quiz: '知识问答',
+    offline: '活动报名',
+    vote: '投票'
+};
+
+const moduleDataStateStore = {};
+
+function getModuleDataTypeFromParams(fallback = 'quiz') {
+    const type = currentPageParams?.activityType || currentPageParams?.moduleType || fallback;
+    if (type === 'activity报名') return 'offline';
+    return MODULE_DATA_TYPE_LABELS[type] ? type : fallback;
+}
+
+function getModuleDataStateKey(moduleType) {
+    return `moduleData:${moduleType}`;
+}
+
+function getDefaultModuleDataFilters(moduleType) {
+    return {
+        range: '近 30 日',
+        status: '全部状态',
+        unit: '全部单位',
+        role: '全部角色',
+        keyword: '',
+        mode: moduleType === 'quiz' ? '全部模式' : '',
+        task: moduleType === 'task' ? '全部任务' : '',
+        session: moduleType === 'offline' ? '全部场次' : ''
+    };
+}
+
+function getModuleDataState(moduleType) {
+    const key = getModuleDataStateKey(moduleType);
+    if (!moduleDataStateStore[key]) {
+        moduleDataStateStore[key] = {
+            filters: getDefaultModuleDataFilters(moduleType),
+            status: 'ready',
+            updatedAt: '2026-06-26 14:30'
+        };
+    }
+    return moduleDataStateStore[key];
+}
+
+function setModuleDataState(moduleType, patch = {}) {
+    const key = getModuleDataStateKey(moduleType);
+    moduleDataStateStore[key] = {
+        ...getModuleDataState(moduleType),
+        ...patch
+    };
+}
+
+function getModuleDataConfig(moduleType) {
+    const configs = {
+        collection: {
+            title: '征集类数据概况',
+            breadcrumb: '活动管理 / 征集类 / 数据概况',
+            description: '覆盖报名、投稿、审核、推选、评选、获奖等作品征集数据。',
+            modeLabel: '活动类型',
+            modeOptions: ['作品征集'],
+            metrics: [
+                { key: 'activities', label: '活动总数', value: '15', note: '进行中 3 / 已结束 8', tag: '规模', tone: 'blue', jump: { page: 'activity-list', params: { activityType: 'collection', activityLabel: '征集类', activityTool: '作品征集', module: '活动列表' } } },
+                { key: 'entries', label: '报名人数', value: '1,260', note: '来源：wy_activity_entry_user', tag: '报名', tone: 'cyan', jump: { page: 'registration', manage: true } },
+                { key: 'contributors', label: '投稿人数', value: '1,000', note: '投稿用户去重', tag: '投稿', tone: 'green', jump: { page: 'submission-list', manage: true, filters: { view: 'user' } } },
+                { key: 'works', label: '作品总数', value: '1,386', note: '不含已删除作品', tag: '作品', tone: 'purple', jump: { page: 'submission-list', manage: true } },
+                { key: 'pendingReview', label: '待审核作品', value: '100', note: 'review_status = 1', tag: '待办', tone: 'red', jump: { page: 'submission-list', manage: true, filters: { review_status: 1 } } },
+                { key: 'awards', label: '获奖作品', value: '86', note: '来源：wy_activity_award_record', tag: '奖证', tone: 'orange', jump: { page: 'certificate-mgmt', manage: true } }
+            ],
+            trends: {
+                title: '投稿与报名趋势',
+                desc: '按日查看新增投稿数和新增报名人数。',
+                legend: ['新增投稿', '新增报名'],
+                colors: ['#2F54EB', '#52C41A'],
+                days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+                series: [[80, 126, 152, 188, 236, 260, 312], [56, 92, 140, 168, 210, 248, 286]]
+            },
+            todos: [
+                { level: 'high', title: '100 件作品待审核', desc: '点击进入作品审核列表，带入 review_status = 1。', jump: { page: 'submission-list', manage: true, filters: { review_status: 1 } } },
+                { level: 'medium', title: '18 件作品待评选', desc: '进入评选管理查看评委、评分和评选进度。', jump: { page: 'activity-module-placeholder', params: { activityType: 'collection', activityLabel: '征集类', module: '评选管理' } } },
+                { level: 'medium', title: '5 个单位推选名额未用完', desc: '进入推选情况查看单位推选进度。', jump: { page: 'activity-module-placeholder', params: { activityType: 'collection', activityLabel: '征集类', module: '作品推选' } } }
+            ],
+            rankingTitle: '作品表现排行',
+            rankingRows: [
+                { name: '舍不得的丽江——丽江礼物”文创大赛', value: 386, note: '投稿成功 320 件' },
+                { name: '锦绣华服·智传千年', value: 286, note: '待审核 42 件' },
+                { name: '华政杯法律翻译征集', value: 224, note: '已推选 80 件' }
+            ],
+            tableColumns: ['活动名称', '状态', '报名人数', '投稿人数', '作品总数', '待审核', '已推选', '获奖', '操作'],
+            rows: [
+                { name: '舍不得的丽江——丽江礼物”文创大赛', status: '进行中', values: [320, 260, 386, 42, 80, 12], manageType: 'collection' },
+                { name: '锦绣华服·智传千年', status: '预告中', values: [286, 210, 286, 58, 0, 0], manageType: 'collection' },
+                { name: '华政杯法律翻译征集', status: '已结束', values: [224, 188, 224, 0, 80, 24], manageType: 'collection' }
+            ],
+            emptyText: '暂无投稿作品'
+        },
+        task: {
+            title: '任务打卡数据概况',
+            breadcrumb: '活动管理 / 任务打卡 / 数据概况',
+            description: '覆盖报名、任务、打卡、缺卡、积分、违规下架等任务打卡数据。',
+            modeLabel: '任务',
+            modeOptions: ['全部任务', '每日打卡', '作品投稿', '阅读记录'],
+            metrics: [
+                { key: 'activities', label: '活动总数', value: '15', note: '进行中 3 / 已结束 8', tag: '规模', tone: 'blue', jump: { page: 'activity-list', params: { activityType: 'task', activityLabel: '任务打卡', activityTool: '任务打卡', module: '活动列表' } } },
+                { key: 'entries', label: '报名人数', value: '1,260', note: '需要报名时统计', tag: '报名', tone: 'cyan', jump: { page: 'registration', manage: true } },
+                { key: 'tasks', label: '任务数', value: '36', note: '来源：wy_activity_clock_task', tag: '任务', tone: 'purple', jump: { page: 'activity-module-placeholder', params: { activityType: 'task', activityLabel: '任务打卡', module: '任务打卡情况' } } },
+                { key: 'users', label: '打卡人数', value: '986', note: 'finished_count > 0', tag: '用户', tone: 'green', jump: { page: 'activity-module-placeholder', params: { activityType: 'task', activityLabel: '任务打卡', module: '用户打卡情况' } } },
+                { key: 'missing', label: '缺卡次数', value: '260', note: 'checkin_status = 2', tag: '缺卡', tone: 'orange', jump: { page: 'activity-module-placeholder', params: { activityType: 'task', activityLabel: '任务打卡', module: '打卡记录' } } },
+                { key: 'violations', label: '违规下架记录', value: '18', note: 'content_status = 2', tag: '风险', tone: 'red', jump: { page: 'activity-module-placeholder', params: { activityType: 'task', activityLabel: '任务打卡', module: '打卡记录' } } }
+            ],
+            trends: {
+                title: '每日打卡趋势',
+                desc: '按日查看打卡人数和打卡次数变化。',
+                legend: ['打卡人数', '打卡次数'],
+                colors: ['#2F54EB', '#52C41A'],
+                days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+                series: [[120, 168, 186, 220, 260, 300, 360], [260, 348, 420, 510, 620, 730, 860]]
+            },
+            todos: [
+                { level: 'high', title: '260 条缺卡记录', desc: '点击进入打卡记录，带入 checkin_status = 2。', jump: { page: 'activity-module-placeholder', params: { activityType: 'task', activityLabel: '任务打卡', module: '打卡记录' } } },
+                { level: 'medium', title: '18 条违规下架记录', desc: '需要运营复核违规原因和积分扣减。', jump: { page: 'activity-module-placeholder', params: { activityType: 'task', activityLabel: '任务打卡', module: '打卡记录' } } },
+                { level: 'medium', title: '32 条记录待评分', desc: '进入评分管理处理待评分任务。', jump: { page: 'activity-module-placeholder', params: { activityType: 'task', activityLabel: '任务打卡', module: '评分管理' } } }
+            ],
+            rankingTitle: '任务完成排行',
+            rankingRows: [
+                { name: '舍不得的丽江——丽江礼物” 文创大赛', value: 860, note: '打卡人数 360' },
+                { name: '华政杯法律翻译打卡赛', value: 620, note: '缺卡 42 次' },
+                { name: '锦绣华服每日阅读', value: 486, note: '完成率 78%' }
+            ],
+            tableColumns: ['活动名称', '状态', '报名人数', '任务数', '打卡人数', '已打卡次数', '缺卡次数', '违规', '操作'],
+            rows: [
+                { name: '舍不得的丽江——丽江礼物” 文创大赛', status: '进行中', values: [300, 8, 260, 860, 42, 5], manageType: 'task' },
+                { name: '华政杯法律翻译打卡赛', status: '预告中', values: [286, 6, 0, 0, 0, 0], manageType: 'task' },
+                { name: '锦绣华服每日阅读', status: '已结束', values: [480, 12, 386, 1200, 86, 13], manageType: 'task' }
+            ],
+            emptyText: '暂无打卡记录'
+        },
+        quiz: {
+            title: '知识问答数据概况',
+            breadcrumb: '活动管理 / 知识问答 / 数据概况',
+            description: '按在线考试、每日答题、趣味闯关分别统计答题、阅卷、成绩和达标数据。',
+            modeLabel: '答题模式',
+            modeOptions: ['全部模式', '在线考试', '每日答题', '趣味闯关'],
+            metrics: [
+                { key: 'activities', label: '活动总数', value: '12', note: '进行中 6 / 已结束 4', tag: '规模', tone: 'blue', jump: { page: 'quiz-activity-list' } },
+                { key: 'entries', label: '报名人数', value: '3,842', note: '来源：wy_activity_entry_user', tag: '报名', tone: 'cyan', jump: { page: 'registration', manage: true } },
+                { key: 'participants', label: '答题人数', value: '2,936', note: '按答题模式区分口径', tag: '答题', tone: 'green', jump: { page: 'exam-records', manage: true } },
+                { key: 'submits', label: '提交/完成次数', value: '4,618', note: '考试交卷或每日提交', tag: '完成', tone: 'purple', jump: { page: 'exam-records', manage: true } },
+                { key: 'pendingReview', label: '待阅卷试卷', value: '126', note: '有主观题且未阅卷', tag: '阅卷', tone: 'orange', jump: { page: 'paper-review', manage: true } },
+                { key: 'pendingResult', label: '待发布成绩场次', value: '5', note: 'is_result = N', tag: '成绩', tone: 'red', jump: { page: 'paper-review', manage: true } }
+            ],
+            trends: {
+                title: '答题趋势',
+                desc: '按日查看答题人数、完成人数和达标/通过人数变化。',
+                legend: ['答题人数', '完成人数', '通过/达标人数'],
+                colors: ['#2F54EB', '#52C41A', '#FAAD14'],
+                days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+                series: [[360, 420, 386, 512, 486, 548, 624], [268, 302, 296, 388, 362, 428, 486], [216, 248, 236, 318, 296, 346, 398]]
+            },
+            todos: [
+                { level: 'high', title: '126 份试卷待阅卷', desc: '进入阅卷管理处理主观题阅卷任务。', jump: { page: 'paper-review', manage: true } },
+                { level: 'medium', title: '5 个场次待发布成绩', desc: '进入阅卷配置 / 发布成绩。', jump: { page: 'paper-review', manage: true } },
+                { level: 'medium', title: '3 个活动完成率低于 70%', desc: '建议检查题量、入口和提醒配置。', jump: { page: 'quiz-activity-list' } }
+            ],
+            rankingTitle: '活动表现排行',
+            rankingRows: [
+                { name: '每日阅读知识挑战', value: 758, note: '平均分 79.8' },
+                { name: '华服知识竞赛', value: 620, note: '达标率 86.8%' },
+                { name: '阅启新篇·读享时光', value: 528, note: '待阅卷 38' }
+            ],
+            tableColumns: ['活动名称', '状态', '答题模式', '报名人数', '答题人数', '完成次数', '待阅卷', '待发布成绩', '操作'],
+            rows: [
+                { name: '阅启新篇·读享时光', status: '进行中', mode: '在线考试', values: [528, 386, 684, 38, 2], manageType: 'quiz' },
+                { name: '华服知识竞赛', status: '进行中', mode: '每日答题', values: [620, 548, 1186, 0, 0], manageType: 'quiz' },
+                { name: '非遗文化闯关', status: '进行中', mode: '趣味闯关', values: [312, 198, 456, 0, 0], manageType: 'quiz' }
+            ],
+            emptyText: '暂无答题数据'
+        },
+        offline: {
+            title: '活动报名数据概况',
+            breadcrumb: '活动管理 / 活动报名 / 数据概况',
+            description: '覆盖场次、报名、审核、签到、签退等线下预约活动数据。',
+            modeLabel: '场次',
+            modeOptions: ['全部场次', '报名中场次', '待签到场次', '已结束场次'],
+            metrics: [
+                { key: 'sessions', label: '场次数', value: '18', note: '来源：wy_activity_reserve_session', tag: '场次', tone: 'blue', jump: { page: 'registration', manage: true } },
+                { key: 'seats', label: '总名额', value: '2,954', note: '各场次 max_seats_no 合计', tag: '名额', tone: 'purple' },
+                { key: 'signupMasters', label: '活动报名人数', value: '2,162', note: '报名成功主记录数', tag: '报名', tone: 'green', jump: { page: 'registration', manage: true, filters: { status: 3 } } },
+                { key: 'pendingReview', label: '待审核报名', value: '126', note: '待审核主记录数', tag: '审核', tone: 'red', jump: { page: 'registration', manage: true, filters: { status: 1 } } },
+                { key: 'checkin', label: '签到人数', value: '1,782', note: 'sign_in_status = Y 的场次关联记录数', tag: '签到', tone: 'cyan', jump: { page: 'offline-signin-stats', manage: true, filters: { sign_in_status: 'Y' } } },
+                { key: 'checkinRate', label: '签到率', value: '82.4%', note: '签到人数 / 场次报名成功人数', tag: '到场', tone: 'orange' }
+            ],
+            trends: {
+                title: '报名与签到趋势',
+                desc: '按日查看活动报名人数和签到人数。',
+                legend: ['活动报名人数', '签到人数'],
+                colors: ['#2F54EB', '#52C41A'],
+                days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+                series: [[188, 236, 284, 342, 386, 452, 528], [86, 126, 148, 184, 216, 268, 326]]
+            },
+            todos: [
+                { level: 'high', title: '126 条报名待审核', desc: '进入报名情况，带入 status = 1。', jump: { page: 'registration', manage: true, filters: { status: 1 } } },
+                { level: 'medium', title: '2 个场次名额不足', desc: '查看名额占用率高的场次。', jump: { page: 'offline-signin-stats', manage: true } },
+                { level: 'medium', title: '86 人未签到', desc: '进入签到/签退情况筛选未签到人员。', jump: { page: 'offline-signin-stats', manage: true, filters: { sign_in_status: 'N' } } }
+            ],
+            rankingTitle: '场次与单位表现',
+            rankingRows: [
+                { name: '非遗手作体验课 · 场次一', value: 92, note: '名额占用率' },
+                { name: '城市阅读季 · 下午场', value: 88, note: '名额占用率' },
+                { name: '古籍修复公开课 · 主会场', value: 84, note: '名额占用率' }
+            ],
+            tableColumns: ['活动名称', '状态', '场次数', '总名额', '报名成功', '待审核', '签到人数', '签到率', '操作'],
+            rows: [
+                { name: '城市阅读季 · 讲座沙龙', status: '报名中', values: [3, 520, 438, 32, 362, '82.6%'], manageType: 'offline' },
+                { name: '非遗手作体验课', status: '报名中', values: [2, 260, 241, 58, 213, '88.4%'], manageType: 'offline' },
+                { name: '古籍修复公开课', status: '已结束', values: [4, 460, 389, 0, 356, '91.5%'], manageType: 'offline' }
+            ],
+            emptyText: '暂无报名数据'
+        },
+        vote: {
+            title: '投票数据概况',
+            breadcrumb: '活动管理 / 投票 / 数据概况',
+            description: '当前投票以征集类互动数据为主，展示活动数、有效票数、投票人数和候选项表现。',
+            modeLabel: '投票状态',
+            modeOptions: ['全部状态', '投票中', '未开始', '已结束'],
+            metrics: [
+                { key: 'activities', label: '投票活动数', value: '18', note: '进行中 6 / 已结束 9', tag: '规模', tone: 'blue', jump: { page: 'vote-activity-list' } },
+                { key: 'validVotes', label: '有效票数', value: '42,618', note: '异常票已排除', tag: '票数', tone: 'cyan' },
+                { key: 'voters', label: '投票人数', value: '15,904', note: '人均投票 2.7 次', tag: '用户', tone: 'green' },
+                { key: 'candidates', label: '候选项数', value: '286', note: '平均每活动 15.9 项', tag: '候选', tone: 'purple' },
+                { key: 'abnormal', label: '异常票数', value: '128', note: '待管理员复核', tag: '风险', tone: 'red' },
+                { key: 'conversion', label: '投票转化率', value: '31.6%', note: '投票人数 / 访问人数', tag: '转化', tone: 'orange' }
+            ],
+            trends: {
+                title: '投票趋势',
+                desc: '按日查看有效票数和投票人数变化。',
+                legend: ['有效票数', '投票人数'],
+                colors: ['#00BCD4', '#52C41A'],
+                days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+                series: [[4200, 4860, 4520, 5380, 6120, 6840, 7350], [1560, 1720, 1680, 1980, 2260, 2480, 2690]]
+            },
+            todos: [
+                { level: 'high', title: '128 张异常票待复核', desc: '进入异常投票记录查看来源和规则命中情况。', jump: { page: 'vote-risk-records', manage: true } },
+                { level: 'medium', title: '3 个活动投票转化率低于 20%', desc: '建议检查分享入口和候选项展示。', jump: { page: 'vote-activity-list' } }
+            ],
+            rankingTitle: '候选项排行',
+            rankingRows: [
+                { name: '候选项 A · 书香空间设计', value: 7350, note: '占总票 17.2%' },
+                { name: '候选项 B · 阅读推广案例', value: 6840, note: '占总票 16.0%' },
+                { name: '候选项 C · 城市文化海报', value: 6120, note: '占总票 14.3%' }
+            ],
+            tableColumns: ['活动名称', '状态', '有效票数', '投票人数', '候选项', '异常票', '转化率', '操作'],
+            rows: [
+                { name: '阅读推广作品投票', status: '进行中', values: [7350, 2690, 36, 18, '31.6%'], manageType: 'vote' },
+                { name: '华服文化人气评选', status: '已结束', values: [6840, 2480, 28, 12, '29.4%'], manageType: 'vote' },
+                { name: '文创作品主题投票', status: '进行中', values: [6120, 2260, 42, 30, '27.8%'], manageType: 'vote' }
+            ],
+            emptyText: '暂无投票数据'
+        }
+    };
+    return configs[moduleType] || configs.quiz;
+}
+
+function renderModuleDataOverviewPage(moduleType = 'quiz') {
+    const config = getModuleDataConfig(moduleType);
+    const state = getModuleDataState(moduleType);
+    if (state.status === 'loading') return renderModuleDataStatusPage(config, moduleType, 'loading');
+    if (state.status === 'error') return renderModuleDataStatusPage(config, moduleType, 'error');
+    const rows = applyModuleDataFilters(config.rows || [], state.filters);
+    return pageHeader(`📊 ${config.title}`, config.breadcrumb) + `
+    <section class="quiz-data-page module-data-overview" data-module-type="${moduleType}">
+        ${renderModuleDataToolbar(moduleType, config, state)}
+        <div class="module-data-summary-note card">
+            <div>
+                <strong>${config.title}</strong>
+                <span>${config.description}</span>
+            </div>
+            <em>数据更新时间：${state.updatedAt}</em>
+        </div>
+        ${renderModuleDataMetricGrid(config.metrics)}
+        <div class="quiz-data-grid primary">
+            <section class="card quiz-data-chart-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>${config.trends.title}</h3>
+                        <p>${config.trends.desc}</p>
+                    </div>
+                    <div class="activity-segment">${config.trends.legend.map((label, index) => `<button class="${index === 0 ? 'active' : ''}">${label}</button>`).join('')}</div>
+                </div>
+                ${renderModuleDataTrendChart(config.trends)}
+                <div class="quiz-data-chart-legend">
+                    ${config.trends.legend.map((label, index) => `<span><i style="background:${config.trends.colors[index]}"></i>${label}</span>`).join('')}
+                </div>
+            </section>
+            <section class="card quiz-data-chart-card">
+                <div class="activity-card-head">
+                    <div>
+                        <h3>待处理事项</h3>
+                        <p>可处理数据支持点击，并会带入当前模块和筛选条件。</p>
+                    </div>
+                </div>
+                ${renderModuleDataTodos(config.todos)}
+            </section>
+        </div>
+        <div class="quiz-data-grid secondary">
+            <section class="card quiz-data-rank-card">
+                <div class="activity-card-head compact">
+                    <div>
+                        <h3>${config.rankingTitle}</h3>
+                        <p>用于快速识别高贡献和待优化活动。</p>
+                    </div>
+                </div>
+                ${renderModuleDataRanking(config.rankingRows)}
+            </section>
+            <section class="card quiz-data-alert-card">
+                <div class="activity-card-head compact">
+                    <div>
+                        <h3>刷新与状态说明</h3>
+                        <p>访问量、趋势图、排行榜可能存在统计延迟。</p>
+                    </div>
+                </div>
+                <div class="activity-todo-list">
+                    ${renderQuizDataAlert('low', '刷新当前数据', '点击刷新将重新请求当前筛选条件下的数据。')}
+                    ${renderQuizDataAlert('medium', '导出数据', '导出范围受当前筛选条件影响，后续可接异步导出。')}
+                    ${renderQuizDataAlert('low', '返回保持状态', '从明细页返回概况页时保留筛选和滚动位置。')}
+                </div>
+            </section>
+        </div>
+        <section class="card quiz-data-table-card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>活动数据列表</h3>
+                    <p>点击活动或指标可进入对应管理页面继续处理。</p>
+                </div>
+            </div>
+            ${rows.length ? tableWrap(config.tableColumns, rows.map(row => renderModuleDataTableRow(row, config, moduleType)).join(''), { total: rows.length }) : renderModuleDataEmpty(config.emptyText)}
+        </section>
+    </section>`;
+}
+
+function renderModuleDataToolbar(moduleType, config, state) {
+    const filters = state.filters;
+    return `
+    <div class="quiz-data-toolbar card">
+        <label><span>时间范围</span><select class="form-control" onchange="updateModuleDataFilter('${moduleType}', 'range', this.value)">${['今日','近 7 日','近 30 日','本月','全部时间'].map(item => `<option ${filters.range === item ? 'selected' : ''}>${item}</option>`).join('')}</select></label>
+        <label><span>活动状态</span><select class="form-control" onchange="updateModuleDataFilter('${moduleType}', 'status', this.value)">${['全部状态','未发布','预告中','进行中','已结束','已下架','报名中'].map(item => `<option ${filters.status === item ? 'selected' : ''}>${item}</option>`).join('')}</select></label>
+        <label><span>${config.modeLabel}</span><select class="form-control" onchange="updateModuleDataFilter('${moduleType}', '${moduleType === 'quiz' ? 'mode' : moduleType === 'task' ? 'task' : moduleType === 'offline' ? 'session' : 'mode'}', this.value)">${config.modeOptions.map(item => `<option ${[filters.mode, filters.task, filters.session].includes(item) ? 'selected' : ''}>${item}</option>`).join('')}</select></label>
+        <label><span>活动名称</span><input class="form-control" value="${escapeHtml(filters.keyword)}" placeholder="请输入活动名称" oninput="updateModuleDataFilter('${moduleType}', 'keyword', this.value, true)"></label>
+        <div class="quiz-data-toolbar-actions">
+            <button class="btn btn-primary" onclick="refreshModuleDataOverview('${moduleType}')">查询</button>
+            <button class="btn btn-outline" onclick="resetModuleDataOverview('${moduleType}')">重置</button>
+            <button class="btn btn-outline" onclick="exportModuleDataOverview('${moduleType}')">导出</button>
+        </div>
+    </div>`;
+}
+
+function updateModuleDataFilter(moduleType, key, value, silent = false) {
+    const state = getModuleDataState(moduleType);
+    state.filters = { ...state.filters, [key]: value };
+    setModuleDataState(moduleType, state);
+    if (!silent) refreshCurrentPage();
+}
+
+function resetModuleDataOverview(moduleType) {
+    setModuleDataState(moduleType, {
+        filters: getDefaultModuleDataFilters(moduleType),
+        status: 'ready',
+        updatedAt: '2026-06-26 14:30'
+    });
+    refreshCurrentPage();
+}
+
+function refreshModuleDataOverview(moduleType) {
+    const now = new Date();
+    const pad = value => String(value).padStart(2, '0');
+    setModuleDataState(moduleType, {
+        status: 'ready',
+        updatedAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
+    });
+    refreshCurrentPage();
+}
+
+function exportModuleDataOverview(moduleType) {
+    const config = getModuleDataConfig(moduleType);
+    openModal('导出数据', `<p>将按当前筛选条件导出「${config.title}」。大数据量导出后续可接异步任务。</p>`, null, {
+        hideCancel: true,
+        confirmText: '知道了'
+    });
+}
+
+function renderModuleDataStatusPage(config, moduleType, status) {
+    if (status === 'loading') {
+        return pageHeader(`📊 ${config.title}`, config.breadcrumb) + renderPlanningEmptyPage('数据加载中', '正在请求最新统计数据，请稍候。');
+    }
+    return pageHeader(`📊 ${config.title}`, config.breadcrumb) + `
+        <div class="planning-empty-page">
+            <div class="planning-empty-icon" aria-hidden="true">!</div>
+            <h2>数据加载失败</h2>
+            <p>数据加载失败，请刷新后重试。</p>
+            <button class="btn btn-primary" onclick="refreshModuleDataOverview('${moduleType}')">重新加载</button>
+        </div>`;
+}
+
+function renderModuleDataMetricGrid(metrics = []) {
+    return `
+    <div class="quiz-data-metric-grid">
+        ${metrics.map(metric => `
+            <section class="card quiz-data-metric ${metric.tone || 'blue'} ${metric.jump ? 'is-clickable' : ''}" ${metric.jump ? `onclick='handleModuleDataJump(${JSON.stringify(metric.jump)})'` : ''}>
+                <div class="quiz-data-metric-top"><span>${metric.label}</span><b>${metric.tag || '指标'}</b></div>
+                <strong>${metric.value}</strong>
+                <p>${metric.note}</p>
+            </section>
+        `).join('')}
+    </div>`;
+}
+
+function renderModuleDataTrendChart(trend = {}) {
+    const series = trend.series || [];
+    const days = trend.days || [];
+    const max = Math.max(...series.flat(), 1);
+    return `
+    <div class="quiz-trend-chart">
+        ${days.map((day, index) => `
+            <div class="quiz-trend-day">
+                <div class="quiz-trend-bars">
+                    ${series.map((values, seriesIndex) => `<i style="height:${Math.round((values[index] || 0) / max * 100)}%;background:${trend.colors?.[seriesIndex] || '#2F54EB'}"></i>`).join('')}
+                </div>
+                <span>${day}</span>
+            </div>
+        `).join('')}
+    </div>`;
+}
+
+function renderModuleDataTodos(todos = []) {
+    if (!todos.length) return renderModuleDataEmpty('当前暂无待处理事项');
+    return `<div class="activity-todo-list">${todos.map(todo => `
+        <div class="activity-todo-item ${todo.level || 'low'} ${todo.jump ? 'is-clickable' : ''}" ${todo.jump ? `onclick='handleModuleDataJump(${JSON.stringify(todo.jump)})'` : ''}>
+            <span>${todo.level === 'high' ? '高' : todo.level === 'medium' ? '中' : '低'}</span>
+            <div><strong>${todo.title}</strong><p>${todo.desc}</p></div>
+        </div>`).join('')}</div>`;
+}
+
+function renderModuleDataRanking(rows = []) {
+    if (!rows.length) return renderModuleDataEmpty('暂无排行数据');
+    const max = Math.max(...rows.map(row => Number(row.value) || 0), 1);
+    return `
+    <div class="quiz-rank-list">
+        ${rows.map((row, index) => `
+            <div class="quiz-rank-row">
+                <span>${index + 1}</span>
+                <div>
+                    <strong>${row.name}</strong>
+                    <small style="display:block;color:var(--text-tertiary);margin-top:2px">${row.note || ''}</small>
+                    <i><b style="width:${Math.max(8, Math.round((Number(row.value) || 0) / max * 100))}%;background:${index === 0 ? '#B8956A' : '#2F54EB'}"></b></i>
+                </div>
+                <em>${row.value}</em>
+            </div>
+        `).join('')}
+    </div>`;
+}
+
+function renderModuleDataTableRow(row, config, moduleType) {
+    const statusCls = row.status === '进行中' || row.status === '报名中' ? 'badge-green' : row.status === '已结束' ? 'badge-gray' : row.status === '预告中' ? 'badge-yellow' : 'badge-blue';
+    const modeCell = row.mode ? `<td><span class="badge badge-blue">${row.mode}</span></td>` : '';
+    return `
+    <tr>
+        <td><strong>${row.name}</strong></td>
+        <td><span class="badge ${statusCls}">${row.status}</span></td>
+        ${modeCell}
+        ${(row.values || []).map(value => `<td>${value}</td>`).join('')}
+        <td><button class="btn btn-ghost btn-sm" onclick="enterModuleDataRowManage('${moduleType}', ${jsString(row.name)}, ${jsString(row.status)}, ${jsString(row.mode || '')})">进入管理</button></td>
+    </tr>`;
+}
+
+function applyModuleDataFilters(rows = [], filters = {}) {
+    return rows.filter(row => {
+        const keyword = String(filters.keyword || '').trim();
+        if (keyword && !row.name.includes(keyword)) return false;
+        if (filters.status && !['全部状态', '全部'].includes(filters.status) && row.status !== filters.status) return false;
+        if (filters.mode && filters.mode !== '全部模式' && row.mode && row.mode !== filters.mode) return false;
+        return true;
+    });
+}
+
+function renderModuleDataEmpty(text = '暂无数据') {
+    return `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">${text}</div><div class="empty-state-desc">调整筛选条件或点击刷新后再试。</div></div>`;
+}
+
+function handleModuleDataJump(jump = {}) {
+    if (!jump.page) return;
+    if (jump.manage) {
+        navigateTo(jump.page, { params: jump.filters || {} });
+        return;
+    }
+    navigateTo(jump.page, { params: jump.params || jump.filters || {} });
+}
+
+function enterModuleDataRowManage(moduleType, name, status, mode = '') {
+    const time = '2026-01-03 09:00:00 至 2026-01-20 12:00:00';
+    if (moduleType === 'collection') return enterCollectionActivityManage(name, time, status || '进行中');
+    if (moduleType === 'task') return enterTaskActivityManage(name, time, status || '进行中');
+    if (moduleType === 'offline') return enterOfflineActivityManage(name, time, status || '进行中');
+    if (moduleType === 'vote') return enterVoteActivityManage(name, time, status || '进行中');
+    return enterQuizActivityManage(name, time, mode || '在线考试');
 }
 
 function renderPublicFeatureEmptyPage() {

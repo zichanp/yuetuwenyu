@@ -1438,7 +1438,7 @@ function renderMyReviewTasksPage(options = {}) {
     <div class="card review-table-card my-review-task-table-card">
       <div class="my-review-task-head">
         <div>
-          <div class="review-list-title">我的阅卷试卷</div>
+          <div class="review-list-title">我的阅卷试卷 <span class="my-review-task-note">（该页面需以独立新页面打开，不放在标签页内，逻辑与评选管理后台一致。）</span></div>
         </div>
       </div>
       <table class="review-table my-review-paper-table">

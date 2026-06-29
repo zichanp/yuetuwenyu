@@ -111,7 +111,7 @@ const VOTE_LIST_ACTIVITIES = [
 ];
 
 registerPage('vote-activity-list', () => renderVoteActivityListPanel());
-registerPage('vote-activity-data', () => renderVotePlatformDataPage());
+registerPage('vote-activity-data', () => renderModuleDataOverviewPage('vote'));
 registerPage('vote-manage-overview', () => renderVoteManageOverview());
 registerPage('vote-records', () => renderVoteRecordsPage());
 registerPage('vote-stats', () => renderVoteStatsPage());
@@ -315,6 +315,11 @@ function getVoteManageTotalVotes(stats) {
 }
 
 function renderVoteManageOverview() {
+    if (typeof getUnifiedActivityOverviewConfig === 'function') {
+        return `
+        ${pageHeader('📊 活动概况', '活动管理 / [当前活动] / 活动概况')}
+        ${renderVoteActivityOverviewBody()}`;
+    }
     const { config, stats } = getCurrentVoteManageData();
     return `
     <section class="vote-overview-data-page">
@@ -343,6 +348,107 @@ function renderVoteManageOverview() {
         </div>
         ${renderVoteStatsOverviewSections(stats)}
     </section>`;
+}
+
+function renderVoteActivityOverviewBody() {
+    const originalType = currentManageActivity.type;
+    currentManageActivity.type = '投票';
+    const config = getUnifiedActivityOverviewConfig('投票');
+    currentManageActivity.type = originalType;
+    return `
+    <section class="activity-overview-hero">
+        <div class="activity-overview-hero-main">
+            <div class="activity-status-line">
+                <span class="badge ${config.statusClass || 'badge-blue'}">${currentManageActivity.status || '进行中'}</span>
+                ${config.tags.map(tag => `<span>${tag}</span>`).join('')}
+            </div>
+            <h2>${escapeHtml(currentManageActivity.name)}</h2>
+            <div class="activity-meta-grid">
+                ${config.meta.map(item => `<span>${escapeHtml(item)}</span>`).join('')}
+            </div>
+        </div>
+        <div class="activity-overview-actions">
+            ${config.actions.map(action => `<button class="btn ${action.primary ? 'btn-primary' : 'btn-outline'}" type="button" onclick="${action.onclick || 'openActivityOverviewAction()'}">${action.label}</button>`).join('')}
+        </div>
+    </section>
+
+    <div class="activity-metric-grid">
+        ${config.metrics.map(metric => statMetricCard(metric.label, metric.value, metric.sub, metric.note, metric.subColor, metric.valueColor, metric.targetPage)).join('')}
+    </div>
+
+    <div class="activity-overview-grid">
+        <section class="card activity-chart-card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>${config.trend.title}</h3>
+                    <p>${config.trend.desc}</p>
+                </div>
+                <div class="activity-segment">
+                    ${config.trend.segments.map((label, index) => `<button class="${index === 0 ? 'active' : ''}">${label}</button>`).join('')}
+                </div>
+            </div>
+            ${renderTrendChart(config.trend)}
+        </section>
+        <section class="card activity-score-card">
+            <div class="activity-card-head compact">
+                <div>
+                    <h3>待处理事项</h3>
+                    <p>按当前活动数据生成的运营提醒</p>
+                </div>
+            </div>
+            <div class="activity-todo-list">
+                ${config.todos.map(item => todoItem(item.level, item.title, item.desc, item.targetPage)).join('')}
+            </div>
+        </section>
+    </div>
+
+    <div class="activity-overview-grid lower">
+        <section class="card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>${config.funnel.title}</h3>
+                    <p>${config.funnel.desc}</p>
+                </div>
+            </div>
+            <div class="activity-funnel">
+                ${config.funnel.steps.map(args => funnelStep(...args)).join('')}
+            </div>
+        </section>
+        <section class="card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>快捷入口</h3>
+                    <p>${config.moduleLabel}常用管理入口</p>
+                </div>
+            </div>
+            <div class="activity-quick-grid">
+                ${config.quickActions.map(action => `<button class="activity-quick-action" type="button" onclick="${action.onclick || `navigateTo('${action.page || 'more-functions'}')`}"><strong>${action.label}</strong><span>${action.desc || '进入管理'}</span></button>`).join('')}
+            </div>
+        </section>
+    </div>
+
+    <div class="activity-overview-grid table-row">
+        <section class="card activity-table-card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>${config.detail.title}</h3>
+                    <p>${config.detail.desc}</p>
+                </div>
+                <span class="action-link" onclick="navigateTo('${config.detail.page || 'vote-stats'}')">查看全部</span>
+            </div>
+            ${renderActivityOverviewSimpleTable(config.detail.headers, config.detail.rows)}
+        </section>
+        <section class="card activity-table-card">
+            <div class="activity-card-head">
+                <div>
+                    <h3>${config.secondary.title}</h3>
+                    <p>${config.secondary.desc}</p>
+                </div>
+                <span class="action-link" onclick="navigateTo('${config.secondary.page || 'vote-records'}')">查看全部</span>
+            </div>
+            ${renderActivityOverviewSimpleTable(config.secondary.headers, config.secondary.rows, 'question')}
+        </section>
+    </div>`;
 }
 
 function renderVoteStatsOverviewSections(stats) {

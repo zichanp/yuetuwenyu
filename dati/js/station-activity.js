@@ -62,7 +62,7 @@ const LEGACY_OPERATION_LOGS = [
         result: '部分成功',
         resultCls: 'badge-yellow',
         count: '成功 92',
-        detail: '失败 8 · 跳过 3'
+        detail: '失败 8 · 去重跳过 3'
     },
     {
         time: '2026-06-18 15:58:06',
@@ -86,7 +86,7 @@ const LEGACY_OPERATION_LOGS = [
         result: '成功',
         resultCls: 'badge-green',
         count: '成功 128',
-        detail: '失败 0 · 跳过 11'
+        detail: '失败 0 · 去重跳过 11'
     },
     {
         time: '2026-06-12 10:36:12',
@@ -154,7 +154,7 @@ const NEW_WORKS_IMPORT_LOGS = [
         result: '部分成功',
         resultCls: 'badge-yellow',
         count: '成功 86',
-        detail: '失败 4 · 跳过 2'
+        detail: '失败 4 · 去重跳过 2'
     },
     {
         time: '2026-06-22 10:15:48',
@@ -164,7 +164,7 @@ const NEW_WORKS_IMPORT_LOGS = [
         result: '成功',
         resultCls: 'badge-green',
         count: '成功 128',
-        detail: '失败 0 · 跳过 0'
+        detail: '失败 0 · 去重跳过 0'
     },
     {
         time: '2026-06-20 16:40:06',
@@ -174,7 +174,7 @@ const NEW_WORKS_IMPORT_LOGS = [
         result: '成功',
         resultCls: 'badge-green',
         count: '成功 42',
-        detail: '失败 0 · 跳过 1'
+        detail: '失败 0 · 去重跳过 1'
     }
 ];
 
@@ -220,11 +220,9 @@ function renderLegacyImportList() {
             <td>${escapeHtml(item.operator)}</td>
             <td>
                 <strong>${escapeHtml(item.sourceActivity)}</strong>
-                <div class="table-subtext">从该活动导出数据</div>
             </td>
             <td>
                 <strong>${escapeHtml(item.targetActivity)}</strong>
-                <div class="table-subtext">${item.type === '导入' ? '导入到该活动' : '导出操作无目标活动'}</div>
             </td>
             <td>${escapeHtml(item.file)}</td>
             <td><span class="badge ${item.resultCls}">${escapeHtml(item.result)}</span></td>
@@ -362,22 +360,20 @@ function renderLegacyShotUploadStep(target) {
     <section class="legacy-shot-content">
         <div class="legacy-shot-head">
             <h2>上传作品表</h2>
-            <p>请上传已整理好的老活动作品数据表</p>
-        </div>
-        <div class="legacy-target-spotlight">
-            <div class="legacy-target-spotlight-head">
-                <span class="legacy-target-chip">目标活动信息</span>
-                <strong>${escapeHtml(target.title)}</strong>
-            </div>
+            <p>请上传已按目标活动模板字段整理完成的老活动作品数据表。</p>
         </div>
         <div class="legacy-upload-box legacy-upload-box-large">
             <div class="legacy-upload-icon">↑</div>
             <div>
                 <strong>上传文件</strong>
-                <p>${legacyImportFileUploaded ? '已上传整理好的老活动作品数据表，可继续配置导入处理规则。' : '请上传已按目标活动模板字段整理完成的老活动作品数据表。'}</p>
+                ${legacyImportFileUploaded ? '<p>已上传整理好的老活动作品数据表，可继续配置导入处理规则。</p>' : ''}
                 <span>${legacyImportFileUploaded ? '2026春季作品导入模板_整理版.xlsx' : '未上传文件'}</span>
             </div>
-            <button class="btn btn-outline" onclick="uploadLegacyImportFile()">${legacyImportFileUploaded ? '重新上传' : '上传文件'}</button>
+            <button class="btn btn-primary" onclick="uploadLegacyImportFile()">${legacyImportFileUploaded ? '重新上传' : '上传文件'}</button>
+        </div>
+        <div class="legacy-target-spotlight">
+            <span class="legacy-target-chip">导入目标</span>
+            <strong>${escapeHtml(target.title)}</strong>
         </div>
         <div class="legacy-rule-form legacy-inline-rule-form">
             <h4>导入处理规则</h4>

@@ -16,7 +16,7 @@ const ACTIVITY_TYPES = [
         color: '#FF9500', created: 15, running: 3, layout: 'grid-2',
         active: '活动列表',
         links: [
-            { label: '活动列表', page: 'activity-list' },
+            { label: '活动列表', page: 'activity-list', params: { activityType: 'collection', activityLabel: '征集类', activityTool: '作品征集', module: '活动列表' } },
             { label: '评选管理' },
             { label: '作品审核' },
             { label: '作品推选' },
@@ -28,7 +28,7 @@ const ACTIVITY_TYPES = [
         key: 'task', title: '任务打卡', desc: '每日任务、周期任务、成长打卡活动',
         color: '#2F7CF6', created: 15, running: 3, layout: 'col',
         links: [
-            { label: '活动列表', page: 'activity-list' },
+            { label: '活动列表', page: 'activity-list', params: { activityType: 'task', activityLabel: '任务打卡', activityTool: '任务打卡', module: '活动列表' } },
             { label: '评分管理' },
             { label: '数据概况' }
         ]

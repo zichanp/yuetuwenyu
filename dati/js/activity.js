@@ -3,18 +3,30 @@
 // ===== ACTIVITY LIST (Level 2 - Card-based layout) =====
 registerPage('activity-list', () => {
     const isOfflineList = currentPageParams?.activityType === 'offline';
+    const activityLabel = currentPageParams?.activityLabel;
+    const activityTool = currentPageParams?.activityTool;
+    const isPrototypeOnlyList = ['task', 'collection'].includes(currentPageParams?.activityType) || ['任务打卡', '作品征集'].includes(activityTool);
+    const pageTitle = isOfflineList ? '📍 活动报名列表' : activityLabel ? `📋 ${activityLabel}活动列表` : '📋 活动列表';
+    const breadcrumb = isOfflineList ? '活动管理 / 工作台 / 活动报名 / 活动列表' : activityLabel ? `活动管理 / 工作台 / ${activityLabel} / 活动列表` : '活动管理 / 活动列表';
+    const createButtonText = activityLabel ? `+ 创建${activityLabel}活动` : '+ 创建活动';
+    const createAction = isPrototypeOnlyList
+        ? renderPrototypeOnlyButton(createButtonText, 'btn btn-primary')
+        : renderGlobalActivityCreateDropdown({ buttonText: createButtonText });
+    const typeOptions = activityTool
+        ? `<option>${activityTool}</option>`
+        : `<option>全部类型</option><option>${isOfflineList ? '讲座沙龙' : '在线考试'}</option><option>${isOfflineList ? '培训会议' : '每日答题'}</option><option>${isOfflineList ? '展览导览' : '趣味闯关'}</option>`;
     return `
-    ${pageHeader(isOfflineList ? '📍 活动报名列表' : '📋 活动列表', isOfflineList ? '活动管理 / 工作台 / 活动报名 / 活动列表' : '活动管理 / 活动列表')}
+    ${pageHeader(pageTitle, breadcrumb)}
 
     <!-- Filter Bar -->
     <div class="card" style="padding:var(--spacing-lg) var(--spacing-xl);margin-bottom:var(--spacing-lg)">
         <div class="form-row-4">
             <div class="form-group"><label>活动名称</label><input class="form-control" placeholder="请输入活动名称"></div>
-            <div class="form-group"><label>活动类型</label><select class="form-control"><option>全部类型</option><option>${isOfflineList ? '讲座沙龙' : '在线考试'}</option><option>${isOfflineList ? '培训会议' : '每日答题'}</option><option>${isOfflineList ? '展览导览' : '趣味闯关'}</option></select></div>
+            <div class="form-group"><label>活动类型</label><select class="form-control">${typeOptions}</select></div>
             <div class="form-group"><label>活动状态</label><select class="form-control"><option>全部状态</option><option>未发布</option><option>预告中</option><option>进行中</option><option>已结束</option><option>已下架</option></select></div>
             <div style="display:flex;align-items:flex-end;justify-content:flex-end;gap:var(--spacing-sm)">
-                <button class="btn btn-primary">搜索</button>
-                <button class="btn btn-ghost">重置</button>
+                ${isPrototypeOnlyList ? renderPrototypeOnlyButton('搜索', 'btn btn-primary') : '<button class="btn btn-primary">搜索</button>'}
+                ${isPrototypeOnlyList ? renderPrototypeOnlyButton('重置', 'btn btn-ghost') : '<button class="btn btn-ghost">重置</button>'}
             </div>
         </div>
     </div>
@@ -23,13 +35,13 @@ registerPage('activity-list', () => {
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--spacing-lg)">
         ${isOfflineList
             ? `<button class="btn btn-primary" onclick="navigateTo('offline-activity-create')">+ 创建活动报名</button>`
-            : renderGlobalActivityCreateDropdown()
+            : createAction
         }
     </div>
 
     <!-- Activity Cards -->
     <div style="display:flex;flex-direction:column;gap:var(--spacing-xs)">
-        ${isOfflineList ? renderOfflineActivityCards() : `
+        ${isOfflineList ? renderOfflineActivityCards() : activityTool === '作品征集' ? renderCollectionActivityCards() : activityTool === '任务打卡' ? renderTaskActivityCards() : `
         ${activityCard({title:'阅读成长知识竞赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'知识问答',mode:'在线考试',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
         ${activityCard({title:'华服知识测评',status:'进行中',statusCls:'badge-status-ongoing',tool:'知识问答',mode:'每日答题',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--color-brand-400),var(--primary))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'quiz'})}
         ${activityCard({title:'法律翻译知识初赛',status:'已结束',statusCls:'badge-status-ended',tool:'知识问答',mode:'在线考试',toolCls:'badge-quiz',scorePublishProgress:{published:3,total:5,reviewing:1,pending:1},grad:'linear-gradient(135deg,var(--warning),var(--warning-600))',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:false})}
@@ -40,8 +52,30 @@ registerPage('activity-list', () => {
         `}
     </div>
 
-    ${renderStandardPagination(isOfflineList ? 5 : 6)}`;
+    ${renderStandardPagination(isOfflineList ? 5 : activityTool === '作品征集' ? 3 : activityTool === '任务打卡' ? 5 : 6)}`;
 });
+
+function renderPrototypeOnlyButton(text, className = 'btn btn-outline btn-sm') {
+    return `<button type="button" class="${className} is-prototype-only" title="详见墨刀原型" onclick="return false">${text}</button>`;
+}
+
+function renderCollectionActivityCards() {
+    return `
+        ${activityCard({title:'获奖名单+文末福利｜「锦绣华服·智传千年」华服文化知识挑战赛',status:'未发布',statusCls:'badge-status-offline',tool:'作品征集',toolCls:'badge-yellow',grad:'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'collection'})}
+        ${activityCard({title:'【第十六届“华政杯”全国法律翻译大赛】打卡赛...',status:'预告中',statusCls:'badge-status-upcoming',tool:'作品征集',toolCls:'badge-yellow',grad:'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'collection'})}
+        ${activityCard({title:'舍不得的丽江——丽江礼物”文创大赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'作品征集',toolCls:'badge-yellow',grad:'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'collection'})}
+    `;
+}
+
+function renderTaskActivityCards() {
+    return `
+        ${activityCard({title:'获奖名单+文末福利｜「锦绣华服·智传千年」华服...',status:'未发布',statusCls:'badge-status-offline',tool:'任务打卡',toolCls:'badge-yellow',grad:'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'task'})}
+        ${activityCard({title:'【第十六届“华政杯”全国法律翻译大赛】打卡赛...',status:'预告中',statusCls:'badge-status-upcoming',tool:'任务打卡',toolCls:'badge-yellow',grad:'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'task'})}
+        ${activityCard({title:'舍不得的丽江——丽江礼物” 文创大赛',status:'进行中',statusCls:'badge-status-ongoing',tool:'任务打卡',toolCls:'badge-yellow',grad:'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'task'})}
+        ${activityCard({title:'【第十六届“华政杯”全国法律翻译大赛】打卡赛...',status:'已结束',statusCls:'badge-status-ended',tool:'任务打卡',toolCls:'badge-yellow',grad:'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'task',series:true})}
+        ${activityCard({title:'知识答题+文末福利｜「锦绣华服·智传千年」华服...',status:'已下架',statusCls:'badge-status-offline',tool:'任务打卡',toolCls:'badge-yellow',grad:'linear-gradient(135deg,#F7E7C8,#FBF5E8 55%,#B8D6C5)',time:'2026-01-03 9:00 至 2026-01-20 12:00',host:'阅途文化集团',creator:'周贺贺  2026-01-01 12:00',canManage:true,manageType:'task'})}
+    `;
+}
 
 function renderLegacyQuizTotalScoreBlock() {
     return `
@@ -91,6 +125,9 @@ function activityCard(c) {
     const toolLabel = formatActivityToolLabel(c);
     const activityTime = formatDateTimeRangeSecond(c.time);
     const creatorText = formatCreatorWithTimeSecond(c.creator);
+    const prototypeOnly = ['task', 'collection'].includes(c.manageType) || ['任务打卡', '作品征集'].includes(c.tool);
+    const actionIconClass = prototypeOnly ? 'top-nav-icon activity-entry-icon is-prototype-only' : 'top-nav-icon activity-entry-icon';
+    const prototypeTooltip = prototypeOnly ? ' title="详见墨刀原型"' : '';
     return `
     <div class="card" style="padding:var(--spacing-lg);display:flex;gap:var(--spacing-lg);align-items:center;position:relative;margin-bottom:0">
         ${c.series ? '<div style="position:absolute;top:0;left:0;background:var(--warning);color:var(--text-inverse);padding:2px var(--spacing-sm);border-radius:0 0 var(--radius-sm) 0;font-size:11px;font-weight:600">系列活动</div>' : ''}
@@ -99,9 +136,9 @@ function activityCard(c) {
             <div style="display:flex;align-items:center;gap:var(--spacing-sm);margin-bottom:var(--spacing-xs);flex-wrap:wrap">
                 <strong style="font-size:var(--font-size-md)">${c.title}</strong>
                 <span class="badge ${c.statusCls}">${c.status}</span>
-                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="访问活动" aria-label="访问活动">↗</button>
-                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="复制链接" aria-label="复制链接">⧉</button>
-                <button type="button" class="top-nav-icon activity-entry-icon" data-tooltip="二维码" aria-label="二维码">▦</button>
+                <button type="button" class="${actionIconClass}" data-tooltip="${prototypeOnly ? '详见墨刀原型' : '访问活动'}" aria-label="访问活动"${prototypeTooltip}>↗</button>
+                <button type="button" class="${actionIconClass}" data-tooltip="${prototypeOnly ? '详见墨刀原型' : '复制链接'}" aria-label="复制链接"${prototypeTooltip}>⧉</button>
+                <button type="button" class="${actionIconClass}" data-tooltip="${prototypeOnly ? '详见墨刀原型' : '二维码'}" aria-label="二维码"${prototypeTooltip}>▦</button>
             </div>
             <div style="display:flex;align-items:center;gap:var(--spacing-sm);margin-bottom:var(--spacing-xs)">
                 <span class="badge ${c.toolCls}">${toolLabel}</span>
@@ -116,13 +153,13 @@ function activityCard(c) {
         <div style="display:flex;align-items:center;gap:var(--spacing-xxs);flex-shrink:0;${c.series ? 'margin-top:8px' : ''}">
             ${renderQuizPublishScoreButton(c.scorePublishProgress, c)}
             ${c.canManage
-                ? `<button class="btn btn-primary btn-sm" onclick="${c.manageType === 'quiz' ? `enterQuizActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.mode || '')}')` : c.manageType === 'offline' ? `enterOfflineActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : c.manageType === 'vote' ? `enterVoteActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : `navigateTo('activity-manage')`}">进入管理</button>
-                   <button class="btn btn-outline btn-sm" onclick="${c.manageType === 'quiz' ? `navigateTo('quiz-activity-create', { params: { mode: 'edit' } })` : c.manageType === 'offline' ? `navigateTo('offline-activity-create', { params: { mode: 'edit' } })` : c.manageType === 'vote' ? `navigateTo('vote-activity-create', { params: { mode: 'edit' } })` : `navigateTo('activity-create')`}">编辑活动</button>`
-                : `<button class="btn btn-outline btn-sm">查看数据</button>
-                   <button class="btn btn-outline btn-sm">创建副本</button>`
+                ? `<button class="btn btn-primary btn-sm" onclick="${c.manageType === 'quiz' ? `enterQuizActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.mode || '')}')` : c.manageType === 'offline' ? `enterOfflineActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : c.manageType === 'vote' ? `enterVoteActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : c.manageType === 'task' ? `enterTaskActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : c.manageType === 'collection' ? `enterCollectionActivityManage('${escHtml(c.title)}', '${escHtml(activityTime)}', '${escHtml(c.status || '进行中')}')` : `navigateTo('activity-manage')`}">进入管理</button>
+                   ${prototypeOnly ? renderPrototypeOnlyButton('编辑活动') : `<button class="btn btn-outline btn-sm" onclick="${c.manageType === 'quiz' ? `navigateTo('quiz-activity-create', { params: { mode: 'edit' } })` : c.manageType === 'offline' ? `navigateTo('offline-activity-create', { params: { mode: 'edit' } })` : c.manageType === 'vote' ? `navigateTo('vote-activity-create', { params: { mode: 'edit' } })` : `navigateTo('activity-create')`}">编辑活动</button>`}`
+                : `${renderPrototypeOnlyButton('查看数据')}
+                   ${renderPrototypeOnlyButton('创建副本')}`
             }
             <div class="activity-more-wrap">
-                <button type="button" class="top-nav-icon activity-more-trigger" aria-label="更多操作" onclick="toggleActivityCardMoreMenu(event)">⋮</button>
+                <button type="button" class="top-nav-icon activity-more-trigger ${prototypeOnly ? 'is-prototype-only' : ''}" aria-label="更多操作" ${prototypeOnly ? 'title="详见墨刀原型" onclick="return false"' : 'onclick="toggleActivityCardMoreMenu(event)"'}>⋮</button>
                 <div class="activity-more-menu">
                     ${isSystemAdmin() ? '<button type="button" onclick="handleActivityMoreAction(event, \'recommend\')">推荐到首页（admin）</button>' : ''}
                     <button type="button" onclick="handleActivityMoreAction(event, 'copy')">创建副本</button>
@@ -259,6 +296,22 @@ function enterQuizActivityManage(activityName, activityTime, activityMode = '') 
 function enterOfflineActivityManage(activityName, activityTime, activityStatus = '') {
     currentManageActivity.name = activityName;
     currentManageActivity.type = '活动报名';
+    currentManageActivity.status = activityStatus || '进行中';
+    currentManageActivity.time = activityTime;
+    enterManageMode(activityName);
+}
+
+function enterTaskActivityManage(activityName, activityTime, activityStatus = '') {
+    currentManageActivity.name = activityName;
+    currentManageActivity.type = '任务打卡';
+    currentManageActivity.status = activityStatus || '进行中';
+    currentManageActivity.time = activityTime;
+    enterManageMode(activityName);
+}
+
+function enterCollectionActivityManage(activityName, activityTime, activityStatus = '') {
+    currentManageActivity.name = activityName;
+    currentManageActivity.type = '征集类';
     currentManageActivity.status = activityStatus || '进行中';
     currentManageActivity.time = activityTime;
     enterManageMode(activityName);

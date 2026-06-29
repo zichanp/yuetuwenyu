@@ -25,7 +25,10 @@ let offlineUnitRoleDropdownOpen = false;
 let offlineHostModes = ['online'];
 let offlineActivityTags = ['讲座', '读书'];
 let offlineActivityTagDropdownOpen = false;
+let offlineSignupStart = '2026-06-09T00:00';
+let offlineSignupEnd = '2026-06-09T01:30';
 let offlineSignupReview = false;
+let offlineMaxSignupSessions = 1;
 let offlineActivityTarget = '面向本馆读者、亲子家庭、传统文化爱好者';
 let offlineActivityScope = 'national';
 let offlineActivityRegion = '';
@@ -108,7 +111,8 @@ const OFFLINE_HOST_MODE_OPTIONS = [
 const OFFLINE_ACTIVITY_TAG_OPTIONS = ['讲座', '读书', '分享会', '培训', '展览', '沙龙', '亲子', '论坛'];
 const OFFLINE_ACTIVITY_REGION_OPTIONS = ['北京市', '上海市', '天津市', '重庆市', '浙江省', '江苏省', '广东省', '四川省', '海南省', '杭州市', '南京市', '广州市', '成都市'];
 const OFFLINE_DEFAULT_RULES = [
-    '每个账号最多可报名场次数量不限。',
+    '不限制单账号可报名人数；活动名额由各场次名额控制。',
+    '单人最多可参与场次数由活动配置控制，默认 1 个场次。',
     '代报人为多人报名时，默认需为每个参加人填写报名信息。',
     '每个场次至少保留 1 个场次，不支持删除最后一个场次。',
     '场次名称默认按“场次一、场次二...”自动生成，支持手动修改。',
@@ -319,6 +323,7 @@ function renderOfflineBasicStep() {
                 <label><span class="req">*</span>活动名称</label>
                 <input class="qc-input" maxlength="50" value="${offlineEscapeAttr(offlineActivityName)}" onchange="setOfflineActivityName(this.value)" placeholder="请输入活动名称，50字以内">
             </div>
+            ${renderOfflineSignupTimeBasicRow()}
             <div class="qc-form-row">
                 <label>活动标签</label>
                 ${renderOfflineActivityTagDropdown()}
@@ -341,6 +346,20 @@ function renderOfflineBasicStep() {
     <section class="quiz-config-card org-card offline-config-section">
         ${renderOfflineOrgUnits()}
     </section>`;
+}
+
+function renderOfflineSignupTimeBasicRow() {
+    return `
+            <div class="qc-form-row span-2 offline-signup-time-basic-row">
+                <label><span class="req">*</span>报名时间</label>
+                <div class="offline-signup-time-basic-control">
+                    <div class="offline-session-date-range">
+                        <input type="datetime-local" class="form-control" value="${offlineEscapeAttr(getOfflineDateTimeLocalValue(offlineSignupStart))}" onchange="setOfflineActivitySignupTime('start', this.value)">
+                        <span class="offline-session-date-separator">至</span>
+                        <input type="datetime-local" class="form-control" required value="${offlineEscapeAttr(getOfflineDateTimeLocalValue(offlineSignupEnd))}" onchange="setOfflineActivitySignupTime('end', this.value)">
+                    </div>
+                </div>
+            </div>`;
 }
 
 function renderOfflineSectionHeader(title, desc) {
@@ -631,6 +650,33 @@ function renderOfflineSignupStep() {
     </section>`;
 }
 
+function renderOfflineActivitySignupRuleRows() {
+    return `
+    <div class="offline-activity-signup-rule-rows">
+        <div class="offline-session-rule-stack">
+            <div class="offline-session-inner-row">
+                <div class="offline-session-inner-label">是否需要审核报名 <span class="offline-help-dot tooltip" data-tooltip="开启后，用户提交活动报名后需管理员审核通过，才算报名成功。">?</span></div>
+                <div class="offline-session-inner-control">
+                    <div class="offline-attendance-radio-options">
+                        <label><input type="radio" name="offlineActivitySignupReviewRequired" value="yes" ${offlineSignupReview ? 'checked' : ''} onchange="setOfflineSignupReview(true)"> 是</label>
+                        <label><input type="radio" name="offlineActivitySignupReviewRequired" value="no" ${offlineSignupReview ? '' : 'checked'} onchange="setOfflineSignupReview(false)"> 否</label>
+                    </div>
+                </div>
+            </div>
+            <div class="offline-session-inner-row">
+                <div class="offline-session-inner-label">单人最多可参与场次 <span class="offline-help-dot tooltip" data-tooltip="限制同一参加人在当前活动下最多可选择几个场次。">?</span></div>
+                <div class="offline-session-inner-control">
+                    <div class="offline-session-checkin-offset">
+                        <span>最多参与</span>
+                        <input class="offline-rule-number-input" type="number" min="1" value="${Number(offlineMaxSignupSessions) || 1}" onchange="setOfflineMaxSignupSessions(this.value)">
+                        <span>个场次</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
 function renderOfflineGroupedSignupPanel() {
     const primaryGroup = offlineGroups[0];
     return `
@@ -754,11 +800,12 @@ function renderOfflineGroupCard(group, index, options = {}) {
                         <div class="gc-tile-icon">⚙</div>
                         <span class="gc-tile-state">${group.participationConfigured ? '已完成' : '待配置'}</span>
                     </div>
-                    <div class="gc-tile-title">场次与报名规则</div>
+                    <div class="gc-tile-title">场次配置</div>
                     <div class="gc-tile-desc">${participationSummary}</div>
                     <button class="btn ${group.participationConfigured ? 'btn-outline' : 'btn-dark'} btn-sm" type="button" onclick="event.stopPropagation();configureOfflineGroupParticipation(${index})">${group.participationConfigured ? '编辑规则' : '配置规则'}</button>
                 </div>
             </div>
+            ${hideGroupConcept ? renderOfflineActivitySignupRuleRows() : ''}
         </div>
     </div>`;
 }
@@ -1245,7 +1292,7 @@ function formatOfflineDateTimeText(value) {
 }
 
 function getOfflineSessionSignupText(session) {
-    return `${formatOfflineDateTimeText(session.signupStart)} 至 ${formatOfflineDateTimeText(session.signupEnd)}`;
+    return `${formatOfflineDateTimeText(offlineSignupStart)} 至 ${formatOfflineDateTimeText(offlineSignupEnd)}`;
 }
 
 function getOfflineSignupRuleText(group) {
@@ -1491,8 +1538,8 @@ function renderOfflineSessionConfigCards(sessions) {
     <div class="phase-config-shell offline-session-phase-shell">
         <div class="phase-section-header">
             <div>
-                <div class="phase-section-title">场次与报名规则</div>
-                <div class="phase-section-subtitle">${singleSession ? '单场活动只需配置默认场次；多场次活动可继续添加场次，并分别配置每场规则。' : '可配置多个活动场次，每场可独立设置时间、名额、报名与签到/签退规则。'}</div>
+                <div class="phase-section-title">场次配置</div>
+                <div class="phase-section-subtitle">${singleSession ? '单场活动只需配置默认场次；多场次活动可继续添加场次。' : '可配置多个活动场次，每场独立设置举办时间、名额与签到/签退规则。'}</div>
             </div>
             <div class="phase-section-actions">
                 <button class="btn btn-outline btn-sm" type="button" onclick="addOfflineParticipationSession()">+ 添加场次</button>
@@ -1514,12 +1561,9 @@ function renderOfflineSessionConfigCard(session, index, total) {
     const canMoveDown = index < total - 1;
     const configured = !!(
         String(session.name || '').trim()
-        && session.signupStart
-        && session.signupEnd
         && session.startTime
         && getOfflineSessionEndTimeValue(session)
         && Number(session.capacity) > 0
-        && Number(session.maxSignupQuantity) > 0
     );
     const collapsed = !!session.collapsed;
     const displayTitle = total <= 1 ? '场次配置' : offlineEscapeHtml(session.name || formatOfflineSessionName(index));
@@ -1551,7 +1595,6 @@ function renderOfflineSessionConfigCard(session, index, total) {
 function renderOfflineSessionCardFields(session, index, total = 1) {
     const endTimeValue = getOfflineDateTimeLocalValue(getOfflineSessionEndTimeValue(session));
     const location = getOfflineSessionLocation(session);
-    const signupReviewEnabled = session.signupReview ?? offlineSignupReview;
     const attendanceConfig = getOfflineSessionAttendanceConfig(session);
     const selfCheckinEnabled = attendanceConfig.selfCheckinEnabled;
     const checkoutEnabled = attendanceConfig.checkoutEnabled;
@@ -1569,17 +1612,6 @@ function renderOfflineSessionCardFields(session, index, total = 1) {
             <div class="cfg-row-label">场次说明</div>
             <div class="cfg-row-control">
                 <textarea class="form-control" rows="3" placeholder="请输入场次说明（选填）" onchange="setOfflineSessionField(${index}, 'subtitle', this.value)">${offlineEscapeHtml(session.subtitle || '')}</textarea>
-            </div>
-        </div>
-        <div class="cfg-row">
-            <div class="cfg-row-label"><span class="req">*</span> 报名时间</div>
-            <div class="cfg-row-control">
-                <div class="offline-session-date-range">
-                    <input type="datetime-local" class="form-control" value="${offlineEscapeAttr(getOfflineDateTimeLocalValue(session.signupStart))}" onchange="setOfflineSessionField(${index}, 'signupStart', this.value)">
-                    <span class="offline-session-date-separator">至</span>
-                    <input type="datetime-local" class="form-control" required value="${offlineEscapeAttr(getOfflineDateTimeLocalValue(session.signupEnd))}" onchange="setOfflineSessionField(${index}, 'signupEnd', this.value)">
-                </div>
-                <div class="cfg-row-hint">//描述：报名开始时间 ≤ 举办开始时间；报名结束时间 ≤ 举办结束时间</div>
             </div>
         </div>
         <div class="cfg-row">
@@ -1617,29 +1649,9 @@ function renderOfflineSessionCardFields(session, index, total = 1) {
                 </div>
             </div>
         </div>
-        <div class="cfg-row">
-            <div class="cfg-row-label"><span class="req">*</span> 单账号最多报名人数 <span class="offline-help-dot tooltip" data-tooltip="限制同一报名账号在当前场次最多可报名的参与人数，包含本人及代报名人员。">?</span></div>
-            <div class="cfg-row-control">
-                <div class="offline-session-capacity-field">
-                    <div class="num-input offline-session-capacity-input">
-                        <input type="number" min="1" value="${Number(session.maxSignupQuantity) || 1}" onchange="setOfflineSessionField(${index}, 'maxSignupQuantity', this.value)">
-                        <span class="unit">人</span>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="cfg-row offline-session-signup-attendance-row">
             <div class="cfg-row-control">
                 <div class="offline-session-rule-stack">
-                    <div class="offline-session-inner-row">
-                        <div class="offline-session-inner-label">是否需要审核报名 <span class="offline-help-dot tooltip" data-tooltip="开启后，用户提交本场报名后需管理员审核通过，才算报名成功。">?</span></div>
-                        <div class="offline-session-inner-control">
-                            <div class="offline-attendance-radio-options">
-                                <label><input type="radio" name="offlineSignupReviewRequired_${index}" value="yes" ${signupReviewEnabled ? 'checked' : ''} onchange="setOfflineSessionRuleField(${index}, 'signupReview', true)"> 是</label>
-                                <label><input type="radio" name="offlineSignupReviewRequired_${index}" value="no" ${signupReviewEnabled ? '' : 'checked'} onchange="setOfflineSessionRuleField(${index}, 'signupReview', false)"> 否</label>
-                            </div>
-                        </div>
-                    </div>
                     <div class="offline-session-inner-row">
                         <div class="offline-session-inner-label">签到提前时长</div>
                         <div class="offline-session-inner-control">
@@ -1714,6 +1726,16 @@ function setOfflineSignupReview(enabled) {
     goOfflineStep(3, { preserveScroll: true });
 }
 
+function setOfflineActivitySignupTime(type, value) {
+    if (type === 'start') offlineSignupStart = value || '';
+    if (type === 'end') offlineSignupEnd = value || '';
+}
+
+function setOfflineMaxSignupSessions(value) {
+    offlineMaxSignupSessions = Math.max(Number(value) || 1, 1);
+    goOfflineStep(3, { preserveScroll: true });
+}
+
 function setOfflineCheckinEnabled(enabled) {
     offlineCheckinEnabled = !!enabled;
     offlineGroups.forEach(group => {
@@ -1743,7 +1765,7 @@ function setOfflineSessionField(index, key, value) {
     if (key === 'startTime' && session.startTime && !session.endTime) {
         session.endTime = getOfflineSessionComputedEndTime(session.startTime, session.duration);
     }
-    session.signupStatus = getOfflineSessionSignupStatus(session.signupStart, session.signupEnd);
+    session.signupStatus = getOfflineSessionSignupStatus(offlineSignupStart, offlineSignupEnd);
     session.sessionStatus = getOfflineSessionStatus(session.startTime, session.duration, session.endTime);
     group.sessionCount = ensureOfflineGroupSessions(group).length;
     group.capacity = ensureOfflineGroupSessions(group).reduce((sum, item) => sum + (Number(item.capacity) || 0), 0);
@@ -1755,7 +1777,7 @@ function setOfflineSessionRuleField(index, key, value) {
     const group = offlineGroups[offlineParticipationGroupIdx];
     const session = ensureOfflineGroupSessions(group)[index];
     if (!session) return;
-    if (key === 'signupReview' || key === 'checkoutEnabled') {
+    if (key === 'checkoutEnabled') {
         session[key] = !!value;
     } else if (key === 'checkinStartOffset') {
         session[key] = Math.max(Number(value) || 0, 0);
@@ -2050,21 +2072,18 @@ function getOfflineSessionStatus(startTime, duration, endTime = '') {
 
 function getOfflineSessionTimeValidationError(session, index) {
     const sessionName = session.name || formatOfflineSessionName(index);
-    const signupStart = new Date(session.signupStart);
-    const signupEnd = new Date(session.signupEnd);
+    const signupStart = new Date(offlineSignupStart);
+    const signupEnd = new Date(offlineSignupEnd);
     const startTime = new Date(session.startTime);
     const endTime = new Date(getOfflineSessionEndTimeValue(session));
-    if (signupStart > signupEnd) {
-        return `${sessionName}的本场报名开始时间不能晚于本场报名结束时间`;
-    }
     if (startTime > endTime) {
         return `${sessionName}的本场举办开始时间不能晚于本场举办结束时间`;
     }
     if (signupStart > startTime) {
-        return `${sessionName}的本场报名开始时间不能晚于本场举办开始时间`;
+        return `活动报名开始时间不能晚于${sessionName}的举办开始时间`;
     }
     if (signupEnd > endTime) {
-        return `${sessionName}的本场报名结束时间不能晚于本场举办结束时间`;
+        return `活动报名结束时间不能晚于${sessionName}的举办结束时间`;
     }
     return '';
 }
@@ -2103,7 +2122,7 @@ function saveOfflineGroupParticipationConfig(index) {
     const attendanceMode = firstAttendanceConfig.attendanceMode;
     const checkinEnabled = true;
     const checkoutEnabled = firstAttendanceConfig.checkoutEnabled;
-    const maxSignupSessions = sessions.length;
+    const maxSignupSessions = offlineMaxSignupSessions;
     const sessionSignupRule = sessions.length > 1 ? 'multiple' : 'single';
     const checkinStartOffset = firstAttendanceConfig.checkinStartOffset;
     const checkinEndRule = firstAttendanceConfig.checkinEndRule;
@@ -2119,14 +2138,16 @@ function saveOfflineGroupParticipationConfig(index) {
         alert(`请填写${formatOfflineSessionName(missingNameIndex)}的场次名称`);
         return;
     }
-    const missingSignupStartIndex = sessions.findIndex(session => !session.signupStart);
-    if (missingSignupStartIndex >= 0) {
-        alert(`请填写${sessions[missingSignupStartIndex].name || formatOfflineSessionName(missingSignupStartIndex)}的本场报名开始时间`);
+    if (!offlineSignupStart) {
+        alert('请填写活动报名开始时间');
         return;
     }
-    const missingSignupEndIndex = sessions.findIndex(session => !session.signupEnd);
-    if (missingSignupEndIndex >= 0) {
-        alert(`请填写${sessions[missingSignupEndIndex].name || formatOfflineSessionName(missingSignupEndIndex)}的本场报名结束时间`);
+    if (!offlineSignupEnd) {
+        alert('请填写活动报名结束时间');
+        return;
+    }
+    if (new Date(offlineSignupStart) > new Date(offlineSignupEnd)) {
+        alert('活动报名开始时间不能晚于活动报名结束时间');
         return;
     }
     const missingStartIndex = sessions.findIndex(session => !session.startTime);
@@ -2149,7 +2170,7 @@ function saveOfflineGroupParticipationConfig(index) {
     group.sessionCount = sessionCount;
     group.capacity = capacity;
     group.needSignup = needSignup;
-    group.signupReview = sessions.some(session => !!session.signupReview);
+    group.signupReview = offlineSignupReview;
     group.sessionSignupRule = sessionSignupRule;
     group.maxSignupSessions = maxSignupSessions;
     group.attendanceMode = attendanceMode;
@@ -2451,12 +2472,9 @@ function openOfflinePublishConfirm() {
 }
 
 function getOfflinePublishSuccessData() {
-    const groups = Array.isArray(offlineGroups) ? offlineGroups : [];
-    const sessions = groups.flatMap(group => ensureOfflineGroupSessions(group));
-    const firstSession = sessions[0] || {};
     const activityName = offlineActivityName || '活动报名';
-    const startTime = firstSession.signupStart || firstSession.startTime || '';
-    const endTime = firstSession.signupEnd || firstSession.endTime || '';
+    const startTime = offlineSignupStart || '';
+    const endTime = offlineSignupEnd || '';
     const activityTime = startTime && endTime ? `${formatOfflineDateTimeText(startTime)} 至 ${formatOfflineDateTimeText(endTime)}` : '';
 
     return {
@@ -2622,9 +2640,9 @@ function renderOfflinePublishConfirm() {
             </div>
         </div>`;
     }).join('');
-    const signupTimeText = firstSession?.signupStart && firstSession?.signupEnd
-        ? `${formatOfflineDateTimeText(firstSession.signupStart)} 至 ${formatOfflineDateTimeText(firstSession.signupEnd)}`
-        : (groups.length > 1 || sessions.length > 1 ? '请在各场次中分别配置报名时间' : '请选择报名时间');
+    const signupTimeText = offlineSignupStart && offlineSignupEnd
+        ? `${formatOfflineDateTimeText(offlineSignupStart)} 至 ${formatOfflineDateTimeText(offlineSignupEnd)}`
+        : '请选择活动报名时间';
     const locationText = firstSession?.location
         ? `${firstSession.location.province || ''}${firstSession.location.city || ''} ${firstSession.location.address || ''}`.trim()
         : getOfflineFullLocationText(0);
@@ -2675,7 +2693,7 @@ function renderOfflinePublishConfirm() {
                     ${groupSummary}
                     <div class="exam-paper-confirm-card">
                         <div class="exam-paper-confirm-title">首个场次概览 <span class="badge badge-green">${offlineEscapeHtml(firstSession.name || '场次一')}</span></div>
-                        <div class="exam-paper-confirm-grid"><span>举办时间：${formatOfflineDateTimeText(firstSession.startTime || '')} 至 ${formatOfflineDateTimeText(firstSession.endTime || '')}</span><span>人数上限：${Number(firstSession.capacity) || 0} 人 <span class="locked-tag">锁定</span></span><span>单账号报名上限：${Number(firstSession.maxSignupQuantity) || 1} 人</span><span>报名审核：${firstSession.signupReview ? '开启' : '关闭'}</span></div>
+                        <div class="exam-paper-confirm-grid"><span>举办时间：${formatOfflineDateTimeText(firstSession.startTime || '')} 至 ${formatOfflineDateTimeText(firstSession.endTime || '')}</span><span>人数上限：${Number(firstSession.capacity) || 0} 人 <span class="locked-tag">锁定</span></span><span>报名审核：${offlineSignupReview ? '开启' : '关闭'}</span><span>单人最多参与：${Number(offlineMaxSignupSessions) || 1} 个场次</span></div>
                     </div>
                     ${renderOfflineConfirmRows([
                         { label: '活动地点', value: offlineEscapeHtml(locationText || '未配置活动地点') },

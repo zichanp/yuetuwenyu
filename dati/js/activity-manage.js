@@ -243,38 +243,485 @@ function renderActivityOverviewModeTabs() {
     </section>`;
 }
 
-function renderActivityOverview() {
-    if (currentManageActivity.type === '活动报名') {
-        return renderPlanningEmptyPage('活动概览', '活动报名活动概览暂未配置，后续将在这里展示报名活动数据概况。');
-    }
+function getUnifiedActivityOverviewConfig(activityType) {
+    const type = activityType || currentManageActivity.type;
+    if (type === '征集类') return getCollectionActivityOverviewConfig();
+    if (type === '任务打卡') return getTaskActivityOverviewConfig();
+    if (type === '活动报名') return getOfflineActivityOverviewConfig();
+    if (type === '投票') return getVoteActivityOverviewConfigFromManage();
+    return getQuizActivityOverviewUnifiedConfig();
+}
 
-    const config = getActivityOverviewConfig();
+function getActivityOverviewBaseMeta(ruleText, extra = []) {
+    return [
+        `活动时间：${currentManageActivity.time}`,
+        '参与范围：集团总部及 8 家分馆',
+        ruleText,
+        ...extra
+    ];
+}
+
+function getActivityOverviewActions() {
+    return [
+        { label: '导出数据', onclick: "openActivityOverviewAction('导出数据')" },
+        { label: '发送提醒', onclick: "openActivityOverviewAction('发送提醒')" },
+        { label: '查看活动', primary: true, onclick: "openActivityOverviewAction('查看活动')" }
+    ];
+}
+
+function getCollectionActivityOverviewConfig() {
+    return {
+        moduleLabel: '作品征集类活动',
+        tags: ['征集类', '作品征集', '剩余 18 天'],
+        statusClass: 'badge-green',
+        actions: getActivityOverviewActions(),
+        meta: getActivityOverviewBaseMeta('征集规则：报名、投稿、审核、推选、评选、获奖', ['投票配置：已开启作品投票，票数展示由活动设置控制']),
+        metrics: [
+            metricConfig('报名人数', '1,260', '今日新增 42', 'wy_activity_entry_user 未删除报名记录数', 'var(--success)', 'var(--primary)', 'registration'),
+            metricConfig('投稿人数', '936', '投稿转化率 74.3%', 'wy_activity_creation 按 app_user_id 去重', 'var(--success)', 'var(--success)', 'submission-list'),
+            metricConfig('作品总数', '1,128', '含审核中/成功/驳回', '当前活动未删除作品总数', 'var(--text-muted)', 'var(--info)', 'submission-list'),
+            metricConfig('待审核作品', '86', '需优先处理', 'review_status = 1', 'var(--warning)', 'var(--warning)', 'submission-list'),
+            metricConfig('投稿成功作品', '892', '审核通过率 79.1%', 'review_status = 2', 'var(--success)', 'var(--success)', 'submission-list'),
+            metricConfig('已推选作品', '128', '覆盖 18 个单位', 'is_elect = Y', 'var(--text-muted)', 'var(--color-gold-500)', 'more-functions'),
+            metricConfig('待评选作品', '214', '评委任务待完成', 'selection_status = 1/2', 'var(--warning)', 'var(--danger)', 'more-functions'),
+            metricConfig('获奖作品', '36', '证书待发 12', 'wy_activity_award_record 作品获奖记录', 'var(--success)', 'var(--primary)', 'certificate-mgmt')
+        ],
+        trend: {
+            title: '投稿趋势',
+            desc: '按日查看报名人数、投稿人数和投稿成功作品变化',
+            segments: ['报名人数', '投稿人数', '通过作品'],
+            days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+            values: [120, 188, 246, 388, 512, 746, 936]
+        },
+        todos: [
+            { level: 'high', title: '86 件作品待审核', desc: '建议先处理临近评选批次的投稿作品。', targetPage: 'submission-list' },
+            { level: 'medium', title: '214 件作品待评选', desc: '请提醒评委完成打分并检查评选进度。', targetPage: 'more-functions' },
+            { level: 'medium', title: '12 份证书待发放', desc: '获奖名单已确认，待发放活动证明。', targetPage: 'certificate-mgmt' },
+            { level: 'low', title: '投票配置需复核', desc: '投票展示规则和结束时间建议在活动结束前确认。', targetPage: 'more-functions' }
+        ],
+        funnel: {
+            title: '征集进度',
+            desc: '从报名到投稿、审核通过、推选评选的业务进度',
+            steps: [
+                ['报名人数', '1,260', 100, 'var(--primary)'],
+                ['投稿人数', '936', 74, 'var(--info)'],
+                ['投稿成功作品', '892', 71, 'var(--success)'],
+                ['已推选作品', '128', 32, 'var(--color-gold-500)'],
+                ['获奖作品', '36', 18, 'var(--warning)']
+            ]
+        },
+        quickActions: [
+            { label: '报名情况', desc: '查看报名用户', page: 'registration' },
+            { label: '投稿情况', desc: '审核和管理作品', page: 'submission-list' },
+            { label: '评选配置/管理', desc: '评委和评选进度', page: 'more-functions' },
+            { label: '奖证管理', desc: '获奖名单和证书', page: 'certificate-mgmt' },
+            { label: '活动动态', desc: '发布活动资讯', page: 'activity-dynamic' },
+            { label: '推荐资源', desc: '配置推荐内容', page: 'recommend-resources' }
+        ],
+        detail: {
+            title: '最近投稿 / 待审核作品',
+            desc: '优先展示需要管理员处理的作品记录',
+            page: 'submission-list',
+            headers: ['作品名称', '投稿人', '选送单位', '审核状态', '提交时间'],
+            rows: [
+                ['《城市书房的一天》', '林悦', '集团总部', badgeHtml('待审核', 'badge-yellow'), '2026-06-26 15:42'],
+                ['《旧书新读》', '黄嘉', '城东分馆', badgeHtml('投稿成功', 'badge-green'), '2026-06-26 14:18'],
+                ['《阅途微光》', '苏晴', '少儿阅读中心', badgeHtml('待评选', 'badge-blue'), '2026-06-25 18:06'],
+                ['《馆藏记忆》', '程默', '城西分馆', badgeHtml('驳回', 'badge-red'), '2026-06-25 11:23']
+            ]
+        },
+        secondary: {
+            title: '单位投稿表现',
+            desc: '识别投稿推进效果较好的单位',
+            page: 'unit-data',
+            headers: ['单位名称', '报名人数', '投稿人数', '作品总数', '通过率'],
+            rows: [
+                ['集团总部', '286', '248', '318', rateHtml('86.8%', 'good')],
+                ['城东分馆', '192', '156', '186', rateHtml('81.2%', 'good')],
+                ['少儿阅读中心', '168', '124', '151', rateHtml('76.5%', '')],
+                ['流动服务站', '96', '48', '62', rateHtml('51.6%', 'warn')]
+            ]
+        }
+    };
+}
+
+function getTaskActivityOverviewConfig() {
+    return {
+        moduleLabel: '任务打卡活动',
+        tags: ['任务打卡', '周期任务', '剩余 12 天'],
+        statusClass: 'badge-green',
+        actions: getActivityOverviewActions(),
+        meta: getActivityOverviewBaseMeta('打卡规则：按任务生成应打卡记录，支持补卡、评分和积分', ['任务配置：5 个任务 / 每日 1 次 / 达标后可发证']),
+        metrics: [
+            metricConfig('报名人数', '1,086', '今日新增 38', 'wy_activity_entry_user 当前活动报名记录数', 'var(--success)', 'var(--primary)', 'registration'),
+            metricConfig('任务数', '5', '进行中 4 个', 'wy_activity_clock_task 当前活动任务数量', 'var(--text-muted)', 'var(--info)', 'more-functions'),
+            metricConfig('打卡人数', '812', '参与率 74.8%', 'finished_count > 0 的去重用户数', 'var(--success)', 'var(--success)', 'exam-records'),
+            metricConfig('已打卡次数', '6,428', '应打卡 8,640', 'finished_count 合计', 'var(--success)', 'var(--primary)', 'exam-records'),
+            metricConfig('今日打卡人数', '486', '较昨日 +32', '今日 checkin_status = 1 的去重用户数', 'var(--success)', 'var(--success)', 'exam-records'),
+            metricConfig('缺卡次数', '318', '需提醒补卡', 'checkin_status = 2 的记录数', 'var(--warning)', 'var(--warning)', 'exam-records'),
+            metricConfig('完成率', '74.4%', '已打卡/应打卡', 'finished_count / required_count', 'var(--text-muted)', 'var(--color-gold-500)'),
+            metricConfig('违规下架记录', '12', '待复核 3 条', 'content_status = 2 的打卡记录数', 'var(--danger)', 'var(--danger)', 'exam-records')
+        ],
+        trend: {
+            title: '打卡趋势',
+            desc: '按日查看打卡人数、已打卡次数和缺卡次数变化',
+            segments: ['打卡人数', '打卡次数', '缺卡次数'],
+            days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+            values: [286, 342, 398, 424, 466, 454, 486]
+        },
+        todos: [
+            { level: 'high', title: '318 次缺卡待跟进', desc: '建议向缺卡用户发送补卡或提醒通知。', targetPage: 'exam-records' },
+            { level: 'medium', title: '12 条违规下架记录', desc: '复核下架原因并处理用户申诉。', targetPage: 'exam-records' },
+            { level: 'medium', title: '3 个单位完成率低于 60%', desc: '联系单位管理员确认组织推进情况。', targetPage: 'unit-data' },
+            { level: 'low', title: '评分记录待同步', desc: '部分打卡任务评分尚未更新到积分流水。', targetPage: 'more-functions' }
+        ],
+        funnel: {
+            title: '打卡进度',
+            desc: '从报名到参与打卡、完成任务和达标的转化',
+            steps: [
+                ['报名人数', '1,086', 100, 'var(--primary)'],
+                ['打卡人数', '812', 75, 'var(--info)'],
+                ['连续打卡人数', '438', 40, 'var(--success)'],
+                ['达标人数', '326', 30, 'var(--color-gold-500)']
+            ]
+        },
+        quickActions: [
+            { label: '报名情况', desc: '查看报名用户', page: 'registration' },
+            { label: '任务打卡情况', desc: '查看用户打卡', page: 'exam-records' },
+            { label: '单位数据情况', desc: '按单位统计', page: 'unit-data' },
+            { label: '排行榜', desc: '积分和连续打卡', page: 'leaderboard' },
+            { label: '奖证管理', desc: '达标证明发放', page: 'certificate-mgmt' },
+            { label: '更多功能', desc: '积分/评分/规则', page: 'more-functions' }
+        ],
+        detail: {
+            title: '任务数据列表',
+            desc: '查看任务维度下的应打卡与完成情况',
+            page: 'exam-records',
+            headers: ['任务名称', '应打卡次数', '已打卡次数', '缺卡次数', '完成率'],
+            rows: [
+                ['每日阅读 30 分钟', '2,172', '1,768', '84', rateHtml('81.4%', 'good')],
+                ['上传读书笔记', '2,172', '1,526', '132', rateHtml('70.3%', '')],
+                ['完成主题练习', '1,086', '746', '58', rateHtml('68.7%', 'warn')],
+                ['分享阅读心得', '1,086', '612', '44', rateHtml('56.4%', 'risk')]
+            ]
+        },
+        secondary: {
+            title: '用户打卡情况',
+            desc: '展示最近需要关注的用户记录',
+            page: 'exam-records',
+            headers: ['用户姓名', '选送单位', '应打卡', '已打卡', '缺卡', '积分'],
+            rows: [
+                ['林悦', '集团总部', '12', '12', '0', '240'],
+                ['黄嘉', '城东分馆', '12', '10', '2', '198'],
+                ['苏晴', '少儿阅读中心', '12', '8', '4', '156'],
+                ['程默', '城西分馆', '12', '7', '5', '142']
+            ]
+        }
+    };
+}
+
+function getOfflineActivityOverviewConfig() {
+    return {
+        moduleLabel: '活动报名活动',
+        tags: ['活动报名', '线下预约', '剩余 5 天'],
+        statusClass: 'badge-green',
+        actions: getActivityOverviewActions(),
+        meta: getActivityOverviewBaseMeta('报名规则：按活动报名，一次选择多个场次，支持审核、签到和签退', ['场次设置：8 场 / 总名额 1,200 / 需工作人员签到']),
+        metrics: [
+            metricConfig('场次数', '8', '即将开始 2 场', 'wy_activity_reserve_session 未删除场次数量', 'var(--text-muted)', 'var(--primary)', 'registration'),
+            metricConfig('总名额', '1,200', '全部场次名额合计', 'max_seats_no 合计', 'var(--text-muted)', 'var(--info)'),
+            metricConfig('剩余名额', '268', '余量 22.3%', 'remain_seats_no 合计', 'var(--success)', 'var(--success)'),
+            metricConfig('活动报名人数', '486', '今日新增 42', '报名成功主记录数', 'var(--success)', 'var(--primary)', 'registration'),
+            metricConfig('待审核报名', '74', '需今日处理', '待审核主记录数', 'var(--warning)', 'var(--warning)', 'registration'),
+            metricConfig('签到人数', '618', '签到率 66.3%', 'sign_in_status = Y 的记录数', 'var(--success)', 'var(--success)', 'offline-signin-stats'),
+            metricConfig('未签到人数', '314', '活动开始前提醒', 'status = 3 且未签到记录数', 'var(--warning)', 'var(--warning)', 'offline-signin-stats'),
+            metricConfig('签退人数', '486', '签退率 78.6%', 'sign_out_status = Y 的记录数', 'var(--text-muted)', 'var(--color-gold-500)', 'offline-signin-stats')
+        ],
+        trend: {
+            title: '报名 / 签到趋势',
+            desc: '按日查看活动报名人数、签到人数和待审核报名变化',
+            segments: ['报名成功', '签到人数', '待审核'],
+            days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+            values: [126, 188, 266, 342, 486, 618, 932]
+        },
+        todos: [
+            { level: 'high', title: '74 条报名待审核', desc: '建议在场次开始前完成审核。', targetPage: 'registration' },
+            { level: 'medium', title: '314 人未签到', desc: '可向报名成功但未签到人员发送提醒。', targetPage: 'offline-signin-stats' },
+            { level: 'medium', title: '2 个场次名额不足', desc: '剩余名额低于 10%，建议评估扩容或加场。', targetPage: 'registration' },
+            { level: 'low', title: '3 名工作人员未排班', desc: '请补充场次签到工作人员。', targetPage: 'offline-checkin-staff' }
+        ],
+        funnel: {
+            title: '场次进度',
+            desc: '从名额到报名成功、签到和签退的业务进度',
+            steps: [
+                ['总名额', '1,200', 100, 'var(--primary)'],
+                ['场次报名人数', '932', 78, 'var(--info)'],
+                ['签到人数', '618', 52, 'var(--success)'],
+                ['签退人数', '486', 41, 'var(--color-gold-500)']
+            ]
+        },
+        quickActions: [
+            { label: '报名情况', desc: '审核和查看报名', page: 'registration' },
+            { label: '工作人员', desc: '签到人员配置', page: 'offline-checkin-staff' },
+            { label: '签到/签退情况', desc: '按场次查看签到签退', page: 'offline-signin-stats' },
+            { label: '单位数据情况', desc: '按单位查看报名', page: 'unit-data' },
+            { label: '活动反馈', desc: '满意度反馈', page: 'activity-feedback' },
+            { label: '更多功能', desc: '资源和扩展', page: 'more-functions' }
+        ],
+        detail: {
+            title: '场次数据列表',
+            desc: '按场次查看名额、报名、签到和签退情况',
+            page: 'registration',
+            headers: ['场次名称', '举办时间', '名额', '报名成功', '签到', '剩余名额'],
+            rows: [
+                ['亲子阅读专场', '06-27 10:00', '200', '186', '142', '14'],
+                ['古籍修复体验', '06-28 14:00', '120', '118', '84', '2'],
+                ['馆员导览活动', '06-29 09:30', '180', '132', '96', '48'],
+                ['城市书房沙龙', '06-30 19:00', '160', '148', '112', '12']
+            ]
+        },
+        secondary: {
+            title: '最近报名记录',
+            desc: '展示最新提交和待审核报名',
+            page: 'registration',
+            headers: ['报名人', '手机号', '场次', '状态', '提交时间'],
+            rows: [
+                ['林悦', '138****1234', '亲子阅读专场', badgeHtml('报名成功', 'badge-green'), '2026-06-26 16:18'],
+                ['黄嘉', '136****9012', '古籍修复体验', badgeHtml('待审核', 'badge-yellow'), '2026-06-26 16:25'],
+                ['苏晴', '133****1122', '城市书房沙龙', badgeHtml('报名成功', 'badge-green'), '2026-06-26 16:42'],
+                ['程默', '132****4509', '馆员导览活动', badgeHtml('已取消', 'badge-gray'), '2026-06-26 17:05']
+            ]
+        }
+    };
+}
+
+function getQuizActivityOverviewUnifiedConfig() {
+    const mode = normalizeActivityOverviewMode(currentManageActivity.quizMode || activityOverviewMode);
+    activityOverviewMode = mode;
+    const old = getActivityOverviewConfig();
+    const modeLabel = old.modeLabel;
+    const metricMap = {
+        exam: [
+            metricConfig('报名人数', '528', '较昨日 +32', 'wy_activity_entry_user 当前活动报名记录数', 'var(--success)', 'var(--primary)', 'registration'),
+            metricConfig('考试场次数', '4', '已发布成绩 1 场', 'wy_activity_quiz_exam 当前活动场次数', 'var(--text-muted)', 'var(--info)', 'paper-review'),
+            metricConfig('答题人数', '477', '参与率 90.3%', 'involved_count > 0 去重用户数', 'var(--success)', 'var(--success)', 'exam-records'),
+            metricConfig('已交卷人次', '386', '交卷率 73.1%', 'submit_time 不为空的答卷场次记录数', 'var(--success)', 'var(--primary)', 'exam-records'),
+            metricConfig('待阅卷试卷', '42', '含主观题试卷', '有主观题且 status != Y', 'var(--warning)', 'var(--warning)', 'paper-review'),
+            metricConfig('待发布成绩场次', '3', '需完成阅卷后发布', 'is_result = N 的考试场次', 'var(--warning)', 'var(--danger)', 'paper-review'),
+            metricConfig('平均分', '78.5', '满分 100', '参与人员总分 / 参与人数', 'var(--text-muted)', 'var(--color-gold-500)'),
+            metricConfig('及格率', '82.3%', '及格线 60 分', '及格人数 / 已交卷人数', 'var(--success)', 'var(--success)')
+        ],
+        daily: [
+            metricConfig('报名人数', '528', '较昨日 +28', 'wy_activity_entry_user 当前活动报名记录数', 'var(--success)', 'var(--primary)', 'registration'),
+            metricConfig('答题人数', '486', '至少答题 1 天', 'answer_days > 0 的用户数', 'var(--success)', 'var(--success)', 'exam-records'),
+            metricConfig('今日答题人数', '386', '今日未答 176', '今日存在答题记录的去重用户数', 'var(--success)', 'var(--primary)', 'exam-records'),
+            metricConfig('答题总次数', '2,184', '人均 4.5 次', '每日答题记录总数', 'var(--text-muted)', 'var(--info)', 'exam-records'),
+            metricConfig('达标人数', '324', '达标率 83.9%', 'psss_days > 0 的用户数', 'var(--success)', 'var(--success)', 'user-qualified'),
+            metricConfig('达标天数合计', '1,680', '今日达标 324', '所有用户达标天数合计', 'var(--success)', 'var(--color-gold-500)', 'user-qualified'),
+            metricConfig('总得分', '402,816', '含分享奖励得分', '用户总得分合计', 'var(--text-muted)', 'var(--primary)', 'daily-score-detail'),
+            metricConfig('平均分', '82.8', '未答题用户不计入', '参与人员总分 / 参与人数', 'var(--text-muted)', 'var(--warning)')
+        ],
+        level: [
+            metricConfig('报名人数', '528', '较昨日 +18', 'wy_activity_entry_user 当前活动报名记录数', 'var(--success)', 'var(--primary)', 'registration'),
+            metricConfig('总关卡数', '3', '顺序解锁', '当前活动配置关卡数量', 'var(--text-muted)', 'var(--info)', 'exam-records'),
+            metricConfig('闯关人数', '438', '参与率 83.0%', 'record_count > 0 的用户数', 'var(--success)', 'var(--success)', 'exam-records'),
+            metricConfig('闯关次数', '1,286', '人均 2.9 次', 'record_count 合计', 'var(--text-muted)', 'var(--primary)', 'exam-records'),
+            metricConfig('已过关数', '784', '含重复挑战过关', 'passed_count 合计', 'var(--success)', 'var(--color-gold-500)', 'level-answer-detail'),
+            metricConfig('闯关成功人数', '168', '全关卡通过', 'is_clear = Y 的用户数', 'var(--success)', 'var(--success)', 'exam-records'),
+            metricConfig('闯关成功率', '38.4%', '168 / 438', '闯关成功人数 / 闯关人数', 'var(--text-muted)', 'var(--warning)'),
+            metricConfig('平均过关数', '1.8', '共 3 关', '已过关数合计 / 闯关人数', 'var(--text-muted)', 'var(--info)')
+        ]
+    };
+    return {
+        moduleLabel: `${modeLabel}活动`,
+        tags: ['知识问答', modeLabel, '剩余 18 天'],
+        showModeTabs: true,
+        statusClass: 'badge-green',
+        actions: getActivityOverviewActions(),
+        meta: getActivityOverviewBaseMeta(old.meta[2].replace(/^.*?：/, `${modeLabel}规则：`), [old.meta[3]]),
+        metrics: metricMap[mode],
+        trend: old.trend,
+        todos: old.todos.map(args => ({ level: args[0], title: args[1], desc: args[2], targetPage: args[1].includes('阅卷') ? 'paper-review' : 'exam-records' })),
+        funnel: old.funnel,
+        quickActions: getQuizOverviewQuickActions(mode),
+        detail: {
+            title: '组织完成情况',
+            desc: '快速识别推进最好和最需要跟进的单位',
+            page: 'unit-data',
+            headers: ['组织名称', '应参与', mode === 'level' ? '已通关' : '已完成', '完成率', mode === 'level' ? '平均过关数' : '平均分', mode === 'level' ? '成功率' : '通过率'],
+            rows: old.orgRows.map(row => [row[0], row[1], row[2], rateHtml(row[3], row[6]), row[4], rateHtml(row[5], row[6])])
+        },
+        secondary: {
+            title: old.questionTitle,
+            desc: old.questionDesc,
+            page: 'exam-records',
+            headers: ['题目', '题型', '知识点', mode === 'level' ? '通过率' : '正确率', '错误人数'],
+            rows: old.questionRows.map(row => [row[0], badgeHtml(row[1], questionTypeBadgeClass(row[1])), row[2], rateHtml(`${row[3]}%`, row[3] < 55 ? 'risk' : 'warn'), row[4]])
+        }
+    };
+}
+
+function getQuizOverviewQuickActions(mode) {
+    const common = [
+        { label: '报名情况', desc: '查看报名用户', page: 'registration' },
+        { label: '用户答题情况', desc: '答卷和记录', page: 'exam-records' },
+        { label: '单位数据情况', desc: '按单位统计', page: 'unit-data' },
+        { label: '排行榜', desc: '成绩排行', page: 'leaderboard' },
+        { label: '奖证管理', desc: '证书发放', page: 'certificate-mgmt' }
+    ];
+    if (mode === 'exam') return [{ label: '阅卷管理', desc: '分配和发布成绩', page: 'paper-review' }, ...common];
+    if (mode === 'daily') return [{ label: '得分明细', desc: '得分流水', page: 'daily-score-detail' }, { label: '用户达标情况', desc: '达标天数', page: 'user-qualified' }, ...common.slice(0, 4)];
+    return [{ label: '关卡记录', desc: '查看过关详情', page: 'level-user-detail' }, { label: '过关详情', desc: '关卡明细', page: 'level-answer-detail' }, ...common.slice(0, 4)];
+}
+
+function normalizeActivityOverviewMode(value) {
+    const text = String(value || '').trim();
+    if (text.includes('每日')) return 'daily';
+    if (text.includes('闯关') || text.includes('关卡')) return 'level';
+    if (ACTIVITY_OVERVIEW_MODES.some(item => item.key === text)) return text;
+    return 'exam';
+}
+
+function getVoteActivityOverviewConfigFromManage() {
+    const stats = currentManageActivity.voteStats || {};
+    const validVotes = Number(stats.validVotes || 42860);
+    const voters = Number(stats.voters || 12860);
+    const visits = Number(stats.visits || 43680);
+    const candidateCount = Number(stats.candidateCount || stats.candidateUnits || 128);
+    const abnormalVotes = Number(stats.abnormalVotes || 126);
+    const voteRate = visits ? `${(voters / visits * 100).toFixed(1)}%` : '0%';
+    return {
+        moduleLabel: '投票活动',
+        tags: ['投票', '独立投票', '剩余 7 天'],
+        statusClass: 'badge-blue',
+        actions: getActivityOverviewActions(),
+        meta: getActivityOverviewBaseMeta('投票规则：候选项投票、异常票复核、排行统计', ['数据来源：候选项表、投票记录表、异常投票表预留接口']),
+        metrics: [
+            metricConfig('候选项数量', formatOverviewNumber(candidateCount), '当前活动候选项总数', '候选项表 mock 字段', 'var(--text-muted)', 'var(--primary)', 'vote-settings'),
+            metricConfig('投票人数', formatOverviewNumber(voters), '有效投票用户去重数', '投票记录表按用户去重', 'var(--success)', 'var(--success)', 'vote-records'),
+            metricConfig('投票总数', formatOverviewNumber(validVotes), '有效票数合计', '投票记录表有效票数合计', 'var(--success)', 'var(--primary)', 'vote-records'),
+            metricConfig('当前领先候选项', '书香校园主题海报', '12,856 票', '候选项统计表最高票候选项', 'var(--text-muted)', 'var(--info)', 'vote-stats'),
+            metricConfig('异常投票数', formatOverviewNumber(abnormalVotes), '待复核异常记录', '异常投票表标记记录数', 'var(--danger)', 'var(--danger)', 'vote-risk-records'),
+            metricConfig('投票转化率', voteRate, '投票人数 / 访客数', '访问统计 + 投票记录', 'var(--text-muted)', 'var(--color-gold-500)')
+        ],
+        trend: {
+            title: '投票趋势',
+            desc: '按日查看有效票数、投票人数和异常票变化',
+            segments: ['有效票数', '投票人数', '异常票'],
+            days: ['6/20','6/21','6/22','6/23','6/24','6/25','6/26'],
+            values: [3280, 5840, 9280, 14860, 22640, 31820, validVotes]
+        },
+        todos: [
+            { level: 'high', title: `${formatOverviewNumber(abnormalVotes)} 条异常投票待复核`, desc: '请确认刷票、重复投票和异常设备记录。', targetPage: 'vote-risk-records' },
+            { level: 'medium', title: '3 个候选项票数波动异常', desc: '建议查看候选项投票明细和来源分布。', targetPage: 'vote-stats' },
+            { level: 'medium', title: '2 个单位参与率偏低', desc: '可联系单位管理员组织投票提醒。', targetPage: 'vote-unit-data' },
+            { level: 'low', title: '结果发布规则待确认', desc: '活动结束前确认是否自动展示排行。', targetPage: 'vote-settings' }
+        ],
+        funnel: {
+            title: '投票进度',
+            desc: '从访问到参与投票、产生有效票和异常复核的转化',
+            steps: [
+                ['访客数', formatOverviewNumber(visits), 100, 'var(--primary)'],
+                ['投票人数', formatOverviewNumber(voters), Math.round(voters / visits * 100), 'var(--info)'],
+                ['有效票数', formatOverviewNumber(validVotes), 82, 'var(--success)'],
+                ['异常票数', formatOverviewNumber(abnormalVotes), 8, 'var(--danger)']
+            ]
+        },
+        quickActions: [
+            { label: '投票情况', desc: '查看投票记录', page: 'vote-records' },
+            { label: '数据统计', desc: '候选项和时段', page: 'vote-stats' },
+            { label: '单位数据情况', desc: '单位参与分布', page: 'vote-unit-data' },
+            { label: '异常投票记录', desc: '复核风险记录', page: 'vote-risk-records' },
+            { label: '活动设置', desc: '规则和结果发布', page: 'vote-settings' }
+        ],
+        detail: {
+            title: '候选项票数排行',
+            desc: '展示当前票数较高的候选项',
+            page: 'vote-stats',
+            headers: ['候选项', '所属单位', '有效票数', '占比', '状态'],
+            rows: [
+                ['书香校园主题海报', '集团总部', '12,856', '30.2%', badgeHtml('领先', 'badge-green')],
+                ['城市书房摄影作品', '城东分馆', '11,342', '26.6%', badgeHtml('正常', 'badge-blue')],
+                ['朗读者风采展示', '少儿阅读中心', '9,284', '21.8%', badgeHtml('正常', 'badge-blue')],
+                ['阅读推广人故事', '城西分馆', '6,902', '16.2%', badgeHtml('正常', 'badge-blue')]
+            ]
+        },
+        secondary: {
+            title: '异常投票记录',
+            desc: '需要管理员复核的风险记录',
+            page: 'vote-risk-records',
+            headers: ['风险类型', '涉及候选项', '票数', '发现时间', '处理状态'],
+            rows: [
+                ['同设备高频投票', '书香校园主题海报', '38', '2026-06-26 16:40', badgeHtml('待复核', 'badge-yellow')],
+                ['IP 集中异常', '城市书房摄影作品', '26', '2026-06-26 15:12', badgeHtml('待复核', 'badge-yellow')],
+                ['短时重复提交', '朗读者风采展示', '19', '2026-06-26 14:36', badgeHtml('已忽略', 'badge-gray')]
+            ]
+        }
+    };
+}
+
+function metricConfig(label, value, sub, note, subColor, valueColor, targetPage) {
+    return { label, value, sub, note, subColor, valueColor, targetPage };
+}
+
+function badgeHtml(label, cls) {
+    return `<span class="badge ${cls}">${escapeHtml(label)}</span>`;
+}
+
+function rateHtml(label, state) {
+    const stateClass = state ? ` ${state}` : '';
+    return `<span class="activity-rate${stateClass}">${escapeHtml(label)}</span>`;
+}
+
+function formatOverviewNumber(value) {
+    return Number(value || 0).toLocaleString('zh-CN');
+}
+
+function renderActivityOverviewSimpleTable(headers, rows, extraClass = '') {
+    return `
+    <table class="activity-overview-table ${extraClass}">
+        <thead><tr>${headers.map(header => `<th>${escapeHtml(header)}</th>`).join('')}</tr></thead>
+        <tbody>
+            ${rows.map(row => `<tr>${row.map(cell => `<td>${isHtmlCell(cell) ? cell : escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}
+        </tbody>
+    </table>`;
+}
+
+function isHtmlCell(value) {
+    return typeof value === 'string' && /<[^>]+>/.test(value);
+}
+
+function openActivityOverviewAction(label = '操作') {
+    openModal(label, `<p>${label}功能已预留，后续接入活动接口后按当前活动范围执行。</p>`, null, { confirmText: '知道了', hideCancel: true, modalClass: 'modal-sm' });
+}
+
+function renderActivityOverview() {
+    const config = getUnifiedActivityOverviewConfig();
+    if (!config) {
+        return renderPlanningEmptyPage('活动概览', '当前活动类型暂未配置活动概况。');
+    }
     return `
     ${pageHeader('📊 活动概况', '活动管理 / [当前活动] / 活动概况')}
-    ${renderActivityOverviewModeTabs()}
+    ${config.showModeTabs ? renderActivityOverviewModeTabs() : ''}
 
     <section class="activity-overview-hero">
         <div class="activity-overview-hero-main">
             <div class="activity-status-line">
-                <span class="badge badge-green">进行中</span>
-                <span>知识问答</span>
-                <span>${config.modeLabel}</span>
-                <span>剩余 18 天</span>
+                <span class="badge ${config.statusClass || 'badge-green'}">${currentManageActivity.status || '进行中'}</span>
+                ${config.tags.map(tag => `<span>${tag}</span>`).join('')}
             </div>
-            <h2>${currentManageActivity.name}</h2>
+            <h2>${escapeHtml(currentManageActivity.name)}</h2>
             <div class="activity-meta-grid">
-                ${config.meta.map(item => `<span>${item}</span>`).join('')}
+                ${config.meta.map(item => `<span>${escapeHtml(item)}</span>`).join('')}
             </div>
         </div>
         <div class="activity-overview-actions">
-            <button class="btn btn-outline">导出数据</button>
-            <button class="btn btn-outline">发送提醒</button>
-            <button class="btn btn-primary">查看活动</button>
+            ${config.actions.map(action => `<button class="btn ${action.primary ? 'btn-primary' : 'btn-outline'}" type="button" onclick="${action.onclick || 'openActivityOverviewAction()'}">${action.label}</button>`).join('')}
         </div>
     </section>
 
     <div class="activity-metric-grid">
-        ${config.metrics.map(args => statMetricCard(...args)).join('')}
+        ${config.metrics.map(metric => statMetricCard(metric.label, metric.value, metric.sub, metric.note, metric.subColor, metric.valueColor, metric.targetPage)).join('')}
     </div>
 
     <div class="activity-overview-grid">
@@ -294,14 +741,13 @@ function renderActivityOverview() {
         <section class="card activity-score-card">
             <div class="activity-card-head compact">
                 <div>
-                    <h3>${config.distribution.title}</h3>
-                    <p>${config.distribution.desc}</p>
+                    <h3>待处理事项</h3>
+                    <p>按当前活动数据生成的运营提醒</p>
                 </div>
             </div>
-            <div class="activity-score-list">
-                ${config.distribution.bars.map(args => scoreBar(...args)).join('')}
+            <div class="activity-todo-list">
+                ${config.todos.map(item => todoItem(item.level, item.title, item.desc, item.targetPage)).join('')}
             </div>
-            <div class="activity-insight success">${config.distribution.insight}</div>
         </section>
     </div>
 
@@ -321,12 +767,12 @@ function renderActivityOverview() {
         <section class="card">
             <div class="activity-card-head">
                 <div>
-                    <h3>运营提醒</h3>
-                    <p>按当前数据自动生成的待处理事项</p>
+                    <h3>快捷入口</h3>
+                    <p>${config.moduleLabel}常用管理入口</p>
                 </div>
             </div>
-            <div class="activity-todo-list">
-                ${config.todos.map(args => todoItem(...args)).join('')}
+            <div class="activity-quick-grid">
+                ${config.quickActions.map(action => `<button class="activity-quick-action" type="button" onclick="${action.onclick || `navigateTo('${action.page || 'more-functions'}')`}"><strong>${action.label}</strong><span>${action.desc || '进入管理'}</span></button>`).join('')}
             </div>
         </section>
     </div>
@@ -335,40 +781,40 @@ function renderActivityOverview() {
         <section class="card activity-table-card">
             <div class="activity-card-head">
                 <div>
-                    <h3>组织完成情况</h3>
-                    <p>快速识别推进最好和最需要跟进的单位</p>
+                    <h3>${config.detail.title}</h3>
+                    <p>${config.detail.desc}</p>
                 </div>
-                <span class="action-link" onclick="navigateTo('unit-data')">查看全部</span>
+                <span class="action-link" onclick="navigateTo('${config.detail.page || 'more-functions'}')">查看全部</span>
             </div>
-            <table class="activity-overview-table">
-                <thead><tr><th>组织名称</th><th>应参与</th><th>已完成</th><th>完成率</th><th>平均分</th><th>通过率</th></tr></thead>
-                <tbody>
-                    ${config.orgRows.map(args => orgRow(...args)).join('')}
-                </tbody>
-            </table>
+            ${renderActivityOverviewSimpleTable(config.detail.headers, config.detail.rows)}
         </section>
 
         <section class="card activity-table-card">
             <div class="activity-card-head">
                 <div>
-                    <h3>${config.questionTitle}</h3>
-                    <p>${config.questionDesc}</p>
+                    <h3>${config.secondary.title}</h3>
+                    <p>${config.secondary.desc}</p>
                 </div>
-                <span class="action-link" onclick="navigateTo('exam-records')">查看答题</span>
+                <span class="action-link" onclick="navigateTo('${config.secondary.page || 'more-functions'}')">查看全部</span>
             </div>
-            <table class="activity-overview-table question">
-                <thead><tr><th>题目</th><th>题型</th><th>知识点</th><th>正确率</th><th>错误人数</th></tr></thead>
-                <tbody>
-                    ${config.questionRows.map(args => questionRow(...args)).join('')}
-                </tbody>
-            </table>
+            ${renderActivityOverviewSimpleTable(config.secondary.headers, config.secondary.rows, 'question')}
         </section>
     </div>`;
 }
 
-function statMetricCard(label, value, sub, note, subColor, valueColor) {
+function renderTaskActivityOverview() {
+    return renderActivityOverview();
+}
+
+function renderCollectionActivityOverview() {
+    return renderActivityOverview();
+}
+
+function statMetricCard(label, value, sub, note, subColor, valueColor, targetPage) {
+    const clickableClass = targetPage ? ' is-clickable' : '';
+    const clickAttr = targetPage ? ` role="button" tabindex="0" onclick="navigateTo('${targetPage}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();navigateTo('${targetPage}')}"` : '';
     return `
-    <div class="card activity-metric-card">
+    <div class="card activity-metric-card${clickableClass}"${clickAttr}>
         <div class="activity-metric-label">${label}</div>
         <div class="activity-metric-value" style="color:${valueColor}">${value}</div>
         <div class="activity-metric-sub" style="color:${subColor}">${sub}</div>
@@ -428,10 +874,12 @@ function funnelStep(label, value, pct, color) {
     </div>`;
 }
 
-function todoItem(level, title, desc) {
+function todoItem(level, title, desc, targetPage) {
     const map = { high: '高', medium: '中', low: '低' };
+    const clickableClass = targetPage ? ' is-clickable' : '';
+    const clickAttr = targetPage ? ` role="button" tabindex="0" onclick="navigateTo('${targetPage}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();navigateTo('${targetPage}')}"` : '';
     return `
-    <div class="activity-todo-item ${level}">
+    <div class="activity-todo-item ${level}${clickableClass}"${clickAttr}>
         <span>${map[level]}</span>
         <div><strong>${title}</strong><p>${desc}</p></div>
     </div>`;
